@@ -1,4 +1,4 @@
-namespace Blocktest
+namespace Blocktest.Blocks
 {
     public class Wood : Block
     {

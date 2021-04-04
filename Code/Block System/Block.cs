@@ -1,7 +1,6 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Blocktest
 {
@@ -41,15 +40,18 @@ namespace Blocktest
         public virtual void Initialize()
         {
             string path = "Blocks\\" + blockName.ToLower().Replace(" ", null);
-            blockSprite = Globals.Game.Content.Load<Texture2D>(path);
-            if (blockSprite == null) {
-                Console.WriteLine("Block " + this + " does not have an icon at " + path + "!");
-            }
-            if (blockSmoothing && false) { // TODO: Remove "&& false" when sprite sheet system works
-                spriteSheet = new SpriteSheet(path);
-                if (spriteSheet.spritesDict.Count <= 1) {
-                    Console.WriteLine("Block " + this + " is marked as smoothable, but a sprite sheet could not be found at " + path + "!");
+            try {
+                blockSprite = Globals.Game.Content.Load<Texture2D>(path);
+                if (blockSmoothing && false) { // TODO: Remove "&& false" when sprite sheet system works
+                    spriteSheet = new SpriteSheet(path);
+                    if (spriteSheet.spritesDict.Count <= 1) {
+                        Console.WriteLine("Block " + this + " is marked as smoothable, but a sprite sheet could not be found at " + path + "!");
+                    }
                 }
+            }
+            catch (ContentLoadException) {
+                blockSprite = Globals.Game.Content.Load<Texture2D>("Blocks\\error");
+                Console.WriteLine("Block " + this + " does not have an icon at " + path + "!");
             }
         }
 

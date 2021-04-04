@@ -1,10 +1,10 @@
-namespace Blocktest
+namespace Blocktest.Blocks
 {
     public class Dirt : Block
     {
         public override void Initialize()
         {
-            blockName = "Dirt";
+            blockName = "Dirts";
             blockID = 0;
             blockSmoothing = true;
             base.Initialize();
