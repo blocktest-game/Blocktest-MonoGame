@@ -18,6 +18,10 @@ namespace Blocktest
         /// </summary>
         private readonly List<Tile> allTiles = new();
         /// <summary>
+        /// The size of the tilemap in tiles.
+        /// </summary>
+        public readonly Vector2Int tilemapSize;
+        /// <summary>
         /// The size of each cell (in pixels) in the tilemap's grid.
         /// </summary>
         public readonly Vector2Int gridSize = new(8, 8);
@@ -34,6 +38,7 @@ namespace Blocktest
         /// <param name="sizeY">The height of the tilemap in tiles.</param>
         public Tilemap(int sizeX, int sizeY)
         {
+            tilemapSize = new(sizeX, sizeY);
             tileGrid = new Tile[sizeX, sizeY];
         }
 
@@ -53,30 +58,13 @@ namespace Blocktest
         /// </summary>
         /// <param name="location">Location the new Block will be placed.</param>
         /// <param name="newBlock">Block type to be placed in the cell.</param>
-        public void SetBlock(Vector2Int location, Block newBlock)
-        {
-            Tile oldTile = GetTile(location);
-            if (oldTile != null) {
-                allTiles.Remove(oldTile);
-            }
-
-            Tile newTile = new(newBlock, location);
-            tileGrid[location.X, location.Y] = newTile;
-
-            if (newBlock != null) {
-                allTiles.Add(newTile);
-            }
-
-            foreach (Vector2Int dir in adjacencies) {
-                tileGrid[location.X + dir.X, location.Y + dir.Y].UpdateAdjacencies(location + dir, this);
-            }
-        }
+        public Tile SetBlock(Vector2Int location, Block newBlock) => SetTile(location, new Tile(newBlock, location));
         /// <summary>
         /// Sets a Tile at the given XYZ coordinates of a cell in the tile map to a specific <see cref="Block"/> type.
         /// </summary>
         /// <param name="location">Location the new Block will be placed.</param>
         /// <param name="newTile">Block type to be placed in the cell.</param>
-        public void SetTile(Vector2Int location, Tile newTile)
+        public Tile SetTile(Vector2Int location, Tile newTile)
         {
             Tile oldTile = GetTile(location);
             if (oldTile != null) {
@@ -90,8 +78,11 @@ namespace Blocktest
             }
 
             foreach (Vector2Int dir in adjacencies) {
-                tileGrid[location.X + dir.X, location.Y + dir.Y].UpdateAdjacencies(location + dir, this);
+                if (location.X + dir.X < 0 || location.X + dir.X >= tilemapSize.X || location.Y + dir.Y < 0 || location.Y + dir.Y >= tilemapSize.Y) { continue; }
+                tileGrid[location.X + dir.X, location.Y + dir.Y]?.UpdateAdjacencies(location + dir, this);
             }
+
+            return newTile;
         }
 
         /// <summary>
@@ -174,7 +165,7 @@ namespace Blocktest
         {
             SourceBlock = newBlock;
             sprite = SourceBlock.blockSprite;
-            rectangle = new Rectangle(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y, size, size);
+            rectangle = new Rectangle(Globals.gridSize.X * position.X, Globals.Game.GraphicsDevice.Viewport.Height - (Globals.gridSize.Y * (position.Y + 1)), size, size); // HACK: This can probably be done better
         }
 
         /// <summary>

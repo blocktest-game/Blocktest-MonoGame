@@ -4,7 +4,7 @@ namespace Blocktest.Blocks
     {
         public override void Initialize()
         {
-            blockName = "Dirts";
+            blockName = "Dirt";
             blockID = 0;
             blockSmoothing = true;
             base.Initialize();

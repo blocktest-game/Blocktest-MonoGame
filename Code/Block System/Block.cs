@@ -34,14 +34,22 @@ namespace Blocktest
         /// <summary>
         /// Called whenever a block is first loaded by the block manager.
         /// </summary>
+        public virtual void Initialize()
+        {
+
+        }
+
+        /// <summary>
+        /// Called whenever a block's content is loaded by the block manager.
+        /// </summary>
         /// <remarks>
         /// DO NOT FORGET TO CALL THE BASE METHOD IF YOU OVERRIDE THIS.
         /// </remarks>
-        public virtual void Initialize()
+        public virtual void LoadSprite(ContentManager content)
         {
             string path = "Blocks\\" + blockName.ToLower().Replace(" ", null);
             try {
-                blockSprite = Globals.Game.Content.Load<Texture2D>(path);
+                blockSprite = content.Load<Texture2D>(path);
                 if (blockSmoothing && false) { // TODO: Remove "&& false" when sprite sheet system works
                     spriteSheet = new SpriteSheet(path);
                     if (spriteSheet.spritesDict.Count <= 1) {
@@ -50,7 +58,7 @@ namespace Blocktest
                 }
             }
             catch (ContentLoadException) {
-                blockSprite = Globals.Game.Content.Load<Texture2D>("Blocks\\error");
+                blockSprite = content.Load<Texture2D>("Blocks\\error");
                 Console.WriteLine("Block " + this + " does not have an icon at " + path + "!");
             }
         }

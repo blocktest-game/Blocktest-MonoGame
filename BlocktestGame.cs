@@ -25,16 +25,26 @@ namespace Blocktest
 
             BlockManager.Initialize();
 
-            Globals.foreground = new Tilemap(Globals.maxX, Globals.maxY);
-            Globals.background = new Tilemap(Globals.maxX, Globals.maxY);
+            Globals.ForegroundTilemap = new Tilemap(Globals.maxX, Globals.maxY);
+            Globals.BackgroundTilemap = new Tilemap(Globals.maxX, Globals.maxY);
 
             base.Initialize();
+
+            for (int i = 0; i < Globals.maxX; i++) {
+                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[2], true, new Vector2Int(i, 0));
+                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 1));
+                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 2));
+                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 3));
+                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 4));
+                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[1], true, new Vector2Int(i, 5));
+            }
         }
 
         /// <inheritdoc />
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            BlockManager.LoadBlockSprites(Content);
         }
 
         /// <inheritdoc />
@@ -53,8 +63,8 @@ namespace Blocktest
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
-            Globals.foreground.Draw(_spriteBatch);
-            Globals.background.Draw(_spriteBatch);
+            Globals.ForegroundTilemap.Draw(_spriteBatch);
+            Globals.BackgroundTilemap.Draw(_spriteBatch);
             _spriteBatch.End();
 
             base.Draw(gameTime);

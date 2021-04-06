@@ -1,21 +1,30 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Content;
+using System;
 using System.Linq;
 
 namespace Blocktest
 {
     /// <summary>
-    /// The BlockManager contains all of the block types in <see cref="allBlocks">an array of blocks</see> and a <see cref="blockNames">list of block names.</see>
+    /// The BlockManager contains all of the block types in <see cref="AllBlocks">an array of blocks</see> and a <see cref="BlockNames">list of block names.</see>
     /// </summary>
     public static class BlockManager
     {
 
         /// <summary> Array which stores all block instances for referencing as if they were globals. </summary>
-        public static Block[] allBlocks;
+        private static Block[] allBlocks;
+        /// <summary> Array which stores all block instances for referencing as if they were globals. </summary>
+        public static Block[] AllBlocks { get => allBlocks; private set => allBlocks = value; }
+
+
         /// <summary> List used to store the names of blocks. The indexes are the corresponding block's ID. </summary>
-        public static string[] blockNames;
+        private static string[] blockNames;
+        /// <summary> List used to store the names of blocks. The indexes are the corresponding block's ID. </summary>
+        public static string[] BlockNames { get => blockNames; private set => blockNames = value; }
+
+
 
         /// <summary>
-        /// Compiles all block subtypes into <see cref="allBlocks">an array of blocks</see> and a <see cref="blockNames">list of block names.</see>
+        /// Compiles all block subtypes into <see cref="AllBlocks">an array of blocks</see> and a <see cref="BlockNames">list of block names.</see>
         /// </summary>
         public static void Initialize()
         {
@@ -26,8 +35,8 @@ namespace Blocktest
                             where assemblyType.IsSubclassOf(typeof(Block))
                             select assemblyType).ToArray();
 
-            allBlocks = new Block[allBlockTypes.Length];
-            blockNames = new string[allBlockTypes.Length];
+            AllBlocks = new Block[allBlockTypes.Length];
+            BlockNames = new string[allBlockTypes.Length];
 
             // For loops to populate main allBlocks array.
             for (int i = 0; i < allBlockTypes.Length; i++) {
@@ -37,13 +46,20 @@ namespace Blocktest
                 if (newBlock.blockID == -1) {
                     newBlock.blockID = i;
                 }
-                if (allBlocks[newBlock.blockID] != null) {
-                    Console.WriteLine("Block " + newBlock + " conflicts with block " + allBlocks[newBlock.blockID] + "! (Block ID: " + newBlock.blockID + ")");
-                } else if (newBlock.blockID > allBlocks.Length || newBlock.blockID < 0) {
-                    Console.WriteLine("Block " + newBlock + " has invalid ID " + newBlock.blockID + "! (Max ID " + allBlocks.Length + ")");
+                if (AllBlocks[newBlock.blockID] != null) {
+                    Console.WriteLine("Block " + newBlock + " conflicts with block " + AllBlocks[newBlock.blockID] + "! (Block ID: " + newBlock.blockID + ")");
+                } else if (newBlock.blockID > AllBlocks.Length || newBlock.blockID < 0) {
+                    Console.WriteLine("Block " + newBlock + " has invalid ID " + newBlock.blockID + "! (Max ID " + AllBlocks.Length + ")");
                 }
-                blockNames[newBlock.blockID] = newBlock.blockName;
-                allBlocks[newBlock.blockID] = newBlock;
+                BlockNames[newBlock.blockID] = newBlock.blockName;
+                AllBlocks[newBlock.blockID] = newBlock;
+            }
+        }
+
+        public static void LoadBlockSprites(ContentManager content)
+        {
+            foreach(Block block in AllBlocks) {
+                block.LoadSprite(content);
             }
         }
     }

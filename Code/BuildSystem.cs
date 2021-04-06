@@ -23,21 +23,21 @@ namespace Blocktest
         /// <param name="tilePosition">The position of the block to destroy (grid coords)</param>
         public static void BreakBlockCell(bool foreground, Vector2Int tilePosition)
         {
-            if (foreground && Globals.foreground.HasTile(tilePosition)) {
-                Tile prevTile = Globals.foreground.GetTile(tilePosition);
+            if (foreground && Globals.ForegroundTilemap.HasTile(tilePosition)) {
+                Tile prevTile = Globals.ForegroundTilemap.GetTile(tilePosition);
                 prevTile.SourceBlock.OnBreak(tilePosition, true);
 
-                Globals.foreground.SetTile(tilePosition, null);
+                Globals.ForegroundTilemap.SetTile(tilePosition, null);
                 currentWorld[tilePosition.X, tilePosition.Y, 0] = 0;
-            } else if (!foreground && Globals.background.HasTile(tilePosition)) {
-                Tile prevTile = Globals.background.GetTile(tilePosition);
+            } else if (!foreground && Globals.BackgroundTilemap.HasTile(tilePosition)) {
+                Tile prevTile = Globals.BackgroundTilemap.GetTile(tilePosition);
                 prevTile.SourceBlock.OnBreak(tilePosition, false);
 
-                Globals.background.SetTile(tilePosition, null);
+                Globals.BackgroundTilemap.SetTile(tilePosition, null);
                 currentWorld[tilePosition.X, tilePosition.Y, 1] = 0;
             }
 
-            Tilemap tilemap = foreground ? Globals.foreground : Globals.background;
+            Tilemap tilemap = foreground ? Globals.ForegroundTilemap : Globals.BackgroundTilemap;
 
             foreach (Vector2Int loc in new List<Vector2Int>() { Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right }) { // Refreshes all blocks in cardinal dirs
                 tilemap.GetTile(tilePosition + loc).UpdateAdjacencies(tilePosition + loc, tilemap);
@@ -66,11 +66,11 @@ namespace Blocktest
 
             if (foreground) {
                 //newTile.colliderType = Tile.ColliderType.Grid;
-                Globals.foreground.SetTile(tilePosition, newTile);
+                Globals.ForegroundTilemap.SetTile(tilePosition, newTile);
                 currentWorld[tilePosition.X, tilePosition.Y, 0] = toPlace.blockID + 1;
             } else if (toPlace.canPlaceBackground) {
                 newTile.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-                Globals.background.SetTile(tilePosition, newTile);
+                Globals.BackgroundTilemap.SetTile(tilePosition, newTile);
                 currentWorld[tilePosition.X, tilePosition.Y, 1] = toPlace.blockID + 1;
             }
         }
