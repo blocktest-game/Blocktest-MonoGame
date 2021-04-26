@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
 namespace Blocktest
 {
@@ -38,6 +39,8 @@ namespace Blocktest
                 BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 4));
                 BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[1], true, new Vector2Int(i, 5));
             }
+
+            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[1], true, new Vector2Int(10, 10));
         }
 
         /// <inheritdoc />
@@ -53,6 +56,12 @@ namespace Blocktest
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
                 Exit();
             }
+
+            // Hittest start
+
+            Debug.HittestDebug();
+
+            // Hittest end
 
             base.Update(gameTime);
         }

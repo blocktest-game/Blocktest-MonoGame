@@ -16,7 +16,7 @@ namespace Blocktest
         /// <summary>
         /// A list of all the tiles currently on the tilemap.
         /// </summary>
-        private readonly List<Tile> allTiles = new();
+        public readonly List<Tile> allTiles = new();        // TODO - Switch back to private
         /// <summary>
         /// The size of the tilemap in tiles.
         /// </summary>
