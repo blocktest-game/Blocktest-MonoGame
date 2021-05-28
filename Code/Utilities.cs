@@ -1,4 +1,7 @@
-﻿namespace Utilities
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Utilities
 {
     struct Algorithms
     {

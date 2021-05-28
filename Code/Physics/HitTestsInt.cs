@@ -3,7 +3,7 @@ using System;
 
 namespace Blocktest
 {
-    public struct HitTests
+    public partial struct HitTests
     {
         /// <summary>
         /// Hit test for a <see cref="Point"/> and a <see cref="Rectangle"/>.
@@ -33,6 +33,28 @@ namespace Blocktest
                 && tester.Y <= target.Y + target.Height);     // target's bottom must be beneath rect's top.
         }
 
+        private static bool CalcNearInterceptPoint(int start, int length, int nearContact, int farContact, out int pointLoc, out float nearContactTime)
+        {
+            pointLoc = 0;
+
+            float slope = 1.0f / length;
+
+            nearContactTime = (float)nearContact * slope;
+            float farContactTime = (float)farContact * slope;
+
+            if (nearContactTime > farContactTime) {
+                Utilities.Algorithms.swap(ref nearContactTime, ref farContactTime);
+            }
+
+            if (farContactTime < 0 || nearContactTime > 1) {
+                return false;
+            }
+
+            pointLoc = (int)Math.Round((float)start + nearContactTime * (float)length);
+
+            return true;
+        }
+
         /// <summary>
         /// Hit test for a ray and a <see cref="Rectangle"/>.
         /// </summary>
@@ -45,7 +67,16 @@ namespace Blocktest
         /// <returns>Returns true if the ray intersects the <paramref name="target"/>.</returns>
         public static bool RayToRectangle(Point start, Point end, Rectangle target, out Point contactPoint, out Point contactNormal, out float nearContactTime)
         {
+
+            Point nearContact;
+            Point farContact;
+
             Point rayDelta = end - start;
+
+            nearContact.X = target.X - start.X;
+            nearContact.Y = target.Y - start.Y;
+            farContact.X = target.X + target.Width - start.X;
+            farContact.Y = target.Y + target.Height - start.Y;
 
             contactPoint.X = 0;
             contactPoint.Y = 0;
@@ -53,24 +84,57 @@ namespace Blocktest
             contactNormal.Y = 0;
             nearContactTime = 0;
 
+            if (start == end) {
+                return false;       // No movement
+            }
+
+            if (rayDelta.X == 0) {      // Handling 0 slopes
+                if (start.X > target.Left && start.X < target.Right) {
+                    if (start.Y > end.Y) {
+                        contactNormal.Y = -1;
+                    } else {
+                        contactNormal.Y = 1;
+                    }
+
+                    contactPoint.X = start.X;
+                    if (CalcNearInterceptPoint(start.Y, rayDelta.Y, nearContact.Y, farContact.Y, out contactPoint.Y, out nearContactTime)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+
+            if (rayDelta.Y == 0) {      // Handling 0 slopes
+                if (start.Y > target.Top && start.Y < target.Bottom) {
+                    if (start.X > end.X) {
+                        contactNormal.X = -1;
+                    } else {
+                        contactNormal.X = 1;
+                    }
+
+                    contactPoint.Y = start.Y;
+                    if (CalcNearInterceptPoint(start.X, rayDelta.X, nearContact.X, farContact.X, out contactPoint.X, out nearContactTime)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+
             if (rayDelta.X == 0 || rayDelta.Y == 0) {
                 return false;
             }
 
-            Point nearContact;
-            Point farContact;
 
             Vector2 nearIntersectTime;
             Vector2 farIntersectTime;
 
             Vector2 slope = new(1.0f / rayDelta.X, 1.0f / rayDelta.Y);
-
-            Point rayLength = end - start;
-
-            nearContact.X = target.X - start.X;
-            nearContact.Y = target.Y - start.Y;
-            farContact.X = target.X + target.Width - start.X;
-            farContact.Y = target.Y + target.Height - start.Y;
 
             nearIntersectTime.X = (float)nearContact.X * slope.X;
             nearIntersectTime.Y = (float)nearContact.Y * slope.Y;
@@ -95,8 +159,8 @@ namespace Blocktest
                 return false;
             }
 
-            contactPoint.X = (int)Math.Round((float)start.X + nearContactTime * (float)rayLength.X);
-            contactPoint.Y = (int)Math.Round((float)start.Y + nearContactTime * (float)rayLength.Y);
+            contactPoint.X = (int)Math.Round((float)start.X + nearContactTime * (float)rayDelta.X);
+            contactPoint.Y = (int)Math.Round((float)start.Y + nearContactTime * (float)rayDelta.Y);
 
             if (nearIntersectTime.X > nearIntersectTime.Y) {
                 if (slope.X > 0) {
@@ -108,7 +172,7 @@ namespace Blocktest
             }
             else if (nearIntersectTime.X < nearIntersectTime.Y) {
                 if (slope.Y > 0) {
-                    contactNormal.Y = 1;
+                   contactNormal.Y = 1;
                 }
                 else {
                     contactNormal.Y = -1;
@@ -140,10 +204,10 @@ namespace Blocktest
                 return false;
             }
 
-            target.Inflate(tester.Width, tester.Height);
+            target.Inflate(tester.Width / 2, tester.Height / 2);
 
-            endPoint.X += tester.Width;
-            endPoint.Y += tester.Height;
+            endPoint.X += (tester.Width / 2);
+            endPoint.Y += (tester.Height / 2);
 
             if (RayToRectangle(tester.Center, endPoint, target, out contactPoint, out contactNormal, out nearContactTime)) {
                 return true;
