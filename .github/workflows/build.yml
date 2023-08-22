@@ -42,6 +42,14 @@ jobs:
         with:
           lfs: true
       
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: |
+            7.x
+            6.x
+            3.1.x
+
       - name: Build
         run: dotnet publish ${{ matrix.projectPath }} --configuration Release --runtime ${{ matrix.targetPlatform }} -p:PublishReadyToRun=false -p:TieredCompilation=false -p:PublishSingleFile=true -p:Version=$(git describe --tags --abbrev=0) --self-contained false --output ./Build/${{ matrix.targetPlatform }}
 
