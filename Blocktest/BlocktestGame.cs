@@ -67,7 +67,7 @@ namespace Blocktest
             } 
             else if (latch == false)
             {
-	            //buildMode = !buildMode;
+	            buildMode = !buildMode;
 	            latch = true;
             }
             MouseState currentState = Mouse.GetState();
