@@ -168,7 +168,7 @@ namespace Blocktest
         {
             SourceBlock = newBlock;
             sprite = SourceBlock.blockSprite;
-            rectangle = new Rectangle(Globals.gridSize.X * position.X, Globals.Game.GraphicsDevice.Viewport.Height - (Globals.gridSize.Y * (position.Y + 1)), size, size); // HACK: This can probably be done better
+            rectangle = new Rectangle(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y, size, size); // HACK: This can probably be done better
         }
 
         /// <summary>
