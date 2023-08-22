@@ -1,7 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-
+﻿using Blocktest.Rendering;
 namespace Blocktest
 {
     /// <summary>
@@ -12,7 +9,7 @@ namespace Blocktest
         /// <summary>
         /// The 2D array of all tiles in the tilemap.
         /// </summary>
-        public Tile[,] tileGrid;
+        public Tile?[,] tileGrid;
         /// <summary>
         /// A list of all the tiles currently on the tilemap.
         /// </summary>
@@ -95,31 +92,37 @@ namespace Blocktest
         /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
         /// </summary>
         /// <param name="location">Location of the Tile on the Tilemap to check.</param>
-        /// <returns>Tilemaps.TileBase|Tile of type T placed at the cell.</returns>
-        public Tile GetTile(Vector2Int location) => tileGrid[location.X, location.Y];
+        /// <returns><see cref="Tile"/> placed at the cell.</returns>
+        public Tile? GetTile(Vector2Int location) => GetTile(location.X, location.Y);
+
         /// <summary>
         /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
         /// </summary>
         /// <param name="x">X position of the Tile on the Tilemap to check.</param>
         /// <param name="y">Y position of the Tile on the Tilemap to check.</param>
-        /// <returns>Tilemaps.TileBase|Tile of type T placed at the cell.</returns>
-        public Tile GetTile(int x, int y) => tileGrid[x, y];
+        /// <returns><see cref="Tile"/> placed at the cell.</returns>
+        public Tile? GetTile(int x, int y) {
+            if (x < 0 || y < 0 || x >= tilemapSize.X || y >= tilemapSize.Y) {
+                return null;
+            }
+            return tileGrid[x, y];
+        }
 
         /// <summary>
         /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
         /// </summary>
         /// <typeparam name="T">The subtype of Tile to return.</typeparam>
         /// <param name="location">Location of the Tile on the Tilemap to check.</param>
-        /// <returns>Tilemaps.TileBase|Tile of type T placed at the cell.</returns>
-        public T GetTile<T>(Vector2Int location) where T : Tile => (T)tileGrid[location.X, location.Y];
+        /// <returns><see cref="Tile"/> of type T placed at the cell.</returns>
+        public T? GetTile<T>(Vector2Int location) where T : Tile => (T?)GetTile(location.X, location.Y);
         /// <summary>
         /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
         /// </summary>
         /// <typeparam name="T">The subtype of Tile to return.</typeparam>
         /// <param name="x">X position of the Tile on the Tilemap to check.</param>
         /// <param name="y">Y position of the Tile on the Tilemap to check.</param>
-        /// <returns>Tilemaps.TileBase|Tile of type T placed at the cell.</returns>
-        public T GetTile<T>(int x, int y) where T : Tile => (T)tileGrid[x, y];
+        /// <returns><see cref="Tile"/> of type T placed at the cell.</returns>
+        public T? GetTile<T>(int x, int y) where T : Tile => (T?)GetTile(x, y);
 
         /// <summary>
         /// Returns whether there is a <see cref="Tile"/> at the location specified.
@@ -142,7 +145,7 @@ namespace Blocktest
         /// <summary>
         /// Sprite to be rendered at the Tile.
         /// </summary>
-        protected Texture2D sprite;
+        protected Drawable sprite;
         /// <summary>
         /// The size of the tile square's edges, in pixels (Default 8) 
         /// </summary>
@@ -175,7 +178,6 @@ namespace Blocktest
         /// <param name="tilemap">The tilemap the tile is on.</param>
         public void UpdateAdjacencies(Vector2Int position, Tilemap tilemap)
         {
-            return; // TODO: Remove this return when sprite sheet system works
             if (!SourceBlock.blockSmoothing || (SourceBlock.spriteSheet == null)) { return; } // If the tile doesn't or can't smooth, don't even try
 
             int bitmask = 0; // Using bitmask smoothing, look it up
@@ -193,7 +195,7 @@ namespace Blocktest
                 bitmask += 8;
             }
 
-            sprite = SourceBlock.spriteSheet.spritesDict[SourceBlock.blockName + "_" + bitmask];
+            sprite = SourceBlock.spriteSheet.OrderedSprites[bitmask];
         }
 
         /// <summary>
@@ -215,7 +217,7 @@ namespace Blocktest
         /// <param name="spriteBatch">The spritebatch to draw the tile's sprite on.</param>
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(sprite, rectangle, color);
+            spriteBatch.Draw(sprite.Texture, new Vector2(rectangle.X, rectangle.Y), sprite.Bounds, Color.White);
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Blocktest.Rendering;
 using Microsoft.Xna.Framework.Input;
 
 namespace Blocktest
@@ -38,12 +37,15 @@ namespace Blocktest
                 BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 4));
                 BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[1], true, new Vector2Int(i, 5));
             }
+            
+            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(20, 20));
         }
 
         /// <inheritdoc />
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            Drawable.ContentManager = Content;
             BlockManager.LoadBlockSprites(Content);
         }
 

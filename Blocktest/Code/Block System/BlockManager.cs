@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework.Content;
-using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace Blocktest
 {

@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using Blocktest.Rendering;
 
 namespace Blocktest
 {
@@ -24,7 +22,7 @@ namespace Blocktest
         public bool canPlaceBackground = true;
 
         /// <summary> The block's sprite. </summary>
-        public Texture2D blockSprite;
+        public Drawable blockSprite;
 
         /// <summary> The sprite sheet used for smoothing the block. </summary>
         public SpriteSheet spriteSheet;
@@ -47,18 +45,19 @@ namespace Blocktest
         /// </remarks>
         public virtual void LoadSprite(ContentManager content)
         {
-            string path = "Blocks\\" + blockName.ToLower().Replace(" ", null);
+            string path = @"Graphics\Blocks\" + blockName.ToLower().Replace(" ", "");
             try {
-                blockSprite = content.Load<Texture2D>(path);
-                if (blockSmoothing && false) { // TODO: Remove "&& false" when sprite sheet system works
-                    spriteSheet = new SpriteSheet(path);
-                    if (spriteSheet.spritesDict.Count <= 1) {
-                        Console.WriteLine("Block " + this + " is marked as smoothable, but a sprite sheet could not be found at " + path + "!");
-                    }
+                blockSprite = new Drawable(path, new Rectangle(1, 1, 8, 8));
+                if (!blockSmoothing) {
+                    return;
+                }
+                spriteSheet = new SpriteSheet(path, 4, 4, 1);
+                if (spriteSheet.OrderedSprites.Length <= 1) {
+                    Console.WriteLine("Block " + this + " is marked as smoothable, but a sprite sheet could not be found at " + path + "!");
                 }
             }
             catch (ContentLoadException) {
-                blockSprite = content.Load<Texture2D>("Blocks\\error");
+                blockSprite = new Drawable("Blocks\\error");
                 Console.WriteLine("Block " + this + " does not have an icon at " + path + "!");
             }
         }

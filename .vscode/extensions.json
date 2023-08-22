@@ -1,6 +1,10 @@
 {
     "recommendations": [
         "ms-dotnettools.csharp",
-        "abcdef.monogame-pipeline-vscode"
+        "oderwat.indent-rainbow",
+        "eamodio.gitlens",
+        "usernamehw.errorlens",
+        "aaron-bond.better-comments",
+        "editorconfig.editorconfig"
     ]
 }
