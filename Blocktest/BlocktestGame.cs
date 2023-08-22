@@ -1,4 +1,4 @@
-﻿using Blocktest.Rendering;
+using Blocktest.Rendering;
 using Microsoft.Xna.Framework.Input;
 
 namespace Blocktest
