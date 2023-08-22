@@ -21,24 +21,24 @@ namespace Blocktest
         /// <param name="tilePosition">The position of the block to destroy (grid coords)</param>
         public static void BreakBlockCell(bool foreground, Vector2Int tilePosition)
         {
-            if (foreground && Globals.ForegroundTilemap.HasTile(tilePosition)) {
-                Tile prevTile = Globals.ForegroundTilemap.GetTile(tilePosition);
-                prevTile.SourceBlock.OnBreak(tilePosition, true);
+	        Tilemap tilemap = foreground ? Globals.ForegroundTilemap : Globals.BackgroundTilemap;
+	        
+            if (tilemap.HasTile(tilePosition)) 
+            {
+	            tilemap.GetTile(tilePosition).SourceBlock.OnBreak(tilePosition, true);
 
-                Globals.ForegroundTilemap.SetTile(tilePosition, null);
+	            tilemap.SetTile(tilePosition, null);
                 currentWorld[tilePosition.X, tilePosition.Y, 0] = 0;
-            } else if (!foreground && Globals.BackgroundTilemap.HasTile(tilePosition)) {
-                Tile prevTile = Globals.BackgroundTilemap.GetTile(tilePosition);
-                prevTile.SourceBlock.OnBreak(tilePosition, false);
-
-                Globals.BackgroundTilemap.SetTile(tilePosition, null);
-                currentWorld[tilePosition.X, tilePosition.Y, 1] = 0;
+            } 
+            else
+            {
+	            return;
             }
 
-            Tilemap tilemap = foreground ? Globals.ForegroundTilemap : Globals.BackgroundTilemap;
-
             foreach (Vector2Int loc in new List<Vector2Int>() { Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right }) { // Refreshes all blocks in cardinal dirs
-                tilemap.GetTile(tilePosition + loc).UpdateAdjacencies(tilePosition + loc, tilemap);
+	            if(tilemap.HasTile(tilePosition + loc)){
+					tilemap.GetTile(tilePosition + loc).UpdateAdjacencies(tilePosition + loc, tilemap);
+	            }
             }
 
         }

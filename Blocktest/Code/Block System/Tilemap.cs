@@ -168,7 +168,7 @@ namespace Blocktest
         {
             SourceBlock = newBlock;
             sprite = SourceBlock.blockSprite;
-            rectangle = new Rectangle(Globals.gridSize.X * position.X, Globals.Game.GraphicsDevice.Viewport.Height - (Globals.gridSize.Y * (position.Y + 1)), size, size); // HACK: This can probably be done better
+            rectangle = new Rectangle(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y, size, size); // HACK: This can probably be done better
         }
 
         /// <summary>
@@ -183,10 +183,10 @@ namespace Blocktest
             int bitmask = 0; // Using bitmask smoothing, look it up
 
             if (HasSmoothableTile(position + Vector2Int.Up, tilemap)) {
-                bitmask += 1;
+                bitmask += 2;
             }
             if (HasSmoothableTile(position + Vector2Int.Down, tilemap)) {
-                bitmask += 2;
+                bitmask += 1;
             }
             if (HasSmoothableTile(position + Vector2Int.Right, tilemap)) {
                 bitmask += 4;
