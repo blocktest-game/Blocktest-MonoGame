@@ -183,10 +183,10 @@ namespace Blocktest
             int bitmask = 0; // Using bitmask smoothing, look it up
 
             if (HasSmoothableTile(position + Vector2Int.Up, tilemap)) {
-                bitmask += 1;
+                bitmask += 2;
             }
             if (HasSmoothableTile(position + Vector2Int.Down, tilemap)) {
-                bitmask += 2;
+                bitmask += 1;
             }
             if (HasSmoothableTile(position + Vector2Int.Right, tilemap)) {
                 bitmask += 4;

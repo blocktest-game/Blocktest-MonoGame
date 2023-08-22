@@ -8,6 +8,11 @@ namespace Blocktest
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        bool latch = false; //latch for button pressing
+        private bool latchBlockSelect = false;
+        bool buildMode = true; //true for build, false for destroy
+        private int blockSelected = 0;
+
 
         /// <inheritdoc />
         public BlocktestGame()
@@ -56,16 +61,57 @@ namespace Blocktest
                 Exit();
             }
 
-            MouseState currentState = Mouse.GetState();
-            if (currentState.LeftButton == ButtonState.Pressed)
+            if (Keyboard.GetState().IsKeyUp(Keys.E))
             {
-                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true,
-                    new Vector2(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
-	                    MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
-            } else if (currentState.RightButton == ButtonState.Pressed) {
-	            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], false,
-		            new Vector2(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
-			            MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+	            latch = false;
+            } 
+            else if (latch == false)
+            {
+	            //buildMode = !buildMode;
+	            latch = true;
+            }
+            MouseState currentState = Mouse.GetState();
+
+            if (Keyboard.GetState().IsKeyUp(Keys.Q))
+            {
+	            latchBlockSelect = false;
+            }
+            else if (latchBlockSelect == false)
+            {
+	            blockSelected++;
+	            if (blockSelected >= BlockManager.AllBlocks.Length)
+	            {
+		            blockSelected = 0;
+	            }
+
+	            latchBlockSelect = true;
+            }
+            
+            if (buildMode)
+            {
+	            if(currentState.LeftButton == ButtonState.Pressed)
+	            {
+	                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[blockSelected], true,
+	                    new Vector2Int(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
+		                    MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+	            } else if (currentState.RightButton == ButtonState.Pressed) {
+		            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[blockSelected], false,
+			            new Vector2Int(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
+				            MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+	            }
+            }
+            else 
+            {
+	            if(currentState.LeftButton == ButtonState.Pressed)
+	            {
+		            BuildSystem.BreakBlockCell( true,
+			            new Vector2Int(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
+				            MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+	            } else if (currentState.RightButton == ButtonState.Pressed) {
+		            BuildSystem.BreakBlockCell( false,
+			            new Vector2Int(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
+				            MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+	            }
             }
 
             base.Update(gameTime);
