@@ -47,7 +47,7 @@ namespace Blocktest
         {
             string path = @"Graphics\Blocks\" + blockName.ToLower().Replace(" ", "");
             try {
-                blockSprite = new Drawable(path, new Rectangle(1, 1, 8, 8));
+                blockSprite = new Drawable(path, new Rectangle(1, 1, 10, 10)); //this might need to be expanded in the future in case we decide to make use of the full 12x12 tiles on our spritesheets
                 if (!blockSmoothing) {
                     return;
                 }
