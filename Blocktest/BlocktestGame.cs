@@ -1,4 +1,4 @@
-using Blocktest.Rendering;
+﻿using Blocktest.Rendering;
 using Microsoft.Xna.Framework.Input;
 
 namespace Blocktest
@@ -9,9 +9,9 @@ namespace Blocktest
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         bool latch = false; //latch for button pressing
-        private bool latchBlockSelect = false;
+        private bool latchBlockSelect = false; //same but for block selection
         bool buildMode = true; //true for build, false for destroy
-        private int blockSelected = 0;
+        private int blockSelected = 0; //ID of the block to place
 
 
         /// <inheritdoc />
@@ -61,6 +61,7 @@ namespace Blocktest
                 Exit();
             }
 
+            //press E to toggle build/destroy
             if (Keyboard.GetState().IsKeyUp(Keys.E))
             {
 	            latch = false;
@@ -70,8 +71,11 @@ namespace Blocktest
 	            buildMode = !buildMode;
 	            latch = true;
             }
+
+            //for block placement
             MouseState currentState = Mouse.GetState();
 
+            //Q changes which block you have selected
             if (Keyboard.GetState().IsKeyUp(Keys.Q))
             {
 	            latchBlockSelect = false;
@@ -86,7 +90,8 @@ namespace Blocktest
 
 	            latchBlockSelect = true;
             }
-            
+
+            //build and destroy mode
             if (buildMode)
             {
 	            if(currentState.LeftButton == ButtonState.Pressed)
@@ -125,6 +130,13 @@ namespace Blocktest
             _spriteBatch.Begin();
             Globals.BackgroundTilemap.Draw(_spriteBatch);
             Globals.ForegroundTilemap.Draw(_spriteBatch);
+            // placement preview
+            if(buildMode)
+                _spriteBatch.Draw(BlockManager.AllBlocks[blockSelected].blockSprite.Texture, 
+                new Vector2Int(Mouse.GetState().X - (Mouse.GetState().X % 8), 
+                    (Mouse.GetState().Y -  Mouse.GetState().Y % 8)), 
+                new Rectangle(1, 1, 10, 10), Color.DimGray);
+            
             _spriteBatch.End();
 
             base.Draw(gameTime);
