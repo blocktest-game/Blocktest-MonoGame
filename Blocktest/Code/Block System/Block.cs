@@ -1,4 +1,4 @@
-﻿using Blocktest.Rendering;
+using Blocktest.Rendering;
 
 namespace Blocktest
 {
@@ -57,7 +57,7 @@ namespace Blocktest
                 }
             }
             catch (ContentLoadException) {
-                blockSprite = new Drawable("Blocks\\error");
+                blockSprite = new Drawable(@"Graphics\Blocks\error");
                 Console.WriteLine("Block " + this + " does not have an icon at " + path + "!");
             }
         }
