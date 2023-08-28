@@ -2,8 +2,6 @@
 {
     public static class Globals
     {
-        /// <summary> The main Game instance. </summary>
-        public static BlocktestGame Game;
 
         /// <summary> Tilemap for foreground objects. </summary>
         private static Tilemap foregroundTilemap;
