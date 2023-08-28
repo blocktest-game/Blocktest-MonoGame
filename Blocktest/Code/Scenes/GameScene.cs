@@ -81,6 +81,13 @@ public class GameScene : Scene {
         _spriteBatch.Begin();
         Globals.BackgroundTilemap.Draw(_spriteBatch);
         Globals.ForegroundTilemap.Draw(_spriteBatch);
+        // placement preview
+        if (buildMode)
+            _spriteBatch.Draw(BlockManager.AllBlocks[blockSelected].blockSprite.Texture,
+            new Vector2Int(Mouse.GetState().X - (Mouse.GetState().X % 8),
+                (Mouse.GetState().Y - Mouse.GetState().Y % 8)),
+            new Rectangle(1, 1, 10, 10), Color.DimGray);
+
         _spriteBatch.End();
     }
 
