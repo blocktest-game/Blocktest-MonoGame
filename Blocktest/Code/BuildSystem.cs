@@ -36,7 +36,8 @@ namespace Blocktest
             }
 
             foreach (Vector2Int loc in new List<Vector2Int>() { Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right }) { // Refreshes all blocks in cardinal dirs
-	            if(tilemap.HasTile(tilePosition + loc)){
+                if ((tilePosition + loc).X >= 0 && (tilePosition + loc).X < tilemap.tilemapSize.X && (tilePosition + loc).Y >= 0 && (tilePosition + loc).Y < tilemap.tilemapSize.Y && (tilemap.HasTile(tilePosition + loc)))
+                {
 					tilemap.GetTile(tilePosition + loc).UpdateAdjacencies(tilePosition + loc, tilemap);
 	            }
             }

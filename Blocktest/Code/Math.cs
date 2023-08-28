@@ -1,4 +1,4 @@
-﻿namespace Blocktest
+namespace Blocktest
 {
     /// <summary>
     /// Represents a vector with two integer values rather than two floating-point values.
