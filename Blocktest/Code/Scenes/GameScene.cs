@@ -4,6 +4,8 @@ namespace Blocktest.Scenes;
 public class GameScene : Scene {
     private readonly BlocktestGame _game;
     private readonly SpriteBatch _spriteBatch;
+    private FrameCounter _frameCounter = new FrameCounter();
+    private readonly SpriteFont _spriteFont;
     
     bool latch = false; //latch for button pressing
     private bool latchBlockSelect = false; //same but for block selection
@@ -37,7 +39,7 @@ public class GameScene : Scene {
             else if (latchBlockSelect == false)
             {
 	            blockSelected++;
-	            if (blockSelected >= BlockManager.AllBlocks.Length)
+	            if (blockSelected >= BlockManagerShared.AllBlocks.Length)
 	            {
 		            blockSelected = 0;
 	            }
@@ -50,13 +52,13 @@ public class GameScene : Scene {
             {
 	            if(currentState.LeftButton == ButtonState.Pressed)
 	            {
-	                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[blockSelected], true,
-	                    new Vector2Int(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
-		                    MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+	                BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[blockSelected], true,
+	                    new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), 
+		                    MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)));
 	            } else if (currentState.RightButton == ButtonState.Pressed) {
-		            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[blockSelected], false,
-			            new Vector2Int(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
-				            MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+		            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[blockSelected], false,
+			            new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), 
+				            MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)));
 	            }
             }
             else 
@@ -64,12 +66,12 @@ public class GameScene : Scene {
 	            if(currentState.LeftButton == ButtonState.Pressed)
 	            {
 		            BuildSystem.BreakBlockCell( true,
-			            new Vector2Int(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
-				            MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+			            new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), 
+				            MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)));
 	            } else if (currentState.RightButton == ButtonState.Pressed) {
 		            BuildSystem.BreakBlockCell( false,
-			            new Vector2Int(MathHelper.Clamp(currentState.X / Globals.gridSize.X, 0, Globals.maxX), 
-				            MathHelper.Clamp(currentState.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+			            new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), 
+				            MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)));
 	            }
             }
 
@@ -79,8 +81,17 @@ public class GameScene : Scene {
         graphicsDevice.Clear(Color.CornflowerBlue);
         
         _spriteBatch.Begin();
-        Globals.BackgroundTilemap.Draw(_spriteBatch);
-        Globals.ForegroundTilemap.Draw(_spriteBatch);
+        Globals.BackgroundTilemapSprites.Draw(_spriteBatch);
+        Globals.ForegroundTilemapSprites.Draw(_spriteBatch);
+
+        var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        _frameCounter.Update(deltaTime);
+
+        String fps = string.Format("FPS: {0}", _frameCounter.AverageFramesPerSecond);
+
+        Console.WriteLine(fps);
+
         _spriteBatch.End();
     }
 
@@ -88,18 +99,20 @@ public class GameScene : Scene {
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
         
-        Globals.BackgroundTilemap = new Tilemap(Globals.maxX, Globals.maxY);
-        Globals.ForegroundTilemap = new Tilemap(Globals.maxX, Globals.maxY);
+        GlobalsShared.BackgroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
+        GlobalsShared.ForegroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
+        Globals.BackgroundTilemapSprites = new(GlobalsShared.BackgroundTilemap);
+        Globals.ForegroundTilemapSprites = new(GlobalsShared.ForegroundTilemap);
 
-        for (int i = 0; i < Globals.maxX; i++) {
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[2], true, new Vector2Int(i, 5));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 4));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 3));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 2));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 1));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[1], true, new Vector2Int(i, 0));
+        for (int i = 0; i < GlobalsShared.maxX; i++) {
+            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[2], true, new Vector2Int(i, 5));
+            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(i, 4));
+            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(i, 3));
+            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(i, 2));
+            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(i, 1));
+            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[1], true, new Vector2Int(i, 0));
         }
             
-        BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(20, 20));
+        BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(20, 20));
     }
 }

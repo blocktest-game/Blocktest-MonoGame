@@ -1,11 +1,11 @@
-namespace Blocktest.Blocks
+namespace Shared.Blocks
 {
-    public class Pykrete : Block
+    public class StoneBrick : BlockShared
     {
         public override void Initialize()
         {
-            blockName = "Pykrete";
-            blockID = 8;
+            blockName = "Stone Brick";
+            blockID = 7;
             blockSmoothing = true;
             base.Initialize();
         }

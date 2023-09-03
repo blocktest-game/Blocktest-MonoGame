@@ -1,6 +1,6 @@
-namespace Blocktest.Blocks
+namespace Shared.Blocks
 {
-    public class Grass : Block
+    public class Grass : BlockShared
     {
         public override void Initialize()
         {

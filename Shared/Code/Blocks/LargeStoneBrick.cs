@@ -1,13 +1,12 @@
-namespace Blocktest.Blocks
+namespace Shared.Blocks
 {
-    public class GlassPane : Block
+    public class LargeStoneBrick : BlockShared
     {
         public override void Initialize()
         {
-            blockName = "Glass Pane";
+            blockName = "Large Stone Brick";
             blockID = 5;
             blockSmoothing = true;
-            smoothSelf = true;
             base.Initialize();
         }
     }
