@@ -19,6 +19,12 @@
         "requested": "[2.2.*, )",
         "resolved": "2.2.0",
         "contentHash": "u06nYzGcXCBcnF7cRe8Xa0KxBxGx8grhujZmb3PUiMVbds8d/I6qJ+waGn0IeC7Tdwmt0P6l3v7MqdYog5rJQg=="
+      },
+      "shared": {
+        "type": "Project",
+        "dependencies": {
+          "MonoGame.Framework.DesktopGL": "[3.8.1.303, )"
+        }
       }
     }
   }

@@ -1,17 +1,17 @@
-﻿using System.Linq;
+using System.Linq;
 
-namespace Blocktest
+namespace Shared
 {
     /// <summary>
     /// The BlockManager contains all of the block types in <see cref="AllBlocks">an array of blocks</see> and a <see cref="BlockNames">list of block names.</see>
     /// </summary>
-    public static class BlockManager
+    public abstract class BlockManagerShared
     {
 
         /// <summary> Array which stores all block instances for referencing as if they were globals. </summary>
-        private static Block[] allBlocks;
+        private static BlockShared[] allBlocks;
         /// <summary> Array which stores all block instances for referencing as if they were globals. </summary>
-        public static Block[] AllBlocks { get => allBlocks; private set => allBlocks = value; }
+        public static BlockShared[] AllBlocks { get => allBlocks; private set => allBlocks = value; }
 
 
         /// <summary> List used to store the names of blocks. The indexes are the corresponding block's ID. </summary>
@@ -30,16 +30,16 @@ namespace Blocktest
             Type[] allBlockTypes = (
                             from domainAssembly in AppDomain.CurrentDomain.GetAssemblies()
                             from assemblyType in domainAssembly.GetTypes()
-                            where assemblyType.IsSubclassOf(typeof(Block))
+                            where assemblyType.IsSubclassOf(typeof(BlockShared))
                             select assemblyType).ToArray();
 
-            AllBlocks = new Block[allBlockTypes.Length];
+            AllBlocks = new BlockShared[allBlockTypes.Length];
             BlockNames = new string[allBlockTypes.Length];
 
             // For loops to populate main allBlocks array.
             for (int i = 0; i < allBlockTypes.Length; i++) {
                 Type newBlockType = allBlockTypes[i];
-                Block newBlock = (Block)Activator.CreateInstance(newBlockType);
+                BlockShared newBlock = (BlockShared)Activator.CreateInstance(newBlockType);
                 newBlock.Initialize();
                 if (newBlock.blockID == -1) {
                     newBlock.blockID = i;
@@ -53,13 +53,5 @@ namespace Blocktest
                 AllBlocks[newBlock.blockID] = newBlock;
             }
         }
-
-        public static void LoadBlockSprites(ContentManager content)
-        {
-            foreach(Block block in AllBlocks) {
-                block.LoadSprite(content);
-            }
-        }
     }
-
 }

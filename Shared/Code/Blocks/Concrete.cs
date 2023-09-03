@@ -1,11 +1,11 @@
-namespace Blocktest.Blocks
+namespace Shared.Blocks
 {
-    public class Dirt : Block
+    public class Concrete : BlockShared
     {
         public override void Initialize()
         {
-            blockName = "Dirt";
-            blockID = 0;
+            blockName = "Concrete";
+            blockID = 14;
             blockSmoothing = true;
             base.Initialize();
         }

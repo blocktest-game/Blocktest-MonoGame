@@ -1,6 +1,6 @@
-namespace Blocktest.Blocks
+namespace Shared.Blocks
 {
-    public class Wood : Block
+    public class Wood : BlockShared
     {
         public override void Initialize()
         {

@@ -1,4 +1,6 @@
-namespace Blocktest
+using Microsoft.Xna.Framework;
+
+namespace Shared
 {
     /// <summary>
     /// Represents a vector with two integer values rather than two floating-point values.

@@ -9,6 +9,7 @@ namespace Blocktest
         private GraphicsDeviceManager _graphics;
         private Scene? _currentScene;
 
+
         /// <inheritdoc />
         public BlocktestGame()
         {
@@ -19,7 +20,7 @@ namespace Blocktest
 
         /// <inheritdoc />
         protected override void Initialize() {
-            BlockManager.Initialize();
+            BlockManagerShared.Initialize();
             base.Initialize();
         }
 
@@ -27,7 +28,7 @@ namespace Blocktest
         protected override void LoadContent()
         {
             Drawable.ContentManager = Content;
-            BlockManager.LoadBlockSprites(Content);
+            BlockSpritesManager.LoadBlockSprites(Content);
             _currentScene = new GameScene(this);
         }
 

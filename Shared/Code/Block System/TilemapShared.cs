@@ -1,19 +1,21 @@
-﻿using Blocktest.Rendering;
-namespace Blocktest
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+namespace Shared
 {
     /// <summary>
-    /// A grid filled with <see cref="Tile"/>s, usually representing terrain.
+    /// A grid filled with <see cref="TileShared"/>s, usually representing terrain.
     /// </summary>
-    public class Tilemap
+    public class TilemapShared
     {
         /// <summary>
         /// The 2D array of all tiles in the tilemap.
         /// </summary>
-        public Tile?[,] tileGrid;
+        public TileShared?[,] tileGrid;
         /// <summary>
         /// A list of all the tiles currently on the tilemap.
         /// </summary>
-        private readonly List<Tile> allTiles = new();
+        public readonly List<TileShared> allTiles = new();
         /// <summary>
         /// The size of the tilemap in tiles.
         /// </summary>
@@ -33,21 +35,10 @@ namespace Blocktest
         /// </summary>
         /// <param name="sizeX">The width of the tilemap in tiles.</param>
         /// <param name="sizeY">The height of the tilemap in tiles.</param>
-        public Tilemap(int sizeX, int sizeY)
+        public TilemapShared(int sizeX, int sizeY)
         {
             tilemapSize = new(sizeX, sizeY);
-            tileGrid = new Tile[sizeX, sizeY];
-        }
-
-        /// <summary>
-        /// Called from the main draw loop, calls <see cref="Tile.Draw(SpriteBatch)"/> on each tile in the tilemap.
-        /// </summary>
-        /// <param name="spriteBatch">The spritebatch to draw the tilemap tiles' sprite on.</param>
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            foreach (Tile tile in allTiles) {
-                tile.Draw(spriteBatch);
-            }
+            tileGrid = new TileShared[sizeX, sizeY];
         }
 
         /// <summary>
@@ -55,15 +46,15 @@ namespace Blocktest
         /// </summary>
         /// <param name="location">Location the new Block will be placed.</param>
         /// <param name="newBlock">Block type to be placed in the cell.</param>
-        public Tile SetBlock(Vector2Int location, Block newBlock) => SetTile(location, new Tile(newBlock, location));
+        public TileShared SetBlock(Vector2Int location, BlockShared newBlock) => SetTile(location, new TileShared(newBlock, location));
         /// <summary>
         /// Sets a Tile at the given XYZ coordinates of a cell in the tile map to a specific <see cref="Block"/> type.
         /// </summary>
         /// <param name="location">Location the new Block will be placed.</param>
         /// <param name="newTile">Block type to be placed in the cell.</param>
-        public Tile SetTile(Vector2Int location, Tile newTile)
+        public TileShared SetTile(Vector2Int location, TileShared newTile)
         {
-            Tile oldTile = GetTile(location);
+            TileShared oldTile = GetTile(location);
             if (oldTile != null) {
                 allTiles.Remove(oldTile);
             }
@@ -83,25 +74,25 @@ namespace Blocktest
         }
 
         /// <summary>
-        /// Deletes a <see cref="Tile"/> at a specific location(sets value to null).
+        /// Deletes a <see cref="TileShared"/> at a specific location(sets value to null).
         /// </summary>
         /// <param name="location"></param>
         public void DeleteTile(Vector2Int location) => SetTile(location, null);
 
         /// <summary>
-        /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
+        /// Gets the <see cref="TileShared"/> at a specific location on a <see cref="Tilemap"/>.
         /// </summary>
         /// <param name="location">Location of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="Tile"/> placed at the cell.</returns>
-        public Tile? GetTile(Vector2Int location) => GetTile(location.X, location.Y);
+        /// <returns><see cref="TileShared"/> placed at the cell.</returns>
+        public TileShared? GetTile(Vector2Int location) => GetTile(location.X, location.Y);
 
         /// <summary>
-        /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
+        /// Gets the <see cref="TileShared"/> at a specific location on a <see cref="Tilemap"/>.
         /// </summary>
         /// <param name="x">X position of the Tile on the Tilemap to check.</param>
         /// <param name="y">Y position of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="Tile"/> placed at the cell.</returns>
-        public Tile? GetTile(int x, int y) {
+        /// <returns><see cref="TileShared"/> placed at the cell.</returns>
+        public TileShared? GetTile(int x, int y) {
             if (x < 0 || y < 0 || x >= tilemapSize.X || y >= tilemapSize.Y) {
                 return null;
             }
@@ -109,23 +100,23 @@ namespace Blocktest
         }
 
         /// <summary>
-        /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
+        /// Gets the <see cref="TileShared"/> at a specific location on a <see cref="Tilemap"/>.
         /// </summary>
         /// <typeparam name="T">The subtype of Tile to return.</typeparam>
         /// <param name="location">Location of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="Tile"/> of type T placed at the cell.</returns>
-        public T? GetTile<T>(Vector2Int location) where T : Tile => (T?)GetTile(location.X, location.Y);
+        /// <returns><see cref="TileShared"/> of type T placed at the cell.</returns>
+        public T? GetTile<T>(Vector2Int location) where T : TileShared => (T?)GetTile(location.X, location.Y);
         /// <summary>
-        /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
+        /// Gets the <see cref="TileShared"/> at a specific location on a <see cref="Tilemap"/>.
         /// </summary>
         /// <typeparam name="T">The subtype of Tile to return.</typeparam>
         /// <param name="x">X position of the Tile on the Tilemap to check.</param>
         /// <param name="y">Y position of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="Tile"/> of type T placed at the cell.</returns>
-        public T? GetTile<T>(int x, int y) where T : Tile => (T?)GetTile(x, y);
+        /// <returns><see cref="TileShared"/> of type T placed at the cell.</returns>
+        public T? GetTile<T>(int x, int y) where T : TileShared => (T?)GetTile(x, y);
 
         /// <summary>
-        /// Returns whether there is a <see cref="Tile"/> at the location specified.
+        /// Returns whether there is a <see cref="TileShared"/> at the location specified.
         /// </summary>
         /// <param name="location">Location to check.</param>
         /// <returns>Returns true if there is a Tile at the position. Returns false otherwise.</returns>
@@ -133,42 +124,41 @@ namespace Blocktest
     }
 
     /// <summary>
-    /// A <see cref="Tilemap"/> is filled with tile instances, one for each grid square. 
+    /// A <see cref="TilemapShared"/> is filled with tile instances, one for each grid square. 
     /// They contain basic information such as name and sprite, but the behaviours and more advanced properties are found in the correlating Block classes.
     /// </summary>
-    public class Tile
+    public class TileShared
     {
         /// <summary>
         /// The type of block this tile is.
         /// </summary>
-        public Block SourceBlock;
-        /// <summary>
-        /// Sprite to be rendered at the Tile.
-        /// </summary>
-        protected Drawable sprite;
+        public BlockShared SourceBlock;
         /// <summary>
         /// The size of the tile square's edges, in pixels (Default 8) 
         /// </summary>
         protected int size = 8;
         /// <summary>
+        /// The rectangle of the tile, used for sprite rendering and collisions.
+        /// </summary>
+        public Rectangle rectangle;
+        /// <summary>
         /// Color of the tile.
         /// </summary>
         public Color color = Color.White;
         /// <summary>
-        /// The rectangle of the tile, used for sprite rendering and collisions.
+        /// Used for bitmask smoothing, should MAYBE not be here.
         /// </summary>
-        public Rectangle rectangle;
+        public int bitmask = 0;
 
         /// <summary>
-        /// Creates a <see cref="Tile"/>.
+        /// Creates a <see cref="TileShared"/>.
         /// </summary>
         /// <param name="newBlock">The type of block the new tile should be.</param>
         /// <param name="position">The position in a tilemap the tile will be.</param>
-        public Tile(Block newBlock, Vector2Int position)
+        public TileShared(BlockShared newBlock, Vector2Int position)
         {
             SourceBlock = newBlock;
-            sprite = SourceBlock.blockSprite;
-            rectangle = new Rectangle(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y, size, size); // HACK: This can probably be done better
+            rectangle = new Rectangle(GlobalsShared.gridSize.X * position.X, GlobalsShared.gridSize.Y * position.Y, size, size); // HACK: This can probably be done better
         }
 
         /// <summary>
@@ -176,11 +166,11 @@ namespace Blocktest
         /// </summary>
         /// <param name="position">The position of the current tile.</param>
         /// <param name="tilemap">The tilemap the tile is on.</param>
-        public void UpdateAdjacencies(Vector2Int position, Tilemap tilemap)
+        public void UpdateAdjacencies(Vector2Int position, TilemapShared tilemap)
         {
-            if (!SourceBlock.blockSmoothing || (SourceBlock.spriteSheet == null)) { return; } // If the tile doesn't or can't smooth, don't even try
+            if (!SourceBlock.blockSmoothing) { return; } // If the tile doesn't smooth, don't even try
 
-            int bitmask = 0; // Using bitmask smoothing, look it up
+            bitmask = 0; // Using bitmask smoothing, look it up
 
             if (HasSmoothableTile(position + Vector2Int.Up, tilemap)) {
                 bitmask += 2;
@@ -194,8 +184,6 @@ namespace Blocktest
             if (HasSmoothableTile(position + Vector2Int.Left, tilemap)) {
                 bitmask += 8;
             }
-
-            sprite = SourceBlock.spriteSheet.OrderedSprites[bitmask];
         }
 
         /// <summary>
@@ -204,20 +192,11 @@ namespace Blocktest
         /// <param name="position">The position of the tile to check for smoothing.</param>
         /// <param name="tilemap">The tilemap on which the tile you want to check for smoothing is.</param>
         /// <returns>Whether or not the tile can smooth with this tile.</returns>
-        private bool HasSmoothableTile(Vector2Int position, Tilemap tilemap)
+        private bool HasSmoothableTile(Vector2Int position, TilemapShared tilemap)
         {
-            Tile otherTile = tilemap.GetTile(position);
+            TileShared otherTile = tilemap.GetTile(position);
             if (SourceBlock.smoothSelf) { return IsSameTileType(otherTile); }
             return otherTile != null;
-        }
-
-        /// <summary>
-        /// Called from the main draw loop.
-        /// </summary>
-        /// <param name="spriteBatch">The spritebatch to draw the tile's sprite on.</param>
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            spriteBatch.Draw(sprite.Texture, new Vector2(rectangle.X, rectangle.Y), sprite.Bounds, Color.White);
         }
 
         /// <summary>
@@ -225,7 +204,7 @@ namespace Blocktest
         /// </summary>
         /// <param name="otherTile">The other tile to check.</param>
         /// <returns>Whether or not the other block is the same type as the current tile</returns>
-        private bool IsSameTileType(Tile otherTile) => otherTile?.SourceBlock == SourceBlock;
+        private bool IsSameTileType(TileShared otherTile) => otherTile?.SourceBlock == SourceBlock;
     }
 
 }
