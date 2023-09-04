@@ -81,6 +81,7 @@ public class GameScene : Scene {
         graphicsDevice.Clear(Color.CornflowerBlue);
         
         _spriteBatch.Begin();
+
         Globals.BackgroundTilemapSprites.Draw(_spriteBatch);
         Globals.ForegroundTilemapSprites.Draw(_spriteBatch);
 
@@ -91,6 +92,12 @@ public class GameScene : Scene {
         String fps = string.Format("FPS: {0}", _frameCounter.AverageFramesPerSecond);
 
         Console.WriteLine(fps);
+
+        if (buildMode)
+            _spriteBatch.Draw(BlockSpritesManager.AllBlocksSprites[blockSelected].blockSprite.Texture,
+            new Vector2Int(Mouse.GetState().X - (Mouse.GetState().X % 8),
+                (Mouse.GetState().Y - Mouse.GetState().Y % 8)),
+            new Rectangle(1, 1, 10, 10), Color.DimGray);
 
         _spriteBatch.End();
     }

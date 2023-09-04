@@ -6,7 +6,7 @@ namespace Shared.Blocks
         public override void Initialize()
         {
             blockName = "Glass";
-            blockID = 15;
+            blockID = 16;
             blockSmoothing = false;
             base.Initialize();
         }
