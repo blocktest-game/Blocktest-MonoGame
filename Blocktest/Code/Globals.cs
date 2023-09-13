@@ -1,4 +1,6 @@
-﻿namespace Blocktest
+﻿using Microsoft.VisualBasic;
+
+namespace Blocktest
 {
     public static class Globals
     {
@@ -12,6 +14,7 @@
         private static TilemapSprites backgroundTilemapSprites;
         /// <summary> Tilemap for background (non-dense) objects. </summary>
         public static TilemapSprites BackgroundTilemapSprites { get => backgroundTilemapSprites; set => backgroundTilemapSprites = value; }
+        
 
     }
 }

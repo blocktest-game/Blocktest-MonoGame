@@ -23,7 +23,7 @@ namespace Shared
         /// <summary> The size of the grid the game is played on. </summary>
         public static readonly Vector2Int gridSize = new(8, 8);
 
-        //public static BlockManager blockManager = new();
-
+        /// <summary> The total number of ticks stored. 10 secs for now. </summary>
+        public const int MaxTicksStored = 600;
     }
 }

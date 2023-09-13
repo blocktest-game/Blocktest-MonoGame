@@ -22,6 +22,7 @@
         <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="LiteNetLib" Version="1.1.0" />
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
         <PackageReference Include="Nopipeline.Task" Version="2.2.*" />
         <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />

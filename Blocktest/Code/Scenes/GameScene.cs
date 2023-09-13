@@ -91,7 +91,7 @@ public class GameScene : Scene {
 
         String fps = string.Format("FPS: {0}", _frameCounter.AverageFramesPerSecond);
 
-        Console.WriteLine(fps);
+        //Console.WriteLine(fps);
 
         if (buildMode)
             _spriteBatch.Draw(BlockSpritesManager.AllBlocksSprites[blockSelected].blockSprite.Texture,
@@ -111,15 +111,15 @@ public class GameScene : Scene {
         Globals.BackgroundTilemapSprites = new(GlobalsShared.BackgroundTilemap);
         Globals.ForegroundTilemapSprites = new(GlobalsShared.ForegroundTilemap);
 
+        int[,,] newWorld = new int[GlobalsShared.maxX, GlobalsShared.maxY, 2];
         for (int i = 0; i < GlobalsShared.maxX; i++) {
-            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[2], true, new Vector2Int(i, 5));
-            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(i, 4));
-            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(i, 3));
-            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(i, 2));
-            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(i, 1));
-            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[1], true, new Vector2Int(i, 0));
+            newWorld[i, 5, 1] = 3;
+            newWorld[i, 4, 1] = 1;
+            newWorld[i, 3, 1] = 1;
+            newWorld[i, 2, 1] = 1;
+            newWorld[i, 1, 1] = 1;
+            newWorld[i, 0, 1] = 2;
         }
-            
-        BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[0], true, new Vector2Int(20, 20));
+        BuildSystem.LoadNewWorld(newWorld);
     }
 }
