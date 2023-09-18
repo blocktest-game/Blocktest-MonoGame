@@ -19,43 +19,25 @@ namespace Blocktest
         /// </summary>
         public readonly Vector2Int tilemapSize;
         /// <summary>
-        /// The size of each cell (in pixels) in the tilemap's grid.
-        /// </summary>
-        public readonly Vector2Int gridSize = new(8, 8);
-        /// <summary>
         /// A list of <see cref="Vector2Int"/>s that specify which blocks should be refreshed when a tile is placed/destroyed. Defaults to the changed block and all cardinal directions.
         /// </summary>
-        private readonly List<Vector2Int> adjacencies = new() { Vector2Int.Zero, Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right };
+        private static readonly List<Vector2Int> adjacencies = new() { Vector2Int.Zero, Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right };
 
+        private readonly Camera _camera;
 
         /// <summary>
         /// Creates a <see cref="Tilemap"/>.
         /// </summary>
         /// <param name="sizeX">The width of the tilemap in tiles.</param>
         /// <param name="sizeY">The height of the tilemap in tiles.</param>
-        public Tilemap(int sizeX, int sizeY)
+        /// <param name="camera">The camera to render tiles on</param>
+        public Tilemap(int sizeX, int sizeY, Camera camera)
         {
+            _camera = camera;
             tilemapSize = new(sizeX, sizeY);
             tileGrid = new Tile[sizeX, sizeY];
         }
 
-        /// <summary>
-        /// Called from the main draw loop, calls <see cref="Tile.Draw(SpriteBatch)"/> on each tile in the tilemap.
-        /// </summary>
-        /// <param name="spriteBatch">The spritebatch to draw the tilemap tiles' sprite on.</param>
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            foreach (Tile tile in allTiles) {
-                tile.Draw(spriteBatch);
-            }
-        }
-
-        /// <summary>
-        /// Sets a Tile at the given XYZ coordinates of a cell in the tile map to a specific <see cref="Block"/> type.
-        /// </summary>
-        /// <param name="location">Location the new Block will be placed.</param>
-        /// <param name="newBlock">Block type to be placed in the cell.</param>
-        public Tile SetBlock(Vector2Int location, Block newBlock) => SetTile(location, new Tile(newBlock, location));
         /// <summary>
         /// Sets a Tile at the given XYZ coordinates of a cell in the tile map to a specific <see cref="Block"/> type.
         /// </summary>
@@ -66,12 +48,14 @@ namespace Blocktest
             Tile oldTile = GetTile(location);
             if (oldTile != null) {
                 allTiles.Remove(oldTile);
+                _camera.RenderedComponents.Remove(oldTile.Renderable);
             }
 
             tileGrid[location.X, location.Y] = newTile;
 
             if (newTile != null) {
                 allTiles.Add(newTile);
+                _camera.RenderedComponents.Add(newTile.Renderable);
             }
 
             foreach (Vector2Int dir in adjacencies) {
@@ -93,36 +77,12 @@ namespace Blocktest
         /// </summary>
         /// <param name="location">Location of the Tile on the Tilemap to check.</param>
         /// <returns><see cref="Tile"/> placed at the cell.</returns>
-        public Tile? GetTile(Vector2Int location) => GetTile(location.X, location.Y);
-
-        /// <summary>
-        /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
-        /// </summary>
-        /// <param name="x">X position of the Tile on the Tilemap to check.</param>
-        /// <param name="y">Y position of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="Tile"/> placed at the cell.</returns>
-        public Tile? GetTile(int x, int y) {
-            if (x < 0 || y < 0 || x >= tilemapSize.X || y >= tilemapSize.Y) {
+        public Tile? GetTile(Vector2Int location)  {
+            if (location.X < 0 || location.Y < 0 || location.X >= tilemapSize.X || location.Y >= tilemapSize.Y) {
                 return null;
             }
-            return tileGrid[x, y];
+            return tileGrid[location.X, location.Y];
         }
-
-        /// <summary>
-        /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
-        /// </summary>
-        /// <typeparam name="T">The subtype of Tile to return.</typeparam>
-        /// <param name="location">Location of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="Tile"/> of type T placed at the cell.</returns>
-        public T? GetTile<T>(Vector2Int location) where T : Tile => (T?)GetTile(location.X, location.Y);
-        /// <summary>
-        /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
-        /// </summary>
-        /// <typeparam name="T">The subtype of Tile to return.</typeparam>
-        /// <param name="x">X position of the Tile on the Tilemap to check.</param>
-        /// <param name="y">Y position of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="Tile"/> of type T placed at the cell.</returns>
-        public T? GetTile<T>(int x, int y) where T : Tile => (T?)GetTile(x, y);
 
         /// <summary>
         /// Returns whether there is a <see cref="Tile"/> at the location specified.
@@ -150,14 +110,8 @@ namespace Blocktest
         /// The size of the tile square's edges, in pixels (Default 8) 
         /// </summary>
         protected int size = 8;
-        /// <summary>
-        /// Color of the tile.
-        /// </summary>
-        public Color color = Color.White;
-        /// <summary>
-        /// The rectangle of the tile, used for sprite rendering and collisions.
-        /// </summary>
-        public Rectangle rectangle;
+
+        public Renderable Renderable;
 
         /// <summary>
         /// Creates a <see cref="Tile"/>.
@@ -167,8 +121,7 @@ namespace Blocktest
         public Tile(Block newBlock, Vector2Int position)
         {
             SourceBlock = newBlock;
-            sprite = SourceBlock.blockSprite;
-            rectangle = new Rectangle(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y, size, size); // HACK: This can probably be done better
+            Renderable = new Renderable(new Transform(new Vector2(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y)), SourceBlock.blockSprite);
         }
 
         /// <summary>
@@ -183,10 +136,10 @@ namespace Blocktest
             int bitmask = 0; // Using bitmask smoothing, look it up
 
             if (HasSmoothableTile(position + Vector2Int.Up, tilemap)) {
-                bitmask += 2;
+                bitmask += 1;
             }
             if (HasSmoothableTile(position + Vector2Int.Down, tilemap)) {
-                bitmask += 1;
+                bitmask += 2;
             }
             if (HasSmoothableTile(position + Vector2Int.Right, tilemap)) {
                 bitmask += 4;
@@ -195,7 +148,7 @@ namespace Blocktest
                 bitmask += 8;
             }
 
-            sprite = SourceBlock.spriteSheet.OrderedSprites[bitmask];
+            Renderable.Appearance = SourceBlock.spriteSheet.OrderedSprites[bitmask];
         }
 
         /// <summary>
@@ -209,15 +162,6 @@ namespace Blocktest
             Tile otherTile = tilemap.GetTile(position);
             if (SourceBlock.smoothSelf) { return IsSameTileType(otherTile); }
             return otherTile != null;
-        }
-
-        /// <summary>
-        /// Called from the main draw loop.
-        /// </summary>
-        /// <param name="spriteBatch">The spritebatch to draw the tile's sprite on.</param>
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            spriteBatch.Draw(sprite.Texture, new Vector2(rectangle.X, rectangle.Y), sprite.Bounds, Color.White);
         }
 
         /// <summary>
