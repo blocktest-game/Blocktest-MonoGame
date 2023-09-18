@@ -5,7 +5,7 @@ namespace Shared.Blocks
         public override void Initialize()
         {
             blockName = "Stone Path Brick";
-            blockID = 13;
+            blockID = 14;
             blockSmoothing = true;
             base.Initialize();
         }

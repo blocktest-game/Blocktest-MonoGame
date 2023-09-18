@@ -1,12 +1,12 @@
 namespace Shared.Blocks
 {
-    public class Dirt : BlockShared
+    public class Air : BlockShared
     {
         public override void Initialize()
         {
-            blockName = "Dirt";
-            blockID = 1;
-            blockSmoothing = true;
+            blockName = "Air";
+            blockID = 0;
+            blockSmoothing = false;
             base.Initialize();
         }
     }

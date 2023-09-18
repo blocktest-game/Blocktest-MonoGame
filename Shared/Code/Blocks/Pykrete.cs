@@ -5,7 +5,7 @@ namespace Shared.Blocks
         public override void Initialize()
         {
             blockName = "Pykrete";
-            blockID = 8;
+            blockID = 9;
             blockSmoothing = true;
             base.Initialize();
         }

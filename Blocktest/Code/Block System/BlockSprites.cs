@@ -35,9 +35,9 @@ namespace Blocktest
             string path = @"Graphics\Blocks\" + blockShared.blockName.ToLower().Replace(" ", "");
             try {
                 blockSprite = new Drawable(path, new Rectangle(1, 1, 10, 10)); //this might need to be expanded in the future in case we decide to make use of the full 12x12 tiles on our spritesheets
-                if (!blockShared.blockSmoothing) {
+                /*if (!blockShared.blockSmoothing) {
                     return;
-                }
+                }*/
                 spriteSheet = new SpriteSheet(path, 4, 4, 1);
                 if (spriteSheet.OrderedSprites.Length <= 1) {
                     Console.WriteLine("Block " + this + " is marked as smoothable, but a sprite sheet could not be found at " + path + "!");

@@ -26,13 +26,23 @@ namespace Blocktest
         /// quickly so the codebase split causes fewer issues for others.
         /// </remark>
         /// <param name="spriteBatch">The spritebatch to draw the tilemap tiles' sprite on.</param>
-        public void Draw(SpriteBatch spriteBatch)
+        public void DrawAllTiles(SpriteBatch spriteBatch)
         {
-            foreach (TileShared tile in tilemap.allTiles) {
+            for(int x = 0; x < tilemap.tilemapSize.X; x++)
+            {
+                for(int y = 0; y < tilemap.tilemapSize.Y; y++)
+                {
+                    TileShared? tile = tilemap.tileGrid[x, y];
+                    BlockSprites blockSprites = BlockSpritesManager.AllBlocksSprites[tile.SourceBlock.blockID];
+                    Drawable sprite = blockSprites.spriteSheet.OrderedSprites[tile.bitmask];
+                    spriteBatch.Draw(sprite.Texture, new Vector2(tile.rectangle.X, tile.rectangle.Y), sprite.Bounds, tile.color);
+                }
+            }
+            /*foreach (TileShared tile in tilemap.allTiles) {
                 BlockSprites blockSprites = BlockSpritesManager.AllBlocksSprites[tile.SourceBlock.blockID];
                 Drawable sprite = blockSprites.spriteSheet.OrderedSprites[tile.bitmask];
                 spriteBatch.Draw(sprite.Texture, new Vector2(tile.rectangle.X, tile.rectangle.Y), sprite.Bounds, tile.color);
-            }
+            }*/
         }
     }
 }

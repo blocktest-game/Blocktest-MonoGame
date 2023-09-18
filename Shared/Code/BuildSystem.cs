@@ -25,15 +25,22 @@ namespace Shared
         /// <param name="tilePosition">The position of the block to destroy (grid coords)</param>
         public static void BreakBlockCell(bool foreground, Vector2Int tilePosition)
         {
+            if(tilePosition.X >= GlobalsShared.maxX || tilePosition.Y >= GlobalsShared.maxY)
+            {
+                return;
+            }
 	        TilemapShared tilemap = foreground ? GlobalsShared.ForegroundTilemap : GlobalsShared.BackgroundTilemap;
+
+            BlockShared toPlace = BlockManagerShared.AllBlocks[0];
+            TileShared newTile = new(toPlace, tilePosition);
 	        
             if (tilemap.HasTile(tilePosition)) 
             {
                 int z = foreground ? 1 : 0;     // Convert foreground bool to int
 	            tilemap.GetTile(tilePosition).SourceBlock.OnBreak(tilePosition, true);
 
-	            tilemap.SetTile(tilePosition, null);
-                currentWorld[tilePosition.X, tilePosition.Y, z] = 0;
+	            tilemap.SetTile(tilePosition, newTile);
+                currentWorld[tilePosition.X, tilePosition.Y, z] = 1;
             } 
             else
             {
@@ -57,6 +64,10 @@ namespace Shared
         /// <param name="tilePosition">The position of the placed block. (Grid coords)</param>
         public static void PlaceBlockCell(BlockShared toPlace, bool foreground, Vector2Int tilePosition)
         {
+            if(tilePosition.X >= GlobalsShared.maxX || tilePosition.Y >= GlobalsShared.maxY)
+            {
+                return;
+            }
             TileShared newTile = new(toPlace, tilePosition);
             toPlace.OnPlace(tilePosition, foreground);
 
@@ -115,7 +126,7 @@ namespace Shared
         {
             currentWorld[tilePosition.X, tilePosition.Y, foregroundInt] = blockNum;
             bool foreground = Convert.ToBoolean(foregroundInt);
-            if(blockNum > 0)
+            if(blockNum > 1)
             {
                 BlockShared newBlock = BlockManagerShared.AllBlocks[blockNum - 1];
                 PlaceBlockCell(newBlock, foreground, tilePosition);
@@ -124,6 +135,11 @@ namespace Shared
             {
                 BreakBlockCell(foreground, tilePosition);
             }
+        }
+
+        public static int[,,] getCurrentWorld()
+        {
+            return currentWorld;
         }
     }
 }

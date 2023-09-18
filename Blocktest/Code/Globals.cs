@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using Shared.Networking;
 
 namespace Blocktest
 {
@@ -15,6 +16,6 @@ namespace Blocktest
         /// <summary> Tilemap for background (non-dense) objects. </summary>
         public static TilemapSprites BackgroundTilemapSprites { get => backgroundTilemapSprites; set => backgroundTilemapSprites = value; }
         
-
+        public static TickBuffer clientTickBuffer = new(0);
     }
 }

@@ -1,4 +1,6 @@
+using Blocktest.Networking;
 using Microsoft.Xna.Framework.Input;
+using Shared.Networking;
 namespace Blocktest.Scenes; 
 
 public class GameScene : Scene {
@@ -6,16 +8,20 @@ public class GameScene : Scene {
     private readonly SpriteBatch _spriteBatch;
     private FrameCounter _frameCounter = new FrameCounter();
     private readonly SpriteFont _spriteFont;
+
+    private Client networkingClient = new();        //TODO - Add config or vars
     
     bool latch = false; //latch for button pressing
     private bool latchBlockSelect = false; //same but for block selection
     bool buildMode = true; //true for build, false for destroy
-    private int blockSelected = 0; //ID of the block to place
+    private int blockSelected = 1; //ID of the block to place
     
     public void Update(GameTime gameTime) {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
                 _game.Exit();
             }
+
+            networkingClient.Update();
 
             //press E to toggle build/destroy
             if (Keyboard.GetState().IsKeyUp(Keys.E))
@@ -41,7 +47,7 @@ public class GameScene : Scene {
 	            blockSelected++;
 	            if (blockSelected >= BlockManagerShared.AllBlocks.Length)
 	            {
-		            blockSelected = 0;
+		            blockSelected = 1;
 	            }
 
 	            latchBlockSelect = true;
@@ -74,7 +80,7 @@ public class GameScene : Scene {
 				            MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)));
 	            }
             }
-
+        Globals.clientTickBuffer.IncrCurrTick();
     }
 
     public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice) {
@@ -82,8 +88,8 @@ public class GameScene : Scene {
         
         _spriteBatch.Begin();
 
-        Globals.BackgroundTilemapSprites.Draw(_spriteBatch);
-        Globals.ForegroundTilemapSprites.Draw(_spriteBatch);
+        Globals.BackgroundTilemapSprites.DrawAllTiles(_spriteBatch);
+        Globals.ForegroundTilemapSprites.DrawAllTiles(_spriteBatch);
 
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -111,15 +117,21 @@ public class GameScene : Scene {
         Globals.BackgroundTilemapSprites = new(GlobalsShared.BackgroundTilemap);
         Globals.ForegroundTilemapSprites = new(GlobalsShared.ForegroundTilemap);
 
+        networkingClient.Start("localhost", 9050, "testKey");
+
+        /*WorldDownload testDownload = new();
+
         int[,,] newWorld = new int[GlobalsShared.maxX, GlobalsShared.maxY, 2];
         for (int i = 0; i < GlobalsShared.maxX; i++) {
-            newWorld[i, 5, 1] = 3;
-            newWorld[i, 4, 1] = 1;
-            newWorld[i, 3, 1] = 1;
-            newWorld[i, 2, 1] = 1;
-            newWorld[i, 1, 1] = 1;
-            newWorld[i, 0, 1] = 2;
+            newWorld[i, 5, 1] = 4;
+            newWorld[i, 4, 1] = 2;
+            newWorld[i, 3, 1] = 2;
+            newWorld[i, 2, 1] = 2;
+            newWorld[i, 1, 1] = 2;
+            newWorld[i, 0, 1] = 3;
         }
-        BuildSystem.LoadNewWorld(newWorld);
+        testDownload.world = newWorld;
+        testDownload.tickNum = 1;
+        testDownload.Process();*/
     }
 }

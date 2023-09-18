@@ -13,10 +13,6 @@ namespace Shared
         /// </summary>
         public TileShared?[,] tileGrid;
         /// <summary>
-        /// A list of all the tiles currently on the tilemap.
-        /// </summary>
-        public readonly List<TileShared> allTiles = new();
-        /// <summary>
         /// The size of the tilemap in tiles.
         /// </summary>
         public readonly Vector2Int tilemapSize;
@@ -39,6 +35,13 @@ namespace Shared
         {
             tilemapSize = new(sizeX, sizeY);
             tileGrid = new TileShared[sizeX, sizeY];
+            for(int x = 0; x < sizeX; x++)
+            {
+                for(int y = 0; y < sizeY; y++)
+                {
+                    tileGrid[x, y] = new TileShared(BlockManagerShared.AllBlocks[0], new Vector2Int(x, y));     //Fill with air
+                }
+            }
         }
 
         /// <summary>
@@ -55,15 +58,8 @@ namespace Shared
         public TileShared SetTile(Vector2Int location, TileShared newTile)
         {
             TileShared oldTile = GetTile(location);
-            if (oldTile != null) {
-                allTiles.Remove(oldTile);
-            }
 
             tileGrid[location.X, location.Y] = newTile;
-
-            if (newTile != null) {
-                allTiles.Add(newTile);
-            }
 
             foreach (Vector2Int dir in adjacencies) {
                 if (location.X + dir.X < 0 || location.X + dir.X >= tilemapSize.X || location.Y + dir.Y < 0 || location.Y + dir.Y >= tilemapSize.Y) { continue; }
@@ -136,7 +132,7 @@ namespace Shared
         /// <summary>
         /// The size of the tile square's edges, in pixels (Default 8) 
         /// </summary>
-        protected int size = 8;
+        protected byte size = 8;
         /// <summary>
         /// The rectangle of the tile, used for sprite rendering and collisions.
         /// </summary>
@@ -148,7 +144,7 @@ namespace Shared
         /// <summary>
         /// Used for bitmask smoothing, should MAYBE not be here.
         /// </summary>
-        public int bitmask = 0;
+        public byte bitmask = 0;
 
         /// <summary>
         /// Creates a <see cref="TileShared"/>.
@@ -196,7 +192,7 @@ namespace Shared
         {
             TileShared otherTile = tilemap.GetTile(position);
             if (SourceBlock.smoothSelf) { return IsSameTileType(otherTile); }
-            return otherTile != null;
+            return otherTile != null && otherTile.SourceBlock.blockID != 0;      // Don't smooth with air, possibly find nicer way to do this later.
         }
 
         /// <summary>

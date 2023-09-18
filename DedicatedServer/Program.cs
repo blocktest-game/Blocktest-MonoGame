@@ -1,2 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using Blocktest;
+
+//private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(166667)
+WorldHandler worldHandler = new();
+worldHandler.Run();

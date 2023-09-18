@@ -5,7 +5,7 @@ namespace Shared.Blocks
         public override void Initialize()
         {
             blockName = "Grass";
-            blockID = 1;
+            blockID = 2;
             blockSmoothing = true;
             base.Initialize();
         }
