@@ -69,10 +69,10 @@ namespace Shared.Networking
 
         public void ProcessTicks(ushort startTick)
         {
-            if(startTick == currTick){return;}
+            //if(startTick == currTick){return;}
             Tick tick = tickBuffer[startTick];
             tick.ProcessStartTick();
-            for(int i = startTick + 1; i != (currTick + 1); i++)
+            for(int i = startTick + 1; i != (currTick + 1); i++)        // We want to process ticks if we start at a ticknum higher than the current
             {
                 if(i == GlobalsShared.MaxTicksStored)
                 {

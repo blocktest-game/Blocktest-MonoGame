@@ -1,6 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Shared;
+using Shared.Networking;
+using Blocktest;
 using Blocktest.Networking;
 
 namespace Blocktest
@@ -23,8 +26,27 @@ namespace Blocktest
 
         public WorldHandler()
         {
+            BlockManagerShared.Initialize();
+            GlobalsShared.BackgroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
+            GlobalsShared.ForegroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
+
+            WorldDownload testDownload = new();
+            int[,,] newWorld = new int[GlobalsShared.maxX, GlobalsShared.maxY, 2];
+            for (int i = 0; i < GlobalsShared.maxX; i++) {
+                newWorld[i, 5, 1] = 4;
+                newWorld[i, 4, 1] = 2;
+                newWorld[i, 3, 1] = 2;
+                newWorld[i, 2, 1] = 2;
+                newWorld[i, 1, 1] = 2;
+                newWorld[i, 0, 1] = 3;
+            }
+            testDownload.world = newWorld;
+            testDownload.tickNum = 1;
+            testDownload.Process();
+
             server = new();
             stopwatch = new();
+            
         }
 
         public void Run()
