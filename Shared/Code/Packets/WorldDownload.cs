@@ -19,9 +19,7 @@ namespace Shared.Networking
         }
         public void Process()
         {
-            Console.WriteLine("Begin Process");
             BuildSystem.LoadNewWorld(this);
-            Console.WriteLine("End Process");
         }
         public void Serialize(NetDataWriter writer)
         {

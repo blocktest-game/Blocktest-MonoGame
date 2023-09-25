@@ -30,6 +30,10 @@ Blocktest will run in local mode by default. To connect to a server, it must be 
 6. Commit and push all the changes you want with git
 7. Make a pull request!
 
+### Compiling after making change to shared folder
+
+After making a change to the shared project, you may need to use the "dotnet clean" and "dotnet build" commands on the shared project to make the changes appear in your dev environment.
+
 ## Reporting issues
 
 To report an issue, please fill out a bug report [here](https://github.com/blocktest-game/blocktest-MonoGame/issues/new?assignees=&labels=bug&template=bug_report.md&title=%5BBUG%5D) so that developers can quickly respond to the bug.
