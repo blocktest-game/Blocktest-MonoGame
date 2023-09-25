@@ -150,7 +150,7 @@ public class GameScene : Scene {
         connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
-        
+
         GlobalsShared.BackgroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
         GlobalsShared.ForegroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
         Globals.BackgroundTilemapSprites = new(GlobalsShared.BackgroundTilemap);
@@ -167,12 +167,12 @@ public class GameScene : Scene {
 
             int[,,] newWorld = new int[GlobalsShared.maxX, GlobalsShared.maxY, 2];
             for (int i = 0; i < GlobalsShared.maxX; i++) {
-                newWorld[i, 5, 1] = 4;
-                newWorld[i, 4, 1] = 2;
-                newWorld[i, 3, 1] = 2;
-                newWorld[i, 2, 1] = 2;
-                newWorld[i, 1, 1] = 2;
-                newWorld[i, 0, 1] = 3;
+                newWorld[i, 59, 1] = 4;
+                newWorld[i, 58, 1] = 2;
+                newWorld[i, 57, 1] = 2;
+                newWorld[i, 56, 1] = 2;
+                newWorld[i, 55, 1] = 2;
+                newWorld[i, 54, 1] = 3;
             }
             testDownload.world = newWorld;
             testDownload.tickNum = 1;
