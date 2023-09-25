@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using Shared;
 using Shared.Networking;
 
@@ -15,6 +16,8 @@ namespace Shared
         private static TilemapShared backgroundTilemap;
         /// <summary> Tilemap for background (non-dense) objects. </summary>
         public static TilemapShared BackgroundTilemap { get => backgroundTilemap; set => backgroundTilemap = value; }
+
+        public static Color backgroundColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 
         /// <summary> The maximum world size. (Width) </summary>
         public static readonly int maxX = 100;

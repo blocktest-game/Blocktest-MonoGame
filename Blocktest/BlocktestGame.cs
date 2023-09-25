@@ -8,14 +8,30 @@ namespace Blocktest
     {
         private GraphicsDeviceManager _graphics;
         private Scene? _currentScene;
+        private bool connect;
+        private string ip;
+
 
 
         /// <inheritdoc />
         public BlocktestGame()
         {
+            connect = false;
+            ip = "";
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(16);
+        }
+
+        public BlocktestGame(string newIp)
+        {
+            connect = true;
+            ip = newIp;
+            _graphics = new GraphicsDeviceManager(this);
+            Content.RootDirectory = "Content";
+            IsMouseVisible = true;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(16);
         }
 
         /// <inheritdoc />
@@ -29,7 +45,7 @@ namespace Blocktest
         {
             Drawable.ContentManager = Content;
             BlockSpritesManager.LoadBlockSprites(Content);
-            _currentScene = new GameScene(this);
+            _currentScene = new GameScene(this, connect, ip);
         }
 
         /// <inheritdoc />

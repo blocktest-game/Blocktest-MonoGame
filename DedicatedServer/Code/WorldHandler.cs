@@ -13,7 +13,7 @@ namespace Blocktest
         private readonly object locker = new();
         private int counter = 0;
         private Stopwatch stopwatch;
-        private TimeSpan targetTime = TimeSpan.FromTicks(166667);
+        private TimeSpan targetTime = TimeSpan.FromMilliseconds(16);
         private TimeSpan currentTime = TimeSpan.Zero;
         private FrameCounter _frameCounter = new FrameCounter();
 

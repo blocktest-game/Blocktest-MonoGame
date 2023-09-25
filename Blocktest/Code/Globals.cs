@@ -17,5 +17,6 @@ namespace Blocktest
         public static TilemapSprites BackgroundTilemapSprites { get => backgroundTilemapSprites; set => backgroundTilemapSprites = value; }
         
         public static TickBuffer clientTickBuffer = new(0);
+
     }
 }

@@ -68,17 +68,17 @@ namespace Shared
             {
                 return;
             }
-            TileShared newTile = new(toPlace, tilePosition);
+            TileShared newTile = new(toPlace, tilePosition);            // TODO - remove new
             toPlace.OnPlace(tilePosition, foreground);
 
             if (foreground) {
                 //newTile.colliderType = Tile.ColliderType.Grid;
                 GlobalsShared.ForegroundTilemap.SetTile(tilePosition, newTile);
-                currentWorld[tilePosition.X, tilePosition.Y, 0] = toPlace.blockID + 1;
-            } else if (toPlace.canPlaceBackground) {
-                newTile.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-                GlobalsShared.BackgroundTilemap.SetTile(tilePosition, newTile);
                 currentWorld[tilePosition.X, tilePosition.Y, 1] = toPlace.blockID + 1;
+            } else if (toPlace.canPlaceBackground) {
+                newTile.color = GlobalsShared.backgroundColor;
+                GlobalsShared.BackgroundTilemap.SetTile(tilePosition, newTile);
+                currentWorld[tilePosition.X, tilePosition.Y, 0] = toPlace.blockID + 1;
             }
         }
 
@@ -121,7 +121,9 @@ namespace Shared
         /// </summary>
         /// <param name="blockNum">The blockid + 1</param>
         /// <param name="tilePosition">The position of the tile in the tilemap</param>
-        /// <param name="foregroundInt">Whether the block is in the foreground, expressed as an int</param>
+        /// <param name="foregroundInt">Whether the blo
+                //Console.WriteLine("Current tick: " + currTick);
+                //Console.WriteLine("i: " + i);ck is in the foreground, expressed as an int</param>
         private static void LoadNewBlock(int blockNum, Vector2Int tilePosition, int foregroundInt)
         {
             currentWorld[tilePosition.X, tilePosition.Y, foregroundInt] = blockNum;

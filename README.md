@@ -16,6 +16,10 @@ A currently highly indev project aiming to give the experience of games like Ter
 
 Find the latest releases [here](https://github.com/blocktest-game/blocktest-MonoGame/releases). All you need to do is download the correct file for your system, unzip the file, and run the executable.
 
+## Running the game
+
+Blocktest will run in local mode by default. To connect to a server, it must be run with the arguments "connect \<ip\>". For localhost this is "connect localhost".
+
 ## Contributing
 
 1. Follow MonoGame's [getting started guide](https://docs.monogame.net/articles/getting_started/0_getting_started.html)
@@ -23,8 +27,8 @@ Find the latest releases [here](https://github.com/blocktest-game/blocktest-Mono
 3. Clone your fork with [git](https://git-scm.com)
 4. Open solution file (Blocktest.sln) in Visual Studio
 5. Edit the code
-5. Commit and push all the changes you want with git
-6. Make a pull request!
+6. Commit and push all the changes you want with git
+7. Make a pull request!
 
 ## Reporting issues
 

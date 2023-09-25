@@ -3,6 +3,13 @@ using LiteNetLib.Utils;
 
 namespace Shared.Networking
 {
+    public enum PacketType : byte
+    {
+        WorldDownload,
+        BreakTile,
+        TileChange
+    }
+    
     public interface Packet : INetSerializable
     {
         /// <summary>

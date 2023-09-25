@@ -1,4 +1,5 @@
 using Blocktest.Networking;
+using LiteNetLib;
 using Microsoft.Xna.Framework.Input;
 using Shared.Networking;
 namespace Blocktest.Scenes; 
@@ -8,8 +9,8 @@ public class GameScene : Scene {
     private readonly SpriteBatch _spriteBatch;
     private FrameCounter _frameCounter = new FrameCounter();
     private readonly SpriteFont _spriteFont;
-
-    private Client networkingClient = new();        //TODO - Add config or vars
+    private bool connect;
+    private Client networkingClient = new();
     
     bool latch = false; //latch for button pressing
     private bool latchBlockSelect = false; //same but for block selection
@@ -21,28 +22,31 @@ public class GameScene : Scene {
                 _game.Exit();
             }
 
-            networkingClient.Update();
+            if(connect)
+            {
+                networkingClient.Update();
+            }
+
+            //for block placement
+            MouseState currentState = Mouse.GetState();
 
             //press E to toggle build/destroy
             if (Keyboard.GetState().IsKeyUp(Keys.E))
             {
 	            latch = false;
             } 
-            else if (latch == false)
+            else if (latch == false && CheckWindowActive(currentState))
             {
 	            buildMode = !buildMode;
 	            latch = true;
             }
-
-            //for block placement
-            MouseState currentState = Mouse.GetState();
 
             //Q changes which block you have selected
             if (Keyboard.GetState().IsKeyUp(Keys.Q))
             {
 	            latchBlockSelect = false;
             }
-            else if (latchBlockSelect == false)
+            else if (latchBlockSelect == false && CheckWindowActive(currentState))
             {
 	            blockSelected++;
 	            if (blockSelected >= BlockManagerShared.AllBlocks.Length)
@@ -56,28 +60,62 @@ public class GameScene : Scene {
             //build and destroy mode
             if (buildMode)
             {
-	            if(currentState.LeftButton == ButtonState.Pressed)
+	            if(currentState.LeftButton == ButtonState.Pressed && CheckWindowActive(currentState))
 	            {
-	                BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[blockSelected], true,
-	                    new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), 
-		                    MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)));
-	            } else if (currentState.RightButton == ButtonState.Pressed) {
-		            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[blockSelected], false,
-			            new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), 
-				            MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)));
+                    TileChange testChange = new()
+                    {
+                        tickNum = Globals.clientTickBuffer.currTick,
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        foreground = true,
+                        blockId = blockSelected
+                    };
+                    Globals.clientTickBuffer.AddPacket(testChange);
+                    if(connect)
+                    {
+                        networkingClient.SendTileChange(testChange);
+                    }
+	            } else if (currentState.RightButton == ButtonState.Pressed && CheckWindowActive(currentState)) {
+                    TileChange testChange = new()
+                    {
+                        tickNum = Globals.clientTickBuffer.currTick,
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        foreground = false,
+                        blockId = blockSelected
+                    };
+                    Globals.clientTickBuffer.AddPacket(testChange);
+                    if(connect)
+                    {
+                        networkingClient.SendTileChange(testChange);
+                    }
 	            }
             }
             else 
             {
-	            if(currentState.LeftButton == ButtonState.Pressed)
+	            if(currentState.LeftButton == ButtonState.Pressed && CheckWindowActive(currentState))
 	            {
-		            BuildSystem.BreakBlockCell( true,
-			            new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), 
-				            MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)));
-	            } else if (currentState.RightButton == ButtonState.Pressed) {
-		            BuildSystem.BreakBlockCell( false,
-			            new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), 
-				            MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)));
+                    BreakTile testBreak = new()
+                    {
+                        tickNum = Globals.clientTickBuffer.currTick,
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        foreground = true
+                    };
+                    Globals.clientTickBuffer.AddPacket(testBreak);
+                    if(connect)
+                    {
+                        networkingClient.SendBreakTile(testBreak);
+                    }
+	            } else if (currentState.RightButton == ButtonState.Pressed && CheckWindowActive(currentState)) {
+                    BreakTile testBreak = new()
+                    {
+                        tickNum = Globals.clientTickBuffer.currTick,
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        foreground = false
+                    };
+                    Globals.clientTickBuffer.AddPacket(testBreak);
+                    if(connect)
+                    {
+                        networkingClient.SendBreakTile(testBreak);
+                    }
 	            }
             }
         Globals.clientTickBuffer.IncrCurrTick();
@@ -108,7 +146,8 @@ public class GameScene : Scene {
         _spriteBatch.End();
     }
 
-    public GameScene(BlocktestGame game) {
+    public GameScene(BlocktestGame game, bool doConnect, string ip) {
+        connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
         
@@ -117,21 +156,46 @@ public class GameScene : Scene {
         Globals.BackgroundTilemapSprites = new(GlobalsShared.BackgroundTilemap);
         Globals.ForegroundTilemapSprites = new(GlobalsShared.ForegroundTilemap);
 
-        networkingClient.Start("localhost", 9050, "testKey");
-
-        /*WorldDownload testDownload = new();
-
-        int[,,] newWorld = new int[GlobalsShared.maxX, GlobalsShared.maxY, 2];
-        for (int i = 0; i < GlobalsShared.maxX; i++) {
-            newWorld[i, 5, 1] = 4;
-            newWorld[i, 4, 1] = 2;
-            newWorld[i, 3, 1] = 2;
-            newWorld[i, 2, 1] = 2;
-            newWorld[i, 1, 1] = 2;
-            newWorld[i, 0, 1] = 3;
+        if(connect)
+        {
+            //networkingClient.Start("localhost", 9050, "testKey");
+            networkingClient.Start(ip, 9050, "testKey");
         }
-        testDownload.world = newWorld;
-        testDownload.tickNum = 1;
-        testDownload.Process();*/
+        else
+        {
+            WorldDownload testDownload = new();
+
+            int[,,] newWorld = new int[GlobalsShared.maxX, GlobalsShared.maxY, 2];
+            for (int i = 0; i < GlobalsShared.maxX; i++) {
+                newWorld[i, 5, 1] = 4;
+                newWorld[i, 4, 1] = 2;
+                newWorld[i, 3, 1] = 2;
+                newWorld[i, 2, 1] = 2;
+                newWorld[i, 1, 1] = 2;
+                newWorld[i, 0, 1] = 3;
+            }
+            testDownload.world = newWorld;
+            testDownload.tickNum = 1;
+            testDownload.Process();
+        }
+        
+    }
+
+    /// <summary>
+    /// Checks if the window is active and the mouse is within the window.
+    /// </summary>
+    /// <param name="mouse">The current state of the mouse</param>
+    /// <returns>True if the window is active and the mouse is within the window.</returns>
+    private bool CheckWindowActive(MouseState mouse)
+    {
+        Point pos = new(mouse.X, mouse.Y);
+        if(_game.IsActive && _game.GraphicsDevice.Viewport.Bounds.Contains(pos))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }
