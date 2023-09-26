@@ -1,3 +1,5 @@
+using Blocktest.Rendering;
+
 namespace Blocktest
 {
     public static class BuildSystem
@@ -45,7 +47,7 @@ namespace Blocktest
         /// <param name="tilePosition">The position of the placed block. (Grid coords)</param>
         public static void PlaceBlockCell(Block toPlace, bool foreground, Vector2Int tilePosition)
         {
-            Tile newTile = new(toPlace, tilePosition);
+            Tile newTile = new(toPlace, tilePosition, foreground ? Layer.ForegroundBlocks : Layer.BackgroundBlocks);
             toPlace.OnPlace(tilePosition, foreground);
 
             if (foreground) {

@@ -13,7 +13,6 @@ public class GameScene : Scene {
     private Camera _camera;
     
     public void Update(GameTime gameTime) {
-            //for block placement
             MouseState mouseState = Mouse.GetState();
             KeyboardState keyState = Keyboard.GetState();
 
@@ -47,24 +46,29 @@ public class GameScene : Scene {
 
 	            latchBlockSelect = true;
             }
+
+            var moveValue = 2.5f;
+            if (keyState.IsKeyDown(Keys.LeftShift) || keyState.IsKeyDown(Keys.RightShift)) {
+                moveValue *= 4;
+            }
             
             if (keyState.IsKeyDown(Keys.A)) {
-                _camera.Position.X -= 2f;
+                _camera.Position.X -= moveValue;
             } else if (keyState.IsKeyDown(Keys.D)) {
-                _camera.Position.X += 2f;
+                _camera.Position.X += moveValue;
             } 
             
             if (keyState.IsKeyDown(Keys.W)) {
-                _camera.Position.Y += 2f;
+                _camera.Position.Y += moveValue;
             } else if (keyState.IsKeyDown(Keys.S)) {
-                _camera.Position.Y -= 2f;
+                _camera.Position.Y -= moveValue;
             }
 
             if (!_camera.RenderLocation.Contains(mouseState.Position)) {
                 return;
             }
 
-            Vector2 mousePos = _camera.CameraToWorldPos(new(mouseState.X, mouseState.Y));
+            var mousePos = _camera.CameraToWorldPos(new(mouseState.X, mouseState.Y));
             //build and destroy mode
             if (buildMode)
             {
@@ -98,7 +102,33 @@ public class GameScene : Scene {
         
         
         _camera.Draw(graphicsDevice, _spriteBatch);
+
+        const bool pixelPerfect = false;
         
+        var destinationRectangle = pixelPerfect ? GetPixelPerfectRect() : GetFitRect();
+        _camera.RenderLocation = destinationRectangle;
+
+        graphicsDevice.Clear(Color.DarkGray);
+        
+        _spriteBatch.Begin(samplerState: pixelPerfect ? SamplerState.PointClamp : null);
+        _spriteBatch.Draw(_camera.RenderTarget, destinationRectangle, Color.White);
+        _spriteBatch.End();
+    }
+
+    private Rectangle GetPixelPerfectRect() {
+        int multiplier = int.Min(_game.GraphicsDevice.Viewport.Height / _camera.RenderTarget.Height,
+            _game.GraphicsDevice.Viewport.Width / _camera.RenderTarget.Width);
+
+        int width = _camera.RenderTarget.Width * multiplier;
+        int height = _camera.RenderTarget.Height * multiplier;
+
+        int x = (_game.GraphicsDevice.Viewport.Width - width) / 2;
+        int y = (_game.GraphicsDevice.Viewport.Height - height) / 2;
+            
+        return new Rectangle(x, y, width, height);
+    }
+
+    private Rectangle GetFitRect() {
         float aspectRatio = (float)_game.GraphicsDevice.Viewport.Width / _game.GraphicsDevice.Viewport.Height;
         float renderTargetAspectRatio = (float)_camera.RenderTarget.Width / _camera.RenderTarget.Height;
 
@@ -111,18 +141,11 @@ public class GameScene : Scene {
             width = _game.GraphicsDevice.Viewport.Width;
             height = (int)(_game.GraphicsDevice.Viewport.Width / renderTargetAspectRatio);
         }
-
+        
         int x = (_game.GraphicsDevice.Viewport.Width - width) / 2;
         int y = (_game.GraphicsDevice.Viewport.Height - height) / 2;
-
-        Rectangle destinationRectangle = new(x, y, width, height);
-        _camera.RenderLocation = destinationRectangle;
-
-        graphicsDevice.Clear(Color.DarkGray);
-        
-        _spriteBatch.Begin();
-        _spriteBatch.Draw(_camera.RenderTarget, destinationRectangle, Color.White);
-        _spriteBatch.End();
+            
+        return new Rectangle(x, y, width, height);
     }
 
     
@@ -130,7 +153,7 @@ public class GameScene : Scene {
     public GameScene(BlocktestGame game) {
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
-        _camera = new Camera(new Vector2(0, 0), new Vector2(534, 300), _game.GraphicsDevice);
+        _camera = new Camera(new Vector2(0, 0), new Vector2(512, 256), _game.GraphicsDevice);
         
         Globals.BackgroundTilemap = new Tilemap(Globals.maxX, Globals.maxY, _camera);
         Globals.ForegroundTilemap = new Tilemap(Globals.maxX, Globals.maxY, _camera);

@@ -43,17 +43,20 @@ public sealed class Camera {
 
             Rectangle positionBounds = new((int)flippedPosition.X, (int)flippedPosition.Y, (int)(component.Appearance.Bounds.Width * component.Transform.Scale.X),
                 (int)(component.Appearance.Bounds.Height * component.Transform.Scale.Y));
-
+            
             spriteBatch.Draw(component.Appearance.Texture, positionBounds, component.Appearance.Bounds,
-                component.RenderColor, component.Transform.Rotation, component.Transform.Origin, SpriteEffects.None, 0);
+                component.RenderColor, component.Transform.Rotation, component.Transform.Origin, SpriteEffects.None, (float)component.Layer / EnumCount);
         }
 
         spriteBatch.End();
 
         graphics.SetRenderTarget(null);
     }
+    
+    private static readonly int EnumCount = Enum.GetValues(typeof(Layer)).Length;
 
     public Vector2 CameraToWorldPos(Vector2 mouseState) {
-        return new(mouseState.X / RenderLocation.Width * RenderTarget.Width + Position.X, Position.Y + RenderTarget.Height - mouseState.Y / RenderLocation.Height * RenderTarget.Height);
+        return new((mouseState.X - RenderLocation.X) / RenderLocation.Width * RenderTarget.Width + Position.X,  Position.Y + RenderTarget.Height -
+            (mouseState.Y - RenderLocation.Y) / RenderLocation.Height * RenderTarget.Height);
     }
 }

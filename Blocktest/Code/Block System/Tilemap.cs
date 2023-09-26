@@ -118,10 +118,10 @@ namespace Blocktest
         /// </summary>
         /// <param name="newBlock">The type of block the new tile should be.</param>
         /// <param name="position">The position in a tilemap the tile will be.</param>
-        public Tile(Block newBlock, Vector2Int position)
+        public Tile(Block newBlock, Vector2Int position, Layer layer = Layer.ForegroundBlocks)
         {
             SourceBlock = newBlock;
-            Renderable = new Renderable(new Transform(new Vector2(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y)), SourceBlock.blockSprite);
+            Renderable = new Renderable(new Transform(new Vector2(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y)), layer, SourceBlock.blockSprite);
         }
 
         /// <summary>
