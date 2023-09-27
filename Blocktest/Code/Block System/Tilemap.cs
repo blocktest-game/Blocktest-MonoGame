@@ -1,4 +1,5 @@
-﻿using Blocktest.Rendering;
+﻿using System.Diagnostics.CodeAnalysis;
+using Blocktest.Rendering;
 namespace Blocktest
 {
     /// <summary>
@@ -23,6 +24,9 @@ namespace Blocktest
         /// </summary>
         private static readonly List<Vector2Int> adjacencies = new() { Vector2Int.Zero, Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right };
 
+        public Layer TileLayer;
+        public Color TileColor;
+        
         private readonly Camera _camera;
 
         /// <summary>
@@ -31,38 +35,49 @@ namespace Blocktest
         /// <param name="sizeX">The width of the tilemap in tiles.</param>
         /// <param name="sizeY">The height of the tilemap in tiles.</param>
         /// <param name="camera">The camera to render tiles on</param>
-        public Tilemap(int sizeX, int sizeY, Camera camera)
+        public Tilemap(int sizeX, int sizeY, Camera camera, Color? tileColor = null, Layer _tileLayer = Layer.ForegroundBlocks)
         {
             _camera = camera;
+            TileColor = tileColor ?? Color.White;
             tilemapSize = new(sizeX, sizeY);
             tileGrid = new Tile[sizeX, sizeY];
+            TileLayer = _tileLayer;
         }
+        
+        public Tile? SetBlock(Vector2Int location, Block newBlock) => SetTile(location, new Tile(newBlock, location, TileLayer));
 
         /// <summary>
         /// Sets a Tile at the given XYZ coordinates of a cell in the tile map to a specific <see cref="Block"/> type.
         /// </summary>
         /// <param name="location">Location the new Block will be placed.</param>
         /// <param name="newTile">Block type to be placed in the cell.</param>
-        public Tile SetTile(Vector2Int location, Tile newTile)
+        public Tile? SetTile(Vector2Int location, Tile? newTile)
         {
-            Tile oldTile = GetTile(location);
-            if (oldTile != null) {
+            if (TryGetTile(location, out Tile? oldTile)) {
+                oldTile.SourceBlock.OnBreak(location, this);
                 allTiles.Remove(oldTile);
                 _camera.RenderedComponents.Remove(oldTile.Renderable);
             }
 
             tileGrid[location.X, location.Y] = newTile;
 
-            if (newTile != null) {
-                allTiles.Add(newTile);
-                _camera.RenderedComponents.Add(newTile.Renderable);
+            
+            foreach (var dir in adjacencies) {
+                if (!TryGetTile(location + dir, out Tile? adjTile)) {
+                    continue;
+                }
+                adjTile.UpdateAdjacencies(location + dir, this);
             }
 
-            foreach (Vector2Int dir in adjacencies) {
-                if (location.X + dir.X < 0 || location.X + dir.X >= tilemapSize.X || location.Y + dir.Y < 0 || location.Y + dir.Y >= tilemapSize.Y) { continue; }
-                tileGrid[location.X + dir.X, location.Y + dir.Y]?.UpdateAdjacencies(location + dir, this);
+            if (newTile == null) {
+                return null;
             }
-
+            
+            allTiles.Add(newTile);
+            _camera.RenderedComponents.Add(newTile.Renderable);
+            newTile.SourceBlock.OnPlace(location, this);
+            newTile.Renderable.RenderColor = TileColor;
+            
             return newTile;
         }
 
@@ -73,23 +88,26 @@ namespace Blocktest
         public void DeleteTile(Vector2Int location) => SetTile(location, null);
 
         /// <summary>
-        /// Gets the <see cref="Tile"/> at a specific location on a <see cref="Tilemap"/>.
-        /// </summary>
-        /// <param name="location">Location of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="Tile"/> placed at the cell.</returns>
-        public Tile? GetTile(Vector2Int location)  {
-            if (location.X < 0 || location.Y < 0 || location.X >= tilemapSize.X || location.Y >= tilemapSize.Y) {
-                return null;
-            }
-            return tileGrid[location.X, location.Y];
-        }
-
-        /// <summary>
         /// Returns whether there is a <see cref="Tile"/> at the location specified.
         /// </summary>
         /// <param name="location">Location to check.</param>
         /// <returns>Returns true if there is a Tile at the position. Returns false otherwise.</returns>
-        public bool HasTile(Vector2Int location) => tileGrid[location.X, location.Y] != null;
+        public bool HasTile(Vector2Int location) {
+            if (location.X < 0 || location.Y < 0 || location.X >= tilemapSize.X || location.Y >= tilemapSize.Y) {
+                return false;
+            }
+            return tileGrid[location.X, location.Y] != null;
+        }
+        
+        public bool TryGetTile<T>(Vector2Int location, [NotNullWhen(true)] out T? result) where T : Tile {
+            result = null;
+            if (location.X < 0 || location.Y < 0 || location.X >= tilemapSize.X || location.Y >= tilemapSize.Y) {
+                return false;
+            }
+            result = tileGrid[location.X, location.Y] as T;
+
+            return result != null;
+        }
     }
 
     /// <summary>
@@ -102,15 +120,7 @@ namespace Blocktest
         /// The type of block this tile is.
         /// </summary>
         public Block SourceBlock;
-        /// <summary>
-        /// Sprite to be rendered at the Tile.
-        /// </summary>
-        protected Drawable sprite;
-        /// <summary>
-        /// The size of the tile square's edges, in pixels (Default 8) 
-        /// </summary>
-        protected int size = 8;
-
+        
         public Renderable Renderable;
 
         /// <summary>
@@ -121,7 +131,7 @@ namespace Blocktest
         public Tile(Block newBlock, Vector2Int position, Layer layer = Layer.ForegroundBlocks)
         {
             SourceBlock = newBlock;
-            Renderable = new Renderable(new Transform(new Vector2(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y)), layer, SourceBlock.blockSprite);
+            Renderable = new Renderable(new Transform(new Vector2(Globals.gridSize.X * position.X, Globals.gridSize.Y * position.Y)), layer, SourceBlock.BlockSprite);
         }
 
         /// <summary>
@@ -131,7 +141,9 @@ namespace Blocktest
         /// <param name="tilemap">The tilemap the tile is on.</param>
         public void UpdateAdjacencies(Vector2Int position, Tilemap tilemap)
         {
-            if (!SourceBlock.blockSmoothing || (SourceBlock.spriteSheet == null)) { return; } // If the tile doesn't or can't smooth, don't even try
+            if (!SourceBlock.blockSmoothing || SourceBlock.SpriteSheet == null) {
+                return; // If the tile doesn't or can't smooth, don't even try
+            } 
 
             int bitmask = 0; // Using bitmask smoothing, look it up
 
@@ -148,7 +160,7 @@ namespace Blocktest
                 bitmask += 8;
             }
 
-            Renderable.Appearance = SourceBlock.spriteSheet.OrderedSprites[bitmask];
+            Renderable.Appearance = SourceBlock.SpriteSheet.OrderedSprites[bitmask];
         }
 
         /// <summary>
@@ -159,9 +171,11 @@ namespace Blocktest
         /// <returns>Whether or not the tile can smooth with this tile.</returns>
         private bool HasSmoothableTile(Vector2Int position, Tilemap tilemap)
         {
-            Tile otherTile = tilemap.GetTile(position);
-            if (SourceBlock.smoothSelf) { return IsSameTileType(otherTile); }
-            return otherTile != null;
+            if(tilemap.TryGetTile(position, out Tile? otherTile)) {
+                return !otherTile.SourceBlock.smoothSelf || IsSameTileType(otherTile);
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -169,7 +183,7 @@ namespace Blocktest
         /// </summary>
         /// <param name="otherTile">The other tile to check.</param>
         /// <returns>Whether or not the other block is the same type as the current tile</returns>
-        private bool IsSameTileType(Tile otherTile) => otherTile?.SourceBlock == SourceBlock;
+        private bool IsSameTileType(Tile? otherTile) => otherTile?.SourceBlock == SourceBlock;
     }
 
 }

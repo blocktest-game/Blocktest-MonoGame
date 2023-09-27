@@ -19,14 +19,14 @@ namespace Blocktest
         /// <remarks> (Use normal 8x8 sprites to prevent overlap) </remarks>
         public bool smoothSelf = false;
         /// <summary> Whether or not a block can be placed in the background. </summary>
-        public bool canPlaceBackground = true;
+        public bool CanPlaceBackground = true;
 
         /// <summary> The block's sprite. </summary>
-        public Drawable blockSprite;
+        public Drawable BlockSprite;
 
         /// <summary> The sprite sheet used for smoothing the block. </summary>
-        public SpriteSheet spriteSheet;
-
+        public SpriteSheet? SpriteSheet;
+        
         /* METHODS */
 
         /// <summary>
@@ -47,17 +47,17 @@ namespace Blocktest
         {
             string path = @"Graphics\Blocks\" + blockName.ToLower().Replace(" ", "");
             try {
-                blockSprite = new Drawable(path, new Rectangle(1, 1, 10, 10)); //this might need to be expanded in the future in case we decide to make use of the full 12x12 tiles on our spritesheets
+                BlockSprite = new Drawable(path, new Rectangle(1, 1, 10, 10)); //this might need to be expanded in the future in case we decide to make use of the full 12x12 tiles on our spritesheets
                 if (!blockSmoothing) {
                     return;
                 }
-                spriteSheet = new SpriteSheet(path, 4, 4, 1);
-                if (spriteSheet.OrderedSprites.Length <= 1) {
+                SpriteSheet = new SpriteSheet(path, 4, 4, 1);
+                if (SpriteSheet.OrderedSprites.Length <= 1) {
                     Console.WriteLine("Block " + this + " is marked as smoothable, but a sprite sheet could not be found at " + path + "!");
                 }
             }
             catch (ContentLoadException) {
-                blockSprite = new Drawable(@"Graphics\Blocks\error");
+                BlockSprite = new Drawable(@"Graphics\Blocks\error");
                 Console.WriteLine("Block " + this + " does not have an icon at " + path + "!");
             }
         }
@@ -66,17 +66,17 @@ namespace Blocktest
         /// Called whenever a block is placed.
         /// </summary>
         /// <param name="position">The position of the block being placed.</param>
-        /// <param name="foreground">Whether the block being placed is in the foreground or not.</param>
-        public virtual void OnPlace(Vector2Int position, bool foreground)
+        /// <param name="tilemap">The tilemap the block is placed on.</param>
+        public virtual void OnPlace(Vector2Int position, Tilemap tilemap)
         {
-
+            
         }
         /// <summary>
         /// Called whenever a block is broken.
         /// </summary>
         /// <param name="position">The position of the block being broken.</param>
-        /// <param name="foreground">Whether the block being broken is in the foreground or not.</param>
-        public virtual void OnBreak(Vector2Int position, bool foreground)
+        /// <param name="tilemap">The tilemap the block was on before it was broken.</param>
+        public virtual void OnBreak(Vector2Int position, Tilemap tilemap)
         {
 
         }

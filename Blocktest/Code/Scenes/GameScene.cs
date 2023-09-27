@@ -6,10 +6,37 @@ public class GameScene : Scene {
     private readonly BlocktestGame _game;
     private readonly SpriteBatch _spriteBatch;
     
-    bool latch = false; //latch for button pressing
-    private bool latchBlockSelect = false; //same but for block selection
+    bool latch; //latch for button pressing
+    private bool latchBlockSelect; //same but for block selection
     bool buildMode = true; //true for build, false for destroy
-    private int blockSelected = 0; //ID of the block to place
+    private int blockSelected; //ID of the block to place
+    
+    /// <summary> Tilemap for foreground objects. </summary>
+    private readonly Tilemap _foregroundTilemap;
+    /// <summary> Tilemap for background (non-dense) objects. </summary>
+    private readonly Tilemap _backgroundTilemap;
+
+    private const int MaxX = 255;
+    private const int MaxY = 255;
+    
+    public GameScene(BlocktestGame game) {
+        _spriteBatch = new SpriteBatch(game.GraphicsDevice);
+        _game = game;
+        _camera = new Camera(new Vector2(0, 0), new Vector2(512, 256), _game.GraphicsDevice);
+        
+        _backgroundTilemap = new Tilemap(MaxX, MaxY, _camera, Color.Gray, Layer.BackgroundBlocks);
+        _foregroundTilemap = new Tilemap(MaxX, MaxY, _camera);
+        
+        for (int i = 0; i < MaxX; i++) {
+            _foregroundTilemap.SetBlock(new Vector2Int(i, 1), BlockManager.AllBlocks[0]);
+            _foregroundTilemap.SetBlock(new Vector2Int(i, 2), BlockManager.AllBlocks[2]);
+            _foregroundTilemap.SetBlock(new Vector2Int(i, 3), BlockManager.AllBlocks[0]);
+            _foregroundTilemap.SetBlock(new Vector2Int(i, 4), BlockManager.AllBlocks[0]);
+            _foregroundTilemap.SetBlock(new Vector2Int(i, 5), BlockManager.AllBlocks[0]);
+            _foregroundTilemap.SetBlock(new Vector2Int(i, 6), BlockManager.AllBlocks[0]);
+            _foregroundTilemap.SetBlock(new Vector2Int(i, 7), BlockManager.AllBlocks[1]);
+        }
+    }
     private Camera _camera;
     
     public void Update(GameTime gameTime) {
@@ -43,7 +70,6 @@ public class GameScene : Scene {
 	            {
 		            blockSelected = 0;
 	            }
-
 	            latchBlockSelect = true;
             }
 
@@ -69,33 +95,20 @@ public class GameScene : Scene {
             }
 
             var mousePos = _camera.CameraToWorldPos(new(mouseState.X, mouseState.Y));
-            //build and destroy mode
-            if (buildMode)
-            {
-	            if(mouseState.LeftButton == ButtonState.Pressed)
-	            {
-	                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[blockSelected], true,
-	                    new Vector2Int(MathHelper.Clamp(mousePos.X / Globals.gridSize.X, 0, Globals.maxX), 
-		                    MathHelper.Clamp(mousePos.Y / Globals.gridSize.Y, 0, Globals.maxY)));
-	            } else if (mouseState.RightButton == ButtonState.Pressed) {
-		            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[blockSelected], false,
-			            new Vector2Int(MathHelper.Clamp(mousePos.X / Globals.gridSize.X, 0, Globals.maxX), 
-				            MathHelper.Clamp(mousePos.Y / Globals.gridSize.Y, 0, Globals.maxY)));
-	            }
+            if(mouseState.LeftButton != ButtonState.Pressed && mouseState.RightButton != ButtonState.Pressed) {
+                return;
             }
-            else 
-            {
-	            if(mouseState.LeftButton == ButtonState.Pressed)
-	            {
-		            BuildSystem.BreakBlockCell( true,
-			            new Vector2Int(MathHelper.Clamp(mousePos.X / Globals.gridSize.X, 0, Globals.maxX), 
-				            MathHelper.Clamp(mousePos.Y / Globals.gridSize.Y, 0, Globals.maxY)));
-	            } else if (mouseState.RightButton == ButtonState.Pressed) {
-		            BuildSystem.BreakBlockCell( false,
-			            new Vector2Int(MathHelper.Clamp(mousePos.X / Globals.gridSize.X, 0, Globals.maxX), 
-				            MathHelper.Clamp(mousePos.Y / Globals.gridSize.Y, 0, Globals.maxY)));
-	            }
-            } 
+            
+            var tilemap = mouseState.LeftButton == ButtonState.Pressed ? _foregroundTilemap : _backgroundTilemap;
+            var tilePos = new Vector2Int(MathHelper.Clamp((int)mousePos.X / Globals.gridSize.X, 0, MaxX),
+                MathHelper.Clamp((int)mousePos.Y / Globals.gridSize.Y, 0, MaxY));
+            
+            if (buildMode) {
+                tilemap.SetBlock(tilePos, BlockManager.AllBlocks[blockSelected]);
+            }
+            else {
+                tilemap.DeleteTile(tilePos);
+            }
     }
 
     public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice) {
@@ -146,25 +159,5 @@ public class GameScene : Scene {
         int y = (_game.GraphicsDevice.Viewport.Height - height) / 2;
             
         return new Rectangle(x, y, width, height);
-    }
-
-    
-    
-    public GameScene(BlocktestGame game) {
-        _spriteBatch = new SpriteBatch(game.GraphicsDevice);
-        _game = game;
-        _camera = new Camera(new Vector2(0, 0), new Vector2(512, 256), _game.GraphicsDevice);
-        
-        Globals.BackgroundTilemap = new Tilemap(Globals.maxX, Globals.maxY, _camera);
-        Globals.ForegroundTilemap = new Tilemap(Globals.maxX, Globals.maxY, _camera);
-
-        for (int i = 0; i < Globals.maxX; i++) {
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[1], true, new Vector2Int(i, 5));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 4));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 3));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 2));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 1));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[2], true, new Vector2Int(i, 0));
-        }
     }
 }

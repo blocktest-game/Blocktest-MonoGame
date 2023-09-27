@@ -4,54 +4,45 @@ namespace Blocktest
     /// Represents a vector with two integer values rather than two floating-point values.
     /// </summary>
     /// <seealso cref="Vector2"/>
-    public struct Vector2Int
+    public readonly struct Vector2Int
     {
         /// <summary>
         /// The X coordinate of this <see cref="Vector2Int"/>.
         /// </summary>
-        public int X;
+        public readonly int X;
         /// <summary>
         /// The Y coordinate of this <see cref="Vector2Int"/>.
         /// </summary>
-        public int Y;
+        public readonly int Y;
 
         /// <summary>
         /// Create a <see cref="Vector2Int"/>.
         /// </summary>
-        public Vector2Int(int X, int Y)
+        public Vector2Int(int x, int y)
         {
-            this.X = X;
-            this.Y = Y;
-        }
-
-        /// <summary>
-        /// Create a <see cref="Vector2Int"/> with two floats. Floats will be rounded with <see cref="Math.Round(float)"/>.
-        /// </summary>
-        public Vector2Int(float X, float Y)
-        {
-            this.X = (int)Math.Round(X);
-            this.Y = (int)Math.Round(Y);
+            X = x;
+            Y = y;
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) => (obj is Vector2Int @int) && (Equals(@int));
+        public override bool Equals(object? obj) => obj is Vector2Int @int && Equals(@int);
 
         /// <summary>
         /// Indicates whether this Vector2Int and another's X and Y values are the same.
         /// </summary>
         /// <param name="other">The Vector2Int to compare this to.</param>
         /// <returns>true if <paramref name="other"/>'s values are the same as this instance's, otherwise, false.</returns>
-        public bool Equals(Vector2Int other) => (X == other.X) && (Y == other.Y);
+        public bool Equals(Vector2Int other) => X == other.X && Y == other.Y;
 
         /// <summary>
         /// Checks if both the X or Y value of two Vector2Int-s are the same.
         /// </summary>
-        public static bool operator ==(Vector2Int value1, Vector2Int value2) => (value1.X == value2.X) && (value1.Y == value2.Y);
+        public static bool operator ==(Vector2Int value1, Vector2Int value2) => value1.X == value2.X && value1.Y == value2.Y;
 
         /// <summary>
         /// Checks if either the X or Y value of two Vector2Int-s are different.
         /// </summary>
-        public static bool operator !=(Vector2Int value1, Vector2Int value2) => (value1.X != value2.X) || (value1.Y != value2.Y);
+        public static bool operator !=(Vector2Int value1, Vector2Int value2) => value1.X != value2.X || value1.Y != value2.Y;
 
         /// <summary>
         /// Adds the values of two Vector2Ints together and returns a Vector2Int with the value.
@@ -64,10 +55,10 @@ namespace Blocktest
         public static Vector2Int operator -(Vector2Int value1, Vector2Int value2) => new(value1.X - value2.X, value1.Y - value2.Y);
 
         /// <inheritdoc/>
-        public override int GetHashCode() => (X.GetHashCode() + Y.GetHashCode());
+        public override int GetHashCode() => X.GetHashCode() + Y.GetHashCode();
 
         /// <inheritdoc/>
-        public override string ToString() => string.Format("{{X:{0} Y:{1}}}", X, Y);
+        public override string ToString() => $"{{X:{X} Y:{Y}}}";
 
         // These allow you to use Vector2Ints as Vector2s, and explicitly (by putting (Vector2Int) in front of the Vector2) use Vector2 as Vector2Int
         public static implicit operator Vector2(Vector2Int vector2Int) => new(vector2Int.X, vector2Int.Y);
