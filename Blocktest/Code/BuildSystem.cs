@@ -1,3 +1,5 @@
+using Blocktest.Rendering;
+
 namespace Blocktest
 {
     public static class BuildSystem
@@ -6,13 +8,6 @@ namespace Blocktest
         /// An array containing an entry for every block in the world. Used for saving games.
         /// </summary>
         private static readonly int[,,] currentWorld = new int[Globals.maxX, Globals.maxY, 2];
-
-        /// <summary>
-        /// The method called whenever an object is removed.
-        /// </summary>
-        /// <param name="foreground">Whether or not the block to be destroyed is in the foreground.</param>
-        /// <param name="position">The position of the block to destroy (world coords)</param>
-        //public static void BreakBlockWorld(bool foreground, Vector2 position) => BreakBlockCell(foreground, Globals.foreground.WorldToCell(position));
 
         /// <summary>
         /// The method called whenever an object is removed.
@@ -49,18 +44,10 @@ namespace Blocktest
         /// </summary>
         /// <param name="toPlace">The block type to place.</param>
         /// <param name="foreground">Whether or not the block should be placed in the foreground.</param>
-        /// <param name="position">The position of the placed block. (World coords)</param>
-        //public static void PlaceBlockWorld(Block toPlace, bool foreground, Vector2 position) => PlaceBlockCell(toPlace, foreground, Globals.foreground.WorldToCell(position));
-
-        /// <summary>
-        /// The method called whenever a block is placed.
-        /// </summary>
-        /// <param name="toPlace">The block type to place.</param>
-        /// <param name="foreground">Whether or not the block should be placed in the foreground.</param>
         /// <param name="tilePosition">The position of the placed block. (Grid coords)</param>
         public static void PlaceBlockCell(Block toPlace, bool foreground, Vector2Int tilePosition)
         {
-            Tile newTile = new(toPlace, tilePosition);
+            Tile newTile = new(toPlace, tilePosition, foreground ? Layer.ForegroundBlocks : Layer.BackgroundBlocks);
             toPlace.OnPlace(tilePosition, foreground);
 
             if (foreground) {
@@ -68,19 +55,10 @@ namespace Blocktest
                 Globals.ForegroundTilemap.SetTile(tilePosition, newTile);
                 currentWorld[tilePosition.X, tilePosition.Y, 0] = toPlace.blockID + 1;
             } else if (toPlace.canPlaceBackground) {
-                newTile.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+                newTile.Renderable.RenderColor = new Color(0.5f, 0.5f, 0.5f, 1f);
                 Globals.BackgroundTilemap.SetTile(tilePosition, newTile);
                 currentWorld[tilePosition.X, tilePosition.Y, 1] = toPlace.blockID + 1;
             }
         }
-
-        /// <summary>
-        /// The method called whenever a block is placed.
-        /// </summary>
-        /// <param name="toPlace">The block type to place.</param>
-        /// <param name="foreground">Whether or not the block should be placed in the foreground.</param>
-        /// <param name="tilePosition">The position of the placed block. (Grid coords)</param>
-        public static void PlaceBlockCell(Block toPlace, bool foreground, Vector2 tilePosition) => PlaceBlockCell(toPlace, foreground, (Vector2Int)tilePosition);
-
     }
 }
