@@ -15,7 +15,6 @@ namespace Blocktest
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            Window.AllowUserResizing = true;
         }
 
         /// <inheritdoc />
@@ -36,7 +35,7 @@ namespace Blocktest
         protected override void Update(GameTime gameTime)
         {
             _currentScene?.Update(gameTime);
-            
+
             base.Update(gameTime);
         }
 
