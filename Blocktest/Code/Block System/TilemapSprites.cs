@@ -38,6 +38,11 @@ namespace Blocktest
                     spriteBatch.Draw(sprite.Texture, new Vector2(tile.rectangle.X, tile.rectangle.Y), sprite.Bounds, tile.color);
                 }
             }
+            /*foreach (TileShared tile in tilemap.allTiles) {
+                BlockSprites blockSprites = BlockSpritesManager.AllBlocksSprites[tile.SourceBlock.blockID];
+                Drawable sprite = blockSprites.spriteSheet.OrderedSprites[tile.bitmask];
+                spriteBatch.Draw(sprite.Texture, new Vector2(tile.rectangle.X, tile.rectangle.Y), sprite.Bounds, tile.color);
+            }*/
         }
     }
 }

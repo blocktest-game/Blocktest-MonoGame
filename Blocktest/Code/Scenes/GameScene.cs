@@ -2,13 +2,10 @@ using Blocktest.Networking;
 using LiteNetLib;
 using Microsoft.Xna.Framework.Input;
 using Shared.Networking;
-using MonoGame.Extended;
-using MonoGame.Extended.ViewportAdapters;
 namespace Blocktest.Scenes; 
 
 public class GameScene : Scene {
     private readonly BlocktestGame _game;
-    private OrthographicCamera _camera;
     private readonly SpriteBatch _spriteBatch;
     private FrameCounter _frameCounter = new FrameCounter();
     private readonly SpriteFont _spriteFont;
@@ -32,13 +29,9 @@ public class GameScene : Scene {
 
             //for block placement
             MouseState currentState = Mouse.GetState();
-            KeyboardState keyboardState = Keyboard.GetState();
-            Vector2 _worldPosition = _camera.ScreenToWorld(new Vector2(currentState.X, currentState.Y));
-
-            _camera.Move(CameraMovement(keyboardState));
 
             //press E to toggle build/destroy
-            if (keyboardState.IsKeyUp(Keys.E))
+            if (Keyboard.GetState().IsKeyUp(Keys.E))
             {
 	            latch = false;
             } 
@@ -49,7 +42,7 @@ public class GameScene : Scene {
             }
 
             //Q changes which block you have selected
-            if (keyboardState.IsKeyUp(Keys.Q))
+            if (Keyboard.GetState().IsKeyUp(Keys.Q))
             {
 	            latchBlockSelect = false;
             }
@@ -72,7 +65,7 @@ public class GameScene : Scene {
                     TileChange testChange = new()
                     {
                         tickNum = Globals.clientTickBuffer.currTick,
-                        position = new Vector2Int(MathHelper.Clamp(_worldPosition.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(_worldPosition.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
                         foreground = true,
                         blockId = blockSelected
                     };
@@ -85,7 +78,7 @@ public class GameScene : Scene {
                     TileChange testChange = new()
                     {
                         tickNum = Globals.clientTickBuffer.currTick,
-                        position = new Vector2Int(MathHelper.Clamp(_worldPosition.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(_worldPosition.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
                         foreground = false,
                         blockId = blockSelected
                     };
@@ -103,7 +96,7 @@ public class GameScene : Scene {
                     BreakTile testBreak = new()
                     {
                         tickNum = Globals.clientTickBuffer.currTick,
-                        position = new Vector2Int(MathHelper.Clamp(_worldPosition.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(_worldPosition.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
                         foreground = true
                     };
                     Globals.clientTickBuffer.AddPacket(testBreak);
@@ -115,7 +108,7 @@ public class GameScene : Scene {
                     BreakTile testBreak = new()
                     {
                         tickNum = Globals.clientTickBuffer.currTick,
-                        position = new Vector2Int(MathHelper.Clamp(_worldPosition.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(_worldPosition.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
                         foreground = false
                     };
                     Globals.clientTickBuffer.AddPacket(testBreak);
@@ -130,22 +123,12 @@ public class GameScene : Scene {
 
     public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice) {
         graphicsDevice.Clear(Color.CornflowerBlue);
-
-        if(_camera == null)
-        {
-            Console.WriteLine("Camera is null");
-        }
-        if(_spriteBatch == null)
-        {
-            Console.WriteLine("SpriteBatch is null");
-        }
         
-        _spriteBatch.Begin(transformMatrix: _camera.GetViewMatrix());
+        _spriteBatch.Begin();
 
         Globals.BackgroundTilemapSprites.DrawAllTiles(_spriteBatch);
         Globals.ForegroundTilemapSprites.DrawAllTiles(_spriteBatch);
 
-        /*
         var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         _frameCounter.Update(deltaTime);
@@ -153,25 +136,20 @@ public class GameScene : Scene {
         String fps = string.Format("FPS: {0}", _frameCounter.AverageFramesPerSecond);
 
         //Console.WriteLine(fps);
-        */
-
-        MouseState currentState = Mouse.GetState();
-        Vector2 _worldPosition = _camera.ScreenToWorld(new Vector2(currentState.X, currentState.Y));
 
         if (buildMode)
             _spriteBatch.Draw(BlockSpritesManager.AllBlocksSprites[blockSelected].blockSprite.Texture,
-            new Vector2Int(_worldPosition.X - (_worldPosition.X % 8),
-                (_worldPosition.Y - _worldPosition.Y % 8)),
+            new Vector2Int(Mouse.GetState().X - (Mouse.GetState().X % 8),
+                (Mouse.GetState().Y - Mouse.GetState().Y % 8)),
             new Rectangle(1, 1, 10, 10), Color.DimGray);
 
         _spriteBatch.End();
     }
 
-    public GameScene(BlocktestGame game, OrthographicCamera newCamera, bool doConnect, string ip) {
+    public GameScene(BlocktestGame game, bool doConnect, string ip) {
         connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
-        _camera = newCamera;
 
         GlobalsShared.BackgroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
         GlobalsShared.ForegroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
@@ -219,30 +197,5 @@ public class GameScene : Scene {
         {
             return false;
         }
-    }
-
-    private Vector2 CameraMovement(KeyboardState keyboardState)
-    {
-        Vector2 movementDirection = Vector2.Zero;
-        if (keyboardState.IsKeyDown(Keys.S))
-        {
-            movementDirection += Vector2.UnitY;
-        }
-        if (keyboardState.IsKeyDown(Keys.W))
-        {
-            movementDirection -= Vector2.UnitY;
-        }
-        if (keyboardState.IsKeyDown(Keys.A))
-        {
-            movementDirection -= Vector2.UnitX;
-        }
-        if (keyboardState.IsKeyDown(Keys.D))
-        {
-            movementDirection += Vector2.UnitX;
-        }
-        if (keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift)) {
-            movementDirection *= 4;
-        }
-        return movementDirection;
     }
 }

@@ -15,6 +15,13 @@ namespace Shared
         /// The method called whenever an object is removed.
         /// </summary>
         /// <param name="foreground">Whether or not the block to be destroyed is in the foreground.</param>
+        /// <param name="position">The position of the block to destroy (world coords)</param>
+        //public static void BreakBlockWorld(bool foreground, Vector2 position) => BreakBlockCell(foreground, Globals.foreground.WorldToCell(position));
+
+        /// <summary>
+        /// The method called whenever an object is removed.
+        /// </summary>
+        /// <param name="foreground">Whether or not the block to be destroyed is in the foreground.</param>
         /// <param name="tilePosition">The position of the block to destroy (grid coords)</param>
         public static void BreakBlockCell(bool foreground, Vector2Int tilePosition)
         {
@@ -46,6 +53,14 @@ namespace Shared
         /// </summary>
         /// <param name="toPlace">The block type to place.</param>
         /// <param name="foreground">Whether or not the block should be placed in the foreground.</param>
+        /// <param name="position">The position of the placed block. (World coords)</param>
+        //public static void PlaceBlockWorld(Block toPlace, bool foreground, Vector2 position) => PlaceBlockCell(toPlace, foreground, Globals.foreground.WorldToCell(position));
+
+        /// <summary>
+        /// The method called whenever a block is placed.
+        /// </summary>
+        /// <param name="toPlace">The block type to place.</param>
+        /// <param name="foreground">Whether or not the block should be placed in the foreground.</param>
         /// <param name="tilePosition">The position of the placed block. (Grid coords)</param>
         public static void PlaceBlockCell(BlockShared toPlace, bool foreground, Vector2Int tilePosition)
         {
@@ -57,6 +72,7 @@ namespace Shared
             toPlace.OnPlace(tilePosition, foreground);
 
             if (foreground) {
+                //newTile.colliderType = Tile.ColliderType.Grid;
                 GlobalsShared.ForegroundTilemap.SetTile(tilePosition, newTile);
                 currentWorld[tilePosition.X, tilePosition.Y, 1] = toPlace.blockID + 1;
             } else if (toPlace.canPlaceBackground) {

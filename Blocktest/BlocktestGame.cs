@@ -1,14 +1,11 @@
 using Blocktest.Rendering;
 using Blocktest.Scenes;
-using MonoGame.Extended;
-using MonoGame.Extended.ViewportAdapters;
 
 namespace Blocktest
 {
     /// <inheritdoc />
     public class BlocktestGame : Game
     {
-        private OrthographicCamera _camera;
         private GraphicsDeviceManager _graphics;
         private Scene? _currentScene;
         private bool connect;
@@ -46,14 +43,9 @@ namespace Blocktest
         /// <inheritdoc />
         protected override void LoadContent()
         {
-
-            BoxingViewportAdapter viewportAdapter = new(Window, GraphicsDevice, 800, 480);
-            _camera = new(viewportAdapter);
-            Console.WriteLine("Camera init");
             Drawable.ContentManager = Content;
             BlockSpritesManager.LoadBlockSprites(Content);
-            Console.WriteLine("LoadContent");
-            _currentScene = new GameScene(this, _camera, connect, ip);
+            _currentScene = new GameScene(this, connect, ip);
         }
 
         /// <inheritdoc />
