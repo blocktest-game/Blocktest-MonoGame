@@ -8,19 +8,35 @@ namespace Blocktest
     {
         private GraphicsDeviceManager _graphics;
         private Scene? _currentScene;
+        private bool connect;
+        private string ip;
+
+
 
         /// <inheritdoc />
         public BlocktestGame()
         {
+            connect = false;
+            ip = "";
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            Window.AllowUserResizing = true;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(16);
+        }
+
+        public BlocktestGame(string newIp)
+        {
+            connect = true;
+            ip = newIp;
+            _graphics = new GraphicsDeviceManager(this);
+            Content.RootDirectory = "Content";
+            IsMouseVisible = true;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(16);
         }
 
         /// <inheritdoc />
         protected override void Initialize() {
-            BlockManager.Initialize();
+            BlockManagerShared.Initialize();
             base.Initialize();
         }
 
@@ -28,15 +44,15 @@ namespace Blocktest
         protected override void LoadContent()
         {
             Drawable.ContentManager = Content;
-            BlockManager.LoadBlockSprites(Content);
-            _currentScene = new GameScene(this);
+            BlockSpritesManager.LoadBlockSprites(Content);
+            _currentScene = new GameScene(this, connect, ip);
         }
 
         /// <inheritdoc />
         protected override void Update(GameTime gameTime)
         {
             _currentScene?.Update(gameTime);
-            
+
             base.Update(gameTime);
         }
 

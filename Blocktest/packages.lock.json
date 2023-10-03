@@ -2,6 +2,12 @@
   "version": 1,
   "dependencies": {
     "net7.0": {
+      "LiteNetLib": {
+        "type": "Direct",
+        "requested": "[1.1.0, )",
+        "resolved": "1.1.0",
+        "contentHash": "GavpDPs65Y4vvAeECbApWXynTOn7f7IVIHmRKpPmzLWSf3vllcxHN4XPN+Tu3YFqIwOYUdgI8fhkCMhn4FLQCw=="
+      },
       "MonoGame.Content.Builder.Task": {
         "type": "Direct",
         "requested": "[3.8.*, )",
@@ -19,6 +25,13 @@
         "requested": "[2.2.*, )",
         "resolved": "2.2.0",
         "contentHash": "u06nYzGcXCBcnF7cRe8Xa0KxBxGx8grhujZmb3PUiMVbds8d/I6qJ+waGn0IeC7Tdwmt0P6l3v7MqdYog5rJQg=="
+      },
+      "shared": {
+        "type": "Project",
+        "dependencies": {
+          "LiteNetLib": "[1.1.0, )",
+          "MonoGame.Framework.DesktopGL": "[3.8.1.303, )"
+        }
       }
     }
   }

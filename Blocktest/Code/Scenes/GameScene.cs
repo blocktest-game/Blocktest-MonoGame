@@ -1,170 +1,201 @@
-using Blocktest.Rendering;
+using Blocktest.Networking;
+using LiteNetLib;
 using Microsoft.Xna.Framework.Input;
+using Shared.Networking;
 namespace Blocktest.Scenes; 
 
 public class GameScene : Scene {
     private readonly BlocktestGame _game;
     private readonly SpriteBatch _spriteBatch;
+    private FrameCounter _frameCounter = new FrameCounter();
+    private readonly SpriteFont _spriteFont;
+    private bool connect;
+    private Client networkingClient = new();
     
     bool latch = false; //latch for button pressing
     private bool latchBlockSelect = false; //same but for block selection
     bool buildMode = true; //true for build, false for destroy
-    private int blockSelected = 0; //ID of the block to place
-    private Camera _camera;
+    private int blockSelected = 1; //ID of the block to place
     
     public void Update(GameTime gameTime) {
-            MouseState mouseState = Mouse.GetState();
-            KeyboardState keyState = Keyboard.GetState();
-
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyState.IsKeyDown(Keys.Escape)) {
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
                 _game.Exit();
             }
 
+            if(connect)
+            {
+                networkingClient.Update();
+            }
+
+            //for block placement
+            MouseState currentState = Mouse.GetState();
+
             //press E to toggle build/destroy
-            if (keyState.IsKeyUp(Keys.E))
+            if (Keyboard.GetState().IsKeyUp(Keys.E))
             {
 	            latch = false;
             } 
-            else if (latch == false)
+            else if (latch == false && CheckWindowActive(currentState))
             {
 	            buildMode = !buildMode;
 	            latch = true;
             }
 
             //Q changes which block you have selected
-            if (keyState.IsKeyUp(Keys.Q))
+            if (Keyboard.GetState().IsKeyUp(Keys.Q))
             {
 	            latchBlockSelect = false;
             }
-            else if (latchBlockSelect == false)
+            else if (latchBlockSelect == false && CheckWindowActive(currentState))
             {
 	            blockSelected++;
-	            if (blockSelected >= BlockManager.AllBlocks.Length)
+	            if (blockSelected >= BlockManagerShared.AllBlocks.Length)
 	            {
-		            blockSelected = 0;
+		            blockSelected = 1;
 	            }
 
 	            latchBlockSelect = true;
             }
 
-            var moveValue = 2.5f;
-            if (keyState.IsKeyDown(Keys.LeftShift) || keyState.IsKeyDown(Keys.RightShift)) {
-                moveValue *= 4;
-            }
-            
-            if (keyState.IsKeyDown(Keys.A)) {
-                _camera.Position.X -= moveValue;
-            } else if (keyState.IsKeyDown(Keys.D)) {
-                _camera.Position.X += moveValue;
-            } 
-            
-            if (keyState.IsKeyDown(Keys.W)) {
-                _camera.Position.Y += moveValue;
-            } else if (keyState.IsKeyDown(Keys.S)) {
-                _camera.Position.Y -= moveValue;
-            }
-
-            if (!_camera.RenderLocation.Contains(mouseState.Position)) {
-                return;
-            }
-
-            var mousePos = _camera.CameraToWorldPos(new(mouseState.X, mouseState.Y));
             //build and destroy mode
             if (buildMode)
             {
-	            if(mouseState.LeftButton == ButtonState.Pressed)
+	            if(currentState.LeftButton == ButtonState.Pressed && CheckWindowActive(currentState))
 	            {
-	                BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[blockSelected], true,
-	                    new Vector2Int(MathHelper.Clamp(mousePos.X / Globals.gridSize.X, 0, Globals.maxX), 
-		                    MathHelper.Clamp(mousePos.Y / Globals.gridSize.Y, 0, Globals.maxY)));
-	            } else if (mouseState.RightButton == ButtonState.Pressed) {
-		            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[blockSelected], false,
-			            new Vector2Int(MathHelper.Clamp(mousePos.X / Globals.gridSize.X, 0, Globals.maxX), 
-				            MathHelper.Clamp(mousePos.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+                    TileChange testChange = new()
+                    {
+                        tickNum = Globals.clientTickBuffer.currTick,
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        foreground = true,
+                        blockId = blockSelected
+                    };
+                    Globals.clientTickBuffer.AddPacket(testChange);
+                    if(connect)
+                    {
+                        networkingClient.SendTileChange(testChange);
+                    }
+	            } else if (currentState.RightButton == ButtonState.Pressed && CheckWindowActive(currentState)) {
+                    TileChange testChange = new()
+                    {
+                        tickNum = Globals.clientTickBuffer.currTick,
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        foreground = false,
+                        blockId = blockSelected
+                    };
+                    Globals.clientTickBuffer.AddPacket(testChange);
+                    if(connect)
+                    {
+                        networkingClient.SendTileChange(testChange);
+                    }
 	            }
             }
             else 
             {
-	            if(mouseState.LeftButton == ButtonState.Pressed)
+	            if(currentState.LeftButton == ButtonState.Pressed && CheckWindowActive(currentState))
 	            {
-		            BuildSystem.BreakBlockCell( true,
-			            new Vector2Int(MathHelper.Clamp(mousePos.X / Globals.gridSize.X, 0, Globals.maxX), 
-				            MathHelper.Clamp(mousePos.Y / Globals.gridSize.Y, 0, Globals.maxY)));
-	            } else if (mouseState.RightButton == ButtonState.Pressed) {
-		            BuildSystem.BreakBlockCell( false,
-			            new Vector2Int(MathHelper.Clamp(mousePos.X / Globals.gridSize.X, 0, Globals.maxX), 
-				            MathHelper.Clamp(mousePos.Y / Globals.gridSize.Y, 0, Globals.maxY)));
+                    BreakTile testBreak = new()
+                    {
+                        tickNum = Globals.clientTickBuffer.currTick,
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        foreground = true
+                    };
+                    Globals.clientTickBuffer.AddPacket(testBreak);
+                    if(connect)
+                    {
+                        networkingClient.SendBreakTile(testBreak);
+                    }
+	            } else if (currentState.RightButton == ButtonState.Pressed && CheckWindowActive(currentState)) {
+                    BreakTile testBreak = new()
+                    {
+                        tickNum = Globals.clientTickBuffer.currTick,
+                        position = new Vector2Int(MathHelper.Clamp(currentState.X / GlobalsShared.gridSize.X, 0, GlobalsShared.maxX), MathHelper.Clamp(currentState.Y / GlobalsShared.gridSize.Y, 0, GlobalsShared.maxY)),
+                        foreground = false
+                    };
+                    Globals.clientTickBuffer.AddPacket(testBreak);
+                    if(connect)
+                    {
+                        networkingClient.SendBreakTile(testBreak);
+                    }
 	            }
-            } 
+            }
+        Globals.clientTickBuffer.IncrCurrTick();
     }
 
     public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice) {
+        graphicsDevice.Clear(Color.CornflowerBlue);
         
-        
-        _camera.Draw(graphicsDevice, _spriteBatch);
+        _spriteBatch.Begin();
 
-        const bool pixelPerfect = false;
-        
-        var destinationRectangle = pixelPerfect ? GetPixelPerfectRect() : GetFitRect();
-        _camera.RenderLocation = destinationRectangle;
+        Globals.BackgroundTilemapSprites.DrawAllTiles(_spriteBatch);
+        Globals.ForegroundTilemapSprites.DrawAllTiles(_spriteBatch);
 
-        graphicsDevice.Clear(Color.DarkGray);
-        
-        _spriteBatch.Begin(samplerState: pixelPerfect ? SamplerState.PointClamp : null);
-        _spriteBatch.Draw(_camera.RenderTarget, destinationRectangle, Color.White);
+        var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        _frameCounter.Update(deltaTime);
+
+        String fps = string.Format("FPS: {0}", _frameCounter.AverageFramesPerSecond);
+
+        //Console.WriteLine(fps);
+
+        if (buildMode)
+            _spriteBatch.Draw(BlockSpritesManager.AllBlocksSprites[blockSelected].blockSprite.Texture,
+            new Vector2Int(Mouse.GetState().X - (Mouse.GetState().X % 8),
+                (Mouse.GetState().Y - Mouse.GetState().Y % 8)),
+            new Rectangle(1, 1, 10, 10), Color.DimGray);
+
         _spriteBatch.End();
     }
 
-    private Rectangle GetPixelPerfectRect() {
-        int multiplier = int.Min(_game.GraphicsDevice.Viewport.Height / _camera.RenderTarget.Height,
-            _game.GraphicsDevice.Viewport.Width / _camera.RenderTarget.Width);
-
-        int width = _camera.RenderTarget.Width * multiplier;
-        int height = _camera.RenderTarget.Height * multiplier;
-
-        int x = (_game.GraphicsDevice.Viewport.Width - width) / 2;
-        int y = (_game.GraphicsDevice.Viewport.Height - height) / 2;
-            
-        return new Rectangle(x, y, width, height);
-    }
-
-    private Rectangle GetFitRect() {
-        float aspectRatio = (float)_game.GraphicsDevice.Viewport.Width / _game.GraphicsDevice.Viewport.Height;
-        float renderTargetAspectRatio = (float)_camera.RenderTarget.Width / _camera.RenderTarget.Height;
-
-        int width, height;
-        if (aspectRatio > renderTargetAspectRatio) {
-            width = (int)(_game.GraphicsDevice.Viewport.Height * renderTargetAspectRatio);
-            height = _game.GraphicsDevice.Viewport.Height;
-        }
-        else {
-            width = _game.GraphicsDevice.Viewport.Width;
-            height = (int)(_game.GraphicsDevice.Viewport.Width / renderTargetAspectRatio);
-        }
-        
-        int x = (_game.GraphicsDevice.Viewport.Width - width) / 2;
-        int y = (_game.GraphicsDevice.Viewport.Height - height) / 2;
-            
-        return new Rectangle(x, y, width, height);
-    }
-
-    
-    
-    public GameScene(BlocktestGame game) {
+    public GameScene(BlocktestGame game, bool doConnect, string ip) {
+        connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
-        _camera = new Camera(new Vector2(0, 0), new Vector2(512, 256), _game.GraphicsDevice);
-        
-        Globals.BackgroundTilemap = new Tilemap(Globals.maxX, Globals.maxY, _camera);
-        Globals.ForegroundTilemap = new Tilemap(Globals.maxX, Globals.maxY, _camera);
 
-        for (int i = 0; i < Globals.maxX; i++) {
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[1], true, new Vector2Int(i, 5));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 4));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 3));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 2));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[0], true, new Vector2Int(i, 1));
-            BuildSystem.PlaceBlockCell(BlockManager.AllBlocks[2], true, new Vector2Int(i, 0));
+        GlobalsShared.BackgroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
+        GlobalsShared.ForegroundTilemap = new TilemapShared(GlobalsShared.maxX, GlobalsShared.maxY);
+        Globals.BackgroundTilemapSprites = new(GlobalsShared.BackgroundTilemap);
+        Globals.ForegroundTilemapSprites = new(GlobalsShared.ForegroundTilemap);
+
+        if(connect)
+        {
+            //networkingClient.Start("localhost", 9050, "testKey");
+            networkingClient.Start(ip, 9050, "testKey");
+        }
+        else
+        {
+            WorldDownload testDownload = new();
+
+            int[,,] newWorld = new int[GlobalsShared.maxX, GlobalsShared.maxY, 2];
+            for (int i = 0; i < GlobalsShared.maxX; i++) {
+                newWorld[i, 59, 1] = 4;
+                newWorld[i, 58, 1] = 2;
+                newWorld[i, 57, 1] = 2;
+                newWorld[i, 56, 1] = 2;
+                newWorld[i, 55, 1] = 2;
+                newWorld[i, 54, 1] = 3;
+            }
+            testDownload.world = newWorld;
+            testDownload.tickNum = 1;
+            testDownload.Process();
+        }
+        
+    }
+
+    /// <summary>
+    /// Checks if the window is active and the mouse is within the window.
+    /// </summary>
+    /// <param name="mouse">The current state of the mouse</param>
+    /// <returns>True if the window is active and the mouse is within the window.</returns>
+    private bool CheckWindowActive(MouseState mouse)
+    {
+        Point pos = new(mouse.X, mouse.Y);
+        if(_game.IsActive && _game.GraphicsDevice.Viewport.Bounds.Contains(pos))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 }
