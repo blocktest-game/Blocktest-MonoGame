@@ -15,6 +15,7 @@ namespace Shared.Networking
         public Vector2Int position;
         public bool foreground;
         public int blockId;
+
         public ushort GetTickNum()
         {
             return tickNum;

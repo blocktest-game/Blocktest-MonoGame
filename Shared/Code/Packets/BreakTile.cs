@@ -14,14 +14,17 @@ namespace Shared.Networking
         public ushort tickNum;
         public Vector2Int position;
         public bool foreground;
+        
         public ushort GetTickNum()
         {
             return tickNum;
         }
+        
         public void Process()
         {
             BuildSystem.BreakBlockCell(foreground, position);
         }
+        
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(tickNum);

@@ -79,11 +79,8 @@ namespace Shared.Networking
         {
             CheckFurthestTick(newPacket.GetTickNum());
             ushort tickNum = newPacket.GetTickNum();
-            if(tickBuffer[tickNum] == null)
-            {
-                tickBuffer[tickNum] = new(GlobalsShared.ForegroundTilemap, GlobalsShared.BackgroundTilemap);
-            }
-            tickBuffer[tickNum].packets.Add(newPacket);
+            tickBuffer[tickNum] ??= new(GlobalsShared.ForegroundTilemap, GlobalsShared.BackgroundTilemap);
+            tickBuffer[tickNum].Packets.Add(newPacket);
         }
     }
 }

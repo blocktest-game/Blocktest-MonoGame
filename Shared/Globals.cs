@@ -8,14 +8,10 @@ namespace Shared
     {
 
         /// <summary> Tilemap for foreground objects. </summary>
-        private static TilemapShared foregroundTilemap;
-        /// <summary> Tilemap for foreground objects. </summary>
-        public static TilemapShared ForegroundTilemap { get => foregroundTilemap; set => foregroundTilemap = value; }
+        public static TilemapShared ForegroundTilemap;
 
         /// <summary> Tilemap for background (non-dense) objects. </summary>
-        private static TilemapShared backgroundTilemap;
-        /// <summary> Tilemap for background (non-dense) objects. </summary>
-        public static TilemapShared BackgroundTilemap { get => backgroundTilemap; set => backgroundTilemap = value; }
+        public static TilemapShared BackgroundTilemap;
 
         public static Color backgroundColor = new Color(0.5f, 0.5f, 0.5f, 1f);
 

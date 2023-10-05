@@ -51,14 +51,16 @@ namespace Blocktest
 
         public void Run()
         {
-            server.Start();
+            lock (locker) {
+                server.Start();
+            }
             stopwatch.Start();
             Loop();
         }
 
         protected void Loop()
         {
-            System.Threading.Timer timer = new(Tick, _frameCounter, TimeSpan.Zero, targetTime);
+            Timer timer = new(Tick, _frameCounter, TimeSpan.Zero, targetTime);
             //System.Threading.Timer timer = new(Tick, _frameCounter, 16, 16);
             while(Interlocked.Exchange(ref continueRun, 1) == 1)
             {
@@ -79,7 +81,7 @@ namespace Blocktest
                 previousTicks = currentTicks;
                 counter++;*/
                 server.Update();
-                GlobalsServer.serverTickBuffer.IncrCurrTick();
+                server.serverTickBuffer.IncrCurrTick();
             }
         }
 

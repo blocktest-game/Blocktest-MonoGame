@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 namespace Shared
 {
@@ -96,27 +97,20 @@ namespace Shared
         }
 
         /// <summary>
-        /// Gets the <see cref="TileShared"/> at a specific location on a <see cref="Tilemap"/>.
-        /// </summary>
-        /// <typeparam name="T">The subtype of Tile to return.</typeparam>
-        /// <param name="location">Location of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="TileShared"/> of type T placed at the cell.</returns>
-        public T? GetTile<T>(Vector2Int location) where T : TileShared => (T?)GetTile(location.X, location.Y);
-        /// <summary>
-        /// Gets the <see cref="TileShared"/> at a specific location on a <see cref="Tilemap"/>.
-        /// </summary>
-        /// <typeparam name="T">The subtype of Tile to return.</typeparam>
-        /// <param name="x">X position of the Tile on the Tilemap to check.</param>
-        /// <param name="y">Y position of the Tile on the Tilemap to check.</param>
-        /// <returns><see cref="TileShared"/> of type T placed at the cell.</returns>
-        public T? GetTile<T>(int x, int y) where T : TileShared => (T?)GetTile(x, y);
-
-        /// <summary>
         /// Returns whether there is a <see cref="TileShared"/> at the location specified.
         /// </summary>
         /// <param name="location">Location to check.</param>
         /// <returns>Returns true if there is a Tile at the position. Returns false otherwise.</returns>
         public bool HasTile(Vector2Int location) => tileGrid[location.X, location.Y] != null;
+
+        public bool TryGetTile<T>(Vector2Int location, [NotNullWhen(true)] out T? result) where T : TileShared {
+            result = null;
+            if (location.X < 0 || location.Y < 0 || location.X >= tilemapSize.X || location.Y >= tilemapSize.Y) {
+                return false;
+            }
+            result = tileGrid[location.X, location.Y] as T;
+            return result != null;
+        }
     }
 
     /// <summary>

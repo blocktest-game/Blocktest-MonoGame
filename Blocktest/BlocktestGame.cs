@@ -9,7 +9,8 @@ namespace Blocktest
         private GraphicsDeviceManager _graphics;
         private Scene? _currentScene;
         private bool connect;
-        private string ip;
+        private string? ip;
+        public static ContentManager? ContentManager { get; private set; }
 
 
 
@@ -17,7 +18,6 @@ namespace Blocktest
         public BlocktestGame()
         {
             connect = false;
-            ip = "";
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -43,7 +43,7 @@ namespace Blocktest
         /// <inheritdoc />
         protected override void LoadContent()
         {
-            Drawable.ContentManager = Content;
+            ContentManager = Content;
             BlockSpritesManager.LoadBlockSprites(Content);
             _currentScene = new GameScene(this, connect, ip);
         }

@@ -17,10 +17,12 @@ namespace Shared.Networking
         {
             return tickNum;
         }
+        
         public void Process()
         {
-            BuildSystem.LoadNewWorld(this);
+            BuildSystem.LoadNewWorld(world);
         }
+        
         public void Serialize(NetDataWriter writer)
         {
             writer.Put(tickNum);

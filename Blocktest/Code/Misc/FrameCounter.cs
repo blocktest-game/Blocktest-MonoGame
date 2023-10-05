@@ -22,7 +22,7 @@ namespace Blocktest
             if (_sampleBuffer.Count > MaximumSamples)
             {
                 _sampleBuffer.Dequeue();
-                AverageFramesPerSecond = _sampleBuffer.Average(i => i);
+                AverageFramesPerSecond = _sampleBuffer.Average();
             }
             else
             {

@@ -9,6 +9,7 @@ namespace Blocktest.Networking
         private EventBasedNetListener listener;
         private NetManager manager;
         private NetPeer? server;
+        public TickBuffer clientTickBuffer = new(0);
 
         public Client()
         {
@@ -43,12 +44,12 @@ namespace Blocktest.Networking
                 WorldDownload worldPacket = new();
                 byte packetByte = packetReader.GetByte();
                 PacketType packetType = (PacketType)packetByte;
-                if(packetType == PacketType.WorldDownload)
-                {
-                    worldPacket.Deserialize(packetReader);
-                    Globals.clientTickBuffer = new(worldPacket.GetTickNum());
-                    Globals.clientTickBuffer.AddPacket(worldPacket);
+                if (packetType != PacketType.WorldDownload) {
+                    return;
                 }
+                worldPacket.Deserialize(packetReader); 
+                clientTickBuffer = new(worldPacket.GetTickNum());
+                clientTickBuffer.AddPacket(worldPacket);
             }
             else
             {
@@ -82,14 +83,14 @@ namespace Blocktest.Networking
         {
             TileChange tileChange = new();
             tileChange.Deserialize(packetReader);
-            Globals.clientTickBuffer.AddPacket(tileChange);
+            clientTickBuffer.AddPacket(tileChange);
         }
 
         private void HandleBreakTile(NetPacketReader packetReader)
         {
             BreakTile breakTile = new();
             breakTile.Deserialize(packetReader);
-            Globals.clientTickBuffer.AddPacket(breakTile);
+            clientTickBuffer.AddPacket(breakTile);
         }
 
         public void SendTileChange(TileChange tileChange)
@@ -97,7 +98,7 @@ namespace Blocktest.Networking
             NetDataWriter writer = new();
             writer.Put((byte)PacketType.TileChange);
             writer.Put(tileChange);
-            server.Send(writer, DeliveryMethod.ReliableUnordered);
+            server?.Send(writer, DeliveryMethod.ReliableUnordered);
         }
 
         public void SendBreakTile(BreakTile breakTile)
@@ -105,7 +106,7 @@ namespace Blocktest.Networking
             NetDataWriter writer = new();
             writer.Put((byte)PacketType.BreakTile);
             writer.Put(breakTile);
-            server.Send(writer, DeliveryMethod.ReliableUnordered);
+            server?.Send(writer, DeliveryMethod.ReliableUnordered);
         }
     }
 }

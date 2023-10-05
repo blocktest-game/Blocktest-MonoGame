@@ -11,6 +11,7 @@ namespace Blocktest.Networking
         private EventBasedNetListener listener = new();
         private NetManager manager;
         private ServerPlayerManager playerManager;
+        public TickBuffer serverTickBuffer = new(0);
 
         public Server()
         {
@@ -54,8 +55,8 @@ namespace Blocktest.Networking
             NetDataWriter writer = new();
             WorldDownload worldDownload = new()
             {
-                world = BuildSystem.getCurrentWorld(),
-                tickNum = GlobalsServer.serverTickBuffer.currTick
+                world = BuildSystem.CurrentWorld,
+                tickNum = serverTickBuffer.currTick
             };
             writer.Put((byte)PacketType.WorldDownload);
             writer.Put(worldDownload);
@@ -91,7 +92,7 @@ namespace Blocktest.Networking
         {
             TileChange tileChange = new();
             tileChange.Deserialize(packetReader);
-            GlobalsServer.serverTickBuffer.AddPacket(tileChange);
+            serverTickBuffer.AddPacket(tileChange);
             
             NetDataWriter writer = new();
             writer.Put((byte)PacketType.TileChange);
@@ -103,7 +104,7 @@ namespace Blocktest.Networking
         {
             BreakTile breakTile = new();
             breakTile.Deserialize(packetReader);
-            GlobalsServer.serverTickBuffer.AddPacket(breakTile);
+            serverTickBuffer.AddPacket(breakTile);
             NetDataWriter writer = new();
             writer.Put((byte)PacketType.BreakTile);
             writer.Put(breakTile);
