@@ -1,13 +1,11 @@
-namespace Shared.Blocks
-{
-    public class SmoothMetal : BlockShared
-    {
-        public override void Initialize()
-        {
-            blockName = "Smooth Metal";
-            blockID = 13;
-            blockSmoothing = true;
-            base.Initialize();
-        }
+using Shared.Code.Block_System;
+namespace Shared.Code.Blocks;
+
+public class SmoothMetal : BlockShared {
+    public override void Initialize() {
+        BlockName = "Smooth Metal";
+        BlockId = 13;
+        BlockSmoothing = true;
+        base.Initialize();
     }
 }

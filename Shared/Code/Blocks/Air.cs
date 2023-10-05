@@ -1,13 +1,11 @@
-namespace Shared.Blocks
-{
-    public class Air : BlockShared
-    {
-        public override void Initialize()
-        {
-            blockName = "Air";
-            blockID = 0;
-            blockSmoothing = false;
-            base.Initialize();
-        }
+using Shared.Code.Block_System;
+namespace Shared.Code.Blocks;
+
+public class Air : BlockShared {
+    public override void Initialize() {
+        BlockName = "Air";
+        BlockId = 0;
+        BlockSmoothing = false;
+        base.Initialize();
     }
 }

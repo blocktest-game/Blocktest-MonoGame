@@ -1,13 +1,11 @@
-namespace Shared.Blocks
-{
-    public class WhiteSandstoneBrick : BlockShared
-    {
-        public override void Initialize()
-        {
-            blockName = "White Sandstone Brick";
-            blockID = 21;
-            blockSmoothing = true;
-            base.Initialize();
-        }
+using Shared.Code.Block_System;
+namespace Shared.Code.Blocks;
+
+public class WhiteSandstoneBrick : BlockShared {
+    public override void Initialize() {
+        BlockName = "White Sandstone Brick";
+        BlockId = 21;
+        BlockSmoothing = true;
+        base.Initialize();
     }
 }

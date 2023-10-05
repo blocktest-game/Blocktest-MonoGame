@@ -1,27 +1,21 @@
-using LiteNetLib;
 using LiteNetLib.Utils;
+namespace Shared.Code.Packets;
 
-namespace Shared.Networking
-{
-    public enum PacketType : byte
-    {
-        WorldDownload,
-        BreakTile,
-        TileChange
-    }
-    
-    public interface Packet : INetSerializable
-    {
-        /// <summary>
-        /// Handles all processing for the packet.
-        /// </summary>
-        public abstract void Process();
+public enum PacketType : byte {
+    WorldDownload,
+    BreakTile,
+    TileChange
+}
 
-        /// <summary>
-        /// Returns the tick number that the simulation must rewind to.
-        /// </summary>
-        /// <returns>The number of the tick this packet applies to.</returns>
-        public abstract ushort GetTickNum();
-    }
+public interface IPacket : INetSerializable {
+    /// <summary>
+    ///     Handles all processing for the packet.
+    /// </summary>
+    public void Process();
 
+    /// <summary>
+    ///     Returns the tick number that the simulation must rewind to.
+    /// </summary>
+    /// <returns>The number of the tick this packet applies to.</returns>
+    public ushort GetTickNum();
 }

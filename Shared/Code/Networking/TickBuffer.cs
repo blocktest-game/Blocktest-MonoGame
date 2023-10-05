@@ -1,86 +1,68 @@
-using System.Security.Cryptography;
+using Shared.Code.Packets;
+namespace Shared.Code.Networking;
 
-namespace Shared.Networking
-{
-    public class TickBuffer
-    {
-        public ushort currTick;
-        private int currentDistance;
-        private ushort currentRecent;
-        private Tick[] tickBuffer = new Tick[GlobalsShared.MaxTicksStored];
+public class TickBuffer {
+    private readonly Tick[] _tickBuffer = new Tick[GlobalsShared.MaxTicksStored];
+    private int _currentDistance;
+    private ushort _currentRecent;
+    public ushort CurrTick;
 
-        public TickBuffer(ushort newTick)
-        {
-            currTick = newTick;
-            for(int i = 0; i < GlobalsShared.MaxTicksStored; i++)
-            {
-                tickBuffer[i] = new(GlobalsShared.ForegroundTilemap, GlobalsShared.BackgroundTilemap);
-            }
-            currentDistance = 0;
-            currentRecent = currTick;
+    public TickBuffer(ushort newTick) {
+        CurrTick = newTick;
+        for (int i = 0; i < GlobalsShared.MaxTicksStored; i++) {
+            _tickBuffer[i] = new Tick(GlobalsShared.ForegroundTilemap, GlobalsShared.BackgroundTilemap);
         }
-        /// <summary>
-        /// Add additional tick
-        /// </summary>
-        public void IncrCurrTick()
-        {
-            //tickBuffer[currTick].ProcessStartTick();
-            ProcessTicks(currentRecent);
-            Tick newTick = new(GlobalsShared.ForegroundTilemap, GlobalsShared.BackgroundTilemap);
-            currTick++;
-            if(currTick == GlobalsShared.MaxTicksStored)
-            {
-                currTick = 0;
-            }
-            tickBuffer[currTick] = newTick;
-            currentDistance = 0;
-            currentRecent = currTick;
-        }
+        _currentDistance = 0;
+        _currentRecent = CurrTick;
+    }
 
-        private bool CheckFurthestTick(ushort newTickNum)
-        {
-            int newTickDistance;
-            if(newTickNum > currTick)
-            {
-                newTickDistance = GlobalsShared.MaxTicksStored - newTickNum + currTick;
-            }
-            else
-            {
-                newTickDistance = currTick - newTickNum;
-            }
-            if(newTickDistance > currentDistance)
-            {
-                currentDistance = newTickDistance;
-                currentRecent = newTickNum;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+    /// <summary>
+    ///     Add additional tick
+    /// </summary>
+    public void IncrCurrTick() {
+        //tickBuffer[currTick].ProcessStartTick();
+        ProcessTicks(_currentRecent);
+        Tick newTick = new(GlobalsShared.ForegroundTilemap, GlobalsShared.BackgroundTilemap);
+        CurrTick++;
+        if (CurrTick == GlobalsShared.MaxTicksStored) {
+            CurrTick = 0;
         }
+        _tickBuffer[CurrTick] = newTick;
+        _currentDistance = 0;
+        _currentRecent = CurrTick;
+    }
 
-        public void ProcessTicks(ushort startTick)
-        {
-            Tick tick = tickBuffer[startTick];
-            tick.ProcessStartTick();
-            for(int i = startTick + 1; i != (currTick + 1); i++)
-            {
-                if(i == GlobalsShared.MaxTicksStored)
-                {
-                    i = 0;
-                }
-                tick = tickBuffer[i];
-                tick.ProcessTick();
-            }
+    private bool CheckFurthestTick(ushort newTickNum) {
+        int newTickDistance;
+        if (newTickNum > CurrTick) {
+            newTickDistance = GlobalsShared.MaxTicksStored - newTickNum + CurrTick;
+        } else {
+            newTickDistance = CurrTick - newTickNum;
         }
+        if (newTickDistance > _currentDistance) {
+            _currentDistance = newTickDistance;
+            _currentRecent = newTickNum;
+            return true;
+        }
+        return false;
+    }
 
-        public void AddPacket(Packet newPacket)
-        {
-            CheckFurthestTick(newPacket.GetTickNum());
-            ushort tickNum = newPacket.GetTickNum();
-            tickBuffer[tickNum] ??= new(GlobalsShared.ForegroundTilemap, GlobalsShared.BackgroundTilemap);
-            tickBuffer[tickNum].Packets.Add(newPacket);
+    public void ProcessTicks(ushort startTick) {
+        Tick tick = _tickBuffer[startTick];
+        tick.ProcessStartTick();
+        for (int i = startTick + 1; i != CurrTick + 1; i++) {
+            if (i == GlobalsShared.MaxTicksStored) {
+                i = 0;
+            }
+            tick = _tickBuffer[i];
+            tick.ProcessTick();
         }
+    }
+
+    public void AddPacket(IPacket newPacket) {
+        CheckFurthestTick(newPacket.GetTickNum());
+        ushort tickNum = newPacket.GetTickNum();
+        _tickBuffer[tickNum] ??= new Tick(GlobalsShared.ForegroundTilemap, GlobalsShared.BackgroundTilemap);
+        _tickBuffer[tickNum].Packets.Add(newPacket);
     }
 }

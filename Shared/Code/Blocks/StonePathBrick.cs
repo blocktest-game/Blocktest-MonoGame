@@ -1,13 +1,11 @@
-namespace Shared.Blocks
-{
-    public class StonePathBrick : BlockShared
-    {
-        public override void Initialize()
-        {
-            blockName = "Stone Path Brick";
-            blockID = 14;
-            blockSmoothing = true;
-            base.Initialize();
-        }
+using Shared.Code.Block_System;
+namespace Shared.Code.Blocks;
+
+public class StonePathBrick : BlockShared {
+    public override void Initialize() {
+        BlockName = "Stone Path Brick";
+        BlockId = 14;
+        BlockSmoothing = true;
+        base.Initialize();
     }
 }

@@ -1,13 +1,11 @@
-namespace Shared.Blocks
-{
-    public class LargeStoneBrick : BlockShared
-    {
-        public override void Initialize()
-        {
-            blockName = "Large Stone Brick";
-            blockID = 6;
-            blockSmoothing = true;
-            base.Initialize();
-        }
+using Shared.Code.Block_System;
+namespace Shared.Code.Blocks;
+
+public class LargeStoneBrick : BlockShared {
+    public override void Initialize() {
+        BlockName = "Large Stone Brick";
+        BlockId = 6;
+        BlockSmoothing = true;
+        base.Initialize();
     }
 }

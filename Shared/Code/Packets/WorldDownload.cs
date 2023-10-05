@@ -1,54 +1,40 @@
 using LiteNetLib;
 using LiteNetLib.Utils;
+namespace Shared.Code.Packets;
 
-namespace Shared.Networking
-{
-    /// <summary>
-    /// Packet for handling initial world download. Should be used with <see cref="DeliveryMethod.ReliableOrdered"/>
-    /// </summary>
-    /// <remarks>
-    /// Should be replaced when chunks are added.
-    /// </remarks>
-    public class WorldDownload : Packet
-    {
-        public ushort tickNum;
-        public int[,,] world = new int[GlobalsShared.maxX, GlobalsShared.maxY, 2];
-        public ushort GetTickNum()
-        {
-            return tickNum;
-        }
-        
-        public void Process()
-        {
-            BuildSystem.LoadNewWorld(world);
-        }
-        
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(tickNum);
-            for(int x = 0; x < GlobalsShared.maxX; x++)
-            {
-                for(int y = 0; y < GlobalsShared.maxY; y++)
-                {
-                    for(int z = 0; z < 2; z++)
-                    {
-                        writer.Put(world[x,y,z]);
-                    }
+/// <summary>
+///     Packet for handling initial world download. Should be used with <see cref="DeliveryMethod.ReliableOrdered" />
+/// </summary>
+/// <remarks>
+///     Should be replaced when chunks are added.
+/// </remarks>
+public sealed class WorldDownload : IPacket {
+    public ushort TickNum;
+    public int[,,] World = new int[GlobalsShared.MaxX, GlobalsShared.MaxY, 2];
+
+    public ushort GetTickNum() => TickNum;
+
+    public void Process() {
+        BuildSystem.LoadNewWorld(World);
+    }
+
+    public void Serialize(NetDataWriter writer) {
+        writer.Put(TickNum);
+        for (int x = 0; x < GlobalsShared.MaxX; x++) {
+            for (int y = 0; y < GlobalsShared.MaxY; y++) {
+                for (int z = 0; z < 2; z++) {
+                    writer.Put(World[x, y, z]);
                 }
             }
         }
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            tickNum = reader.GetUShort();
-            for(int x = 0; x < GlobalsShared.maxX; x++)
-            {
-                for(int y = 0; y < GlobalsShared.maxY; y++)
-                {
-                    for(int z = 0; z < 2; z++)
-                    {
-                        world[x,y,z] = reader.GetInt();
-                    }
+    public void Deserialize(NetDataReader reader) {
+        TickNum = reader.GetUShort();
+        for (int x = 0; x < GlobalsShared.MaxX; x++) {
+            for (int y = 0; y < GlobalsShared.MaxY; y++) {
+                for (int z = 0; z < 2; z++) {
+                    World[x, y, z] = reader.GetInt();
                 }
             }
         }

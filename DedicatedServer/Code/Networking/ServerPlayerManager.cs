@@ -1,38 +1,29 @@
-using LiteNetLib;
-using LiteNetLib.Utils;
 using System.Collections;
-using System.Collections.Generic;
+using LiteNetLib;
+namespace DedicatedServer.Code.Networking;
 
-namespace Blocktest.Networking
-{
-    public class ServerPlayerManager : IEnumerable<NetPeer>
-    {
-        private NetPeer[] playerList;
-        public int playerCount;
-        private int playerNum = 0;
+public sealed class ServerPlayerManager : IEnumerable<NetPeer> {
+    private readonly Dictionary<int, NetPeer> _playerList;
+    public int PlayerCount;
 
-        public ServerPlayerManager(int maxPlayers)
-        {
-            playerList = new NetPeer[maxPlayers];
-        }
+    public ServerPlayerManager(int maxPlayers) {
+        _playerList = new Dictionary<int, NetPeer>();
+        _playerList.EnsureCapacity(maxPlayers);
+    }
 
-        public IEnumerator<NetPeer> GetEnumerator()
-        {
-            for(int i = 0; i < playerCount; i++)
-            {
-                yield return playerList[i];
-            }
-        }
+    public IEnumerator<NetPeer> GetEnumerator() {
+        return _playerList.Select(player => player.Value).GetEnumerator();
+    }
 
-        public void addPlayer(NetPeer newPlayer)
-        {
-            playerList[playerNum] = newPlayer;
-            playerNum++;
-        }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+    public void AddPlayer(NetPeer newPlayer) {
+        _playerList.Add(newPlayer.Id, newPlayer);
+        PlayerCount++;
+    }
+
+    public void RemovePlayer(NetPeer player) {
+        _playerList.Remove(player.Id);
+        PlayerCount--;
     }
 }

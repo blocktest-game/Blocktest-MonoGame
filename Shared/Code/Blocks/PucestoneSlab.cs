@@ -1,13 +1,11 @@
-namespace Shared.Blocks
-{
-    public class PucestoneSlab : BlockShared
-    {
-        public override void Initialize()
-        {
-            blockName = "Pucestone Slab";
-            blockID = 22;
-            blockSmoothing = true;
-            base.Initialize();
-        }
+using Shared.Code.Block_System;
+namespace Shared.Code.Blocks;
+
+public class PucestoneSlab : BlockShared {
+    public override void Initialize() {
+        BlockName = "Pucestone Slab";
+        BlockId = 22;
+        BlockSmoothing = true;
+        base.Initialize();
     }
 }

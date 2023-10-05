@@ -1,22 +1,21 @@
-﻿using Blocktest;
+﻿using System.Net;
+namespace Blocktest;
 
-public class Program
-{
-    static public void Main(String[] args)
-    {
+public abstract class Program {
+    public static void Main(string[] args) {
         int argLength = args.Length;
-        if(argLength == 2)
-        {
-            String argument = args[0];              // This can be cleaned up, may want to use a config object
-            String value = args[1];
-            if(argument.Equals("connect"))
-            {
-                using BlocktestGame game = new(value);
-                game.Run();
+        if (argLength == 2) {
+            if (!args[0].EndsWith("connect")) {
+                Console.WriteLine("Invalid argument.");
+                return;
             }
-        }
-        else
-        {
+            if (!IPAddress.TryParse(args[1], out IPAddress? _)) {
+                Console.WriteLine("Invalid IP address.");
+                return;
+            }
+            using BlocktestGame game = new(args[1]);
+            game.Run();
+        } else {
             using BlocktestGame game = new();
             game.Run();
         }

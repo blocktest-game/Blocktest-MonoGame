@@ -1,13 +1,11 @@
-namespace Shared.Blocks
-{
-    public class Log : BlockShared
-    {
-        public override void Initialize()
-        {
-            blockName = "Log";
-            blockID = 7;
-            blockSmoothing = true;
-            base.Initialize();
-        }
+using Shared.Code.Block_System;
+namespace Shared.Code.Blocks;
+
+public class Log : BlockShared {
+    public override void Initialize() {
+        BlockName = "Log";
+        BlockId = 7;
+        BlockSmoothing = true;
+        base.Initialize();
     }
 }

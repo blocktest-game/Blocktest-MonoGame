@@ -1,5 +1,3 @@
-﻿using Blocktest;
-
-//private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(166667)
+﻿using DedicatedServer.Code;
 WorldHandler worldHandler = new();
 worldHandler.Run();

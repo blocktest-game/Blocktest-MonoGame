@@ -1,46 +1,37 @@
 using LiteNetLib;
 using LiteNetLib.Utils;
+namespace Shared.Code.Packets;
 
-namespace Shared.Networking
-{
-    /// <summary>
-    /// Packet for handling tile breaking. Planned to be used with <see cref="DeliveryMethod.ReliableUnordered"/>
-    /// </summary>
-    /// <remarks>
-    /// Should be reworked when chunks are added.
-    /// </remarks>
-    public class BreakTile : Packet
-    {
-        public ushort tickNum;
-        public Vector2Int position;
-        public bool foreground;
-        
-        public ushort GetTickNum()
-        {
-            return tickNum;
-        }
-        
-        public void Process()
-        {
-            BuildSystem.BreakBlockCell(foreground, position);
-        }
-        
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(tickNum);
-            writer.Put(position.X);
-            writer.Put(position.Y);
-            writer.Put(foreground);
-        }
+/// <summary>
+///     Packet for handling tile breaking. Planned to be used with <see cref="DeliveryMethod.ReliableUnordered" />
+/// </summary>
+/// <remarks>
+///     Should be reworked when chunks are added.
+/// </remarks>
+public sealed class BreakTile : IPacket {
+    public bool Foreground;
+    public Vector2Int Position;
+    public ushort TickNum;
 
-        public void Deserialize(NetDataReader reader)
-        {
-            tickNum = reader.GetUShort();
-            int x = reader.GetInt();
-            int y = reader.GetInt();
-            foreground = reader.GetBool();
+    public ushort GetTickNum() => TickNum;
 
-            position = new(x, y);
-        }
+    public void Process() {
+        BuildSystem.BreakBlockCell(Foreground, Position);
+    }
+
+    public void Serialize(NetDataWriter writer) {
+        writer.Put(TickNum);
+        writer.Put(Position.X);
+        writer.Put(Position.Y);
+        writer.Put(Foreground);
+    }
+
+    public void Deserialize(NetDataReader reader) {
+        TickNum = reader.GetUShort();
+        int x = reader.GetInt();
+        int y = reader.GetInt();
+        Foreground = reader.GetBool();
+
+        Position = new Vector2Int(x, y);
     }
 }

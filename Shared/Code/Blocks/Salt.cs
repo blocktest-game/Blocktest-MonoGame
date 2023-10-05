@@ -1,13 +1,11 @@
-namespace Shared.Blocks
-{
-    public class Salt : BlockShared
-    {
-        public override void Initialize()
-        {
-            blockName = "Salt";
-            blockID = 20;
-            blockSmoothing = true;
-            base.Initialize();
-        }
+using Shared.Code.Block_System;
+namespace Shared.Code.Blocks;
+
+public class Salt : BlockShared {
+    public override void Initialize() {
+        BlockName = "Salt";
+        BlockId = 20;
+        BlockSmoothing = true;
+        base.Initialize();
     }
 }

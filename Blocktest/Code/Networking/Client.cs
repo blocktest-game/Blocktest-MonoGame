@@ -1,112 +1,102 @@
 using LiteNetLib;
 using LiteNetLib.Utils;
-using Shared.Networking;
+using Shared.Code.Networking;
+using Shared.Code.Packets;
+namespace Blocktest.Networking;
 
-namespace Blocktest.Networking
-{
-    public class Client
-    {
-        private EventBasedNetListener listener;
-        private NetManager manager;
-        private NetPeer? server;
-        public TickBuffer clientTickBuffer = new(0);
+public sealed class Client {
+    private readonly EventBasedNetListener _listener;
+    private readonly NetManager _manager;
+    private NetPeer? _server;
+    public TickBuffer ClientTickBuffer = new(0);
 
-        public Client()
-        {
-            listener = new();
-            manager = new(listener);
-            listener.NetworkReceiveEvent += NetworkRecieveEvent;
-            manager.Start();
-        }
+    public Client() {
+        _listener = new EventBasedNetListener();
+        _manager = new NetManager(_listener);
+        _listener.NetworkReceiveEvent += NetworkRecieveEvent;
+        _manager.Start();
+    }
 
-        public void Start(string ip, int port, string key)
-        {
-            manager.Connect(ip, port, key);
-        }
+    public void Start(string ip, int port, string key) {
+        _manager.Connect(ip, port, key);
+    }
 
-        public void Update()
-        {
-            manager.PollEvents();
-        }
+    public void Stop() {
+        _manager.Stop();
+    }
 
-        /// <summary>
-        /// Recieve network events from LiteNetLib
-        /// </summary>
-        /// <param name="peer">The server the packet is coming from.</param>
-        /// <param name="packetReader">Contains the packet from the server.</param>
-        /// <param name="channelNumber"></param>
-        /// <param name="deliveryMethod">The delivery method used to deliver this packet.</param>
-        protected void NetworkRecieveEvent(NetPeer peer, NetPacketReader packetReader, byte channelNumber, DeliveryMethod deliveryMethod)
-        {
-            if(server == null)
-            {
-                server = peer;
-                WorldDownload worldPacket = new();
-                byte packetByte = packetReader.GetByte();
-                PacketType packetType = (PacketType)packetByte;
-                if (packetType != PacketType.WorldDownload) {
-                    return;
-                }
-                worldPacket.Deserialize(packetReader); 
-                clientTickBuffer = new(worldPacket.GetTickNum());
-                clientTickBuffer.AddPacket(worldPacket);
-            }
-            else
-            {
-                HandlePackets(packetReader);
-            }
-        }
+    public void Update() {
+        _manager.PollEvents();
+    }
 
-        /// <summary>
-        /// Handles packets after the first.
-        /// </summary>
-        /// <param name="packetReader">Contains the packet sent by the server.</param>
-        public void HandlePackets(NetPacketReader packetReader)
-        {
+    /// <summary>
+    ///     Recieve network events from LiteNetLib
+    /// </summary>
+    /// <param name="peer">The server the packet is coming from.</param>
+    /// <param name="packetReader">Contains the packet from the server.</param>
+    /// <param name="channelNumber"></param>
+    /// <param name="deliveryMethod">The delivery method used to deliver this packet.</param>
+    protected void NetworkRecieveEvent(NetPeer peer, NetPacketReader packetReader, byte channelNumber,
+                                       DeliveryMethod deliveryMethod) {
+        if (_server == null) {
+            _server = peer;
+            WorldDownload worldPacket = new();
             byte packetByte = packetReader.GetByte();
             PacketType packetType = (PacketType)packetByte;
-            switch (packetType)
-            {
-                case PacketType.TileChange:
-                    HandleTileChange(packetReader);
-                    break;
-                case PacketType.BreakTile:
-                    HandleBreakTile(packetReader);
-                    break;
-                default:
-                    Console.WriteLine("Bad packet!!!");
-                    break;
+            if (packetType != PacketType.WorldDownload) {
+                return;
             }
+            worldPacket.Deserialize(packetReader);
+            ClientTickBuffer = new TickBuffer(worldPacket.TickNum);
+            ClientTickBuffer.AddPacket(worldPacket);
+        } else {
+            HandlePackets(packetReader);
         }
+    }
 
-        private void HandleTileChange(NetPacketReader packetReader)
-        {
-            TileChange tileChange = new();
-            tileChange.Deserialize(packetReader);
-            clientTickBuffer.AddPacket(tileChange);
+    /// <summary>
+    ///     Handles packets after the first.
+    /// </summary>
+    /// <param name="packetReader">Contains the packet sent by the server.</param>
+    public void HandlePackets(NetPacketReader packetReader) {
+        byte packetByte = packetReader.GetByte();
+        PacketType packetType = (PacketType)packetByte;
+        switch (packetType) {
+            case PacketType.TileChange:
+                HandleTileChange(packetReader);
+                break;
+            case PacketType.BreakTile:
+                HandleBreakTile(packetReader);
+                break;
+            default:
+                Console.WriteLine("Bad packet!!!");
+                break;
         }
+    }
 
-        private void HandleBreakTile(NetPacketReader packetReader)
-        {
-            BreakTile breakTile = new();
-            breakTile.Deserialize(packetReader);
-            clientTickBuffer.AddPacket(breakTile);
-        }
+    private void HandleTileChange(NetPacketReader packetReader) {
+        TileChange tileChange = new();
+        tileChange.Deserialize(packetReader);
+        ClientTickBuffer.AddPacket(tileChange);
+    }
 
-        public void SendTileChange(TileChange tileChange)
-        {
-            NetDataWriter writer = new();
-            writer.Put((byte)PacketType.TileChange);
-            writer.Put(tileChange);
-            server?.Send(writer, DeliveryMethod.ReliableUnordered);
-        }
+    private void HandleBreakTile(NetPacketReader packetReader) {
+        BreakTile breakTile = new();
+        breakTile.Deserialize(packetReader);
+        ClientTickBuffer.AddPacket(breakTile);
+    }
 
-        public void SendBreakTile(BreakTile breakTile)
-        {
-            NetDataWriter writer = new();
-            writer.Put((byte)PacketType.BreakTile);
-            writer.Put(breakTile);
-            server?.Send(writer, DeliveryMethod.ReliableUnordered);
-        }
+    public void SendTileChange(TileChange tileChange) {
+        NetDataWriter writer = new();
+        writer.Put((byte)PacketType.TileChange);
+        writer.Put(tileChange);
+        _server?.Send(writer, DeliveryMethod.ReliableUnordered);
+    }
+
+    public void SendBreakTile(BreakTile breakTile) {
+        NetDataWriter writer = new();
+        writer.Put((byte)PacketType.BreakTile);
+        writer.Put(breakTile);
+        _server?.Send(writer, DeliveryMethod.ReliableUnordered);
     }
 }

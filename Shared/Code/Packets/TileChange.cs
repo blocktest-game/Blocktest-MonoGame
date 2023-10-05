@@ -1,47 +1,41 @@
 using LiteNetLib;
 using LiteNetLib.Utils;
+using Shared.Code.Block_System;
+namespace Shared.Code.Packets;
 
-namespace Shared.Networking
-{
-    /// <summary>
-    /// Packet for handling tile changes. Planned to be used with <see cref="DeliveryMethod.ReliableUnordered"/>
-    /// </summary>
-    /// <remarks>
-    /// Should be reworked when chunks are added.
-    /// </remarks>
-    public class TileChange : Packet
-    {
-        public ushort tickNum;
-        public Vector2Int position;
-        public bool foreground;
-        public int blockId;
+/// <summary>
+///     Packet for handling tile changes. Planned to be used with <see cref="DeliveryMethod.ReliableUnordered" />
+/// </summary>
+/// <remarks>
+///     Should be reworked when chunks are added.
+/// </remarks>
+public sealed class TileChange : IPacket {
+    public int BlockId;
+    public bool Foreground;
+    public Vector2Int Position;
+    public ushort TickNum;
 
-        public ushort GetTickNum()
-        {
-            return tickNum;
-        }
-        public void Process()
-        {
-            BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[blockId], foreground, position);
-        }
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(tickNum);
-            writer.Put(position.X);
-            writer.Put(position.Y);
-            writer.Put(foreground);
-            writer.Put(blockId);
-        }
+    public ushort GetTickNum() => TickNum;
 
-        public void Deserialize(NetDataReader reader)
-        {
-            tickNum = reader.GetUShort();
-            int x = reader.GetInt();
-            int y = reader.GetInt();
-            foreground = reader.GetBool();
-            blockId = reader.GetInt();
+    public void Process() {
+        BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[BlockId], Foreground, Position);
+    }
 
-            position = new(x, y);
-        }
+    public void Serialize(NetDataWriter writer) {
+        writer.Put(TickNum);
+        writer.Put(Position.X);
+        writer.Put(Position.Y);
+        writer.Put(Foreground);
+        writer.Put(BlockId);
+    }
+
+    public void Deserialize(NetDataReader reader) {
+        TickNum = reader.GetUShort();
+        int x = reader.GetInt();
+        int y = reader.GetInt();
+        Foreground = reader.GetBool();
+        BlockId = reader.GetInt();
+
+        Position = new Vector2Int(x, y);
     }
 }
