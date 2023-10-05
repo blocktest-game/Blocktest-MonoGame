@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Multiplayer Test" type="CompoundRunConfigurationType">
+    <toRun name="Blocktest (Local Multiplayer)" type="DotNetProject" />
+    <toRun name="DedicatedServer" type="DotNetProject" />
+    <method v="2" />
+  </configuration>
+</component>
