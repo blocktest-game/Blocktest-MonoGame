@@ -33,14 +33,6 @@
           "MonoGame.Framework.DesktopGL": "[3.8.1.303, )"
         }
       }
-    },
-    "net7.0/win-x64": {
-      "MonoGame.Framework.DesktopGL": {
-        "type": "Direct",
-        "requested": "[3.8.*, )",
-        "resolved": "3.8.1.303",
-        "contentHash": "eGYhqn0n1olk8MNYeE9EuBmoNNECN1T18rPMaQpkzsEQ0H3nVyFPXC+uCo78v5pi5juQpJ3PSFnSkjzZJ1U58A=="
-      }
     }
   }
 }
