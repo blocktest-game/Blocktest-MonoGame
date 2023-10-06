@@ -21,7 +21,7 @@ public abstract class BlockShared {
     /// <summary> Whether or not a block smooths only with itself </summary>
     /// <remarks> (Use normal 8x8 sprites to prevent overlap) </remarks>
     public bool SmoothSelf = false;
-
+    
     /* METHODS */
 
     /// <summary>

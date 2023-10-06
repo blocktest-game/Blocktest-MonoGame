@@ -10,7 +10,6 @@ public sealed class BlocktestGame : Game {
     private IScene? _currentScene;
     private GraphicsDeviceManager _graphics;
 
-
     /// <inheritdoc />
     public BlocktestGame() {
         _connect = false;
@@ -18,6 +17,7 @@ public sealed class BlocktestGame : Game {
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         TargetElapsedTime = TimeSpan.FromMilliseconds(16);
+        Window.AllowUserResizing = true;
     }
 
     public BlocktestGame(string newIp) {
@@ -26,6 +26,7 @@ public sealed class BlocktestGame : Game {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+        Window.AllowUserResizing = true;
         TargetElapsedTime = TimeSpan.FromMilliseconds(16);
     }
 

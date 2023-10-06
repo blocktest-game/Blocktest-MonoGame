@@ -7,7 +7,7 @@ namespace Blocktest.Block_System;
 /// </summary>
 public sealed class BlockSprites {
     /// <summary> Shared block info </summary>
-    public BlockShared BlockShared;
+    private readonly BlockShared _blockShared;
 
     /// <summary> The block's sprite. </summary>
     public Drawable BlockSprite;
@@ -18,7 +18,7 @@ public sealed class BlockSprites {
     /* METHODS */
 
     public BlockSprites(BlockShared newBlockShared) {
-        BlockShared = newBlockShared;
+        _blockShared = newBlockShared;
         LoadSprite();
     }
 
@@ -29,27 +29,24 @@ public sealed class BlockSprites {
     ///     DO NOT FORGET TO CALL THE BASE METHOD IF YOU OVERRIDE THIS.
     /// </remarks>
     public void LoadSprite() {
-        string path = @"Graphics\Blocks\" + BlockShared.BlockName.ToLower().Replace(" ", "");
+        string path = @"Graphics\Blocks\" + _blockShared.BlockName.ToLower().Replace(" ", "");
         try {
             BlockSprite =
                 new Drawable(path,
                     new Rectangle(1, 1, 10,
                         10)); //this might need to be expanded in the future in case we decide to make use of the full 12x12 tiles on our spritesheets
-            if (!BlockShared.BlockSmoothing) {
+            if (!_blockShared.BlockSmoothing) {
                 return;
             }
             SpriteSheet = new SpriteSheet(path, 4, 4, 1);
             if (SpriteSheet.OrderedSprites.Length <= 1) {
-                Console.WriteLine("Block " +
-                                  this +
-                                  " is marked as smoothable, but a sprite sheet could not be found at " +
-                                  path +
-                                  "!");
+                Console.WriteLine(
+                    $"Block {this} is marked as smoothable, but a sprite sheet could not be found at {path}!");
             }
         }
         catch (ContentLoadException) {
             BlockSprite = new Drawable(@"Graphics\Blocks\error");
-            Console.WriteLine("Block " + this + " does not have an icon at " + path + "!");
+            Console.WriteLine($"Block {this} does not have a sprite at {path}!");
         }
     }
 }

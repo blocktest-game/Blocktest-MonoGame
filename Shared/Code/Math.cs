@@ -1,3 +1,4 @@
+using LiteNetLib.Utils;
 using Microsoft.Xna.Framework;
 namespace Shared.Code;
 
@@ -5,16 +6,16 @@ namespace Shared.Code;
 ///     Represents a vector with two integer values rather than two floating-point values.
 /// </summary>
 /// <seealso cref="Vector2" />
-public struct Vector2Int {
+public struct Vector2Int : INetSerializable {
     /// <summary>
     ///     The X coordinate of this <see cref="Vector2Int" />.
     /// </summary>
-    public readonly int X;
+    public int X { get; private set; }
 
     /// <summary>
     ///     The Y coordinate of this <see cref="Vector2Int" />.
     /// </summary>
-    public readonly int Y;
+    public int Y { get; private set; }
 
     /// <summary>
     ///     Create a <see cref="Vector2Int" />.
@@ -58,6 +59,18 @@ public struct Vector2Int {
     public static Vector2Int operator -(Vector2Int value1, Vector2Int value2) =>
         new(value1.X - value2.X, value1.Y - value2.Y);
 
+    public static Vector2Int operator -(Vector2Int value1) =>
+        new(-value1.X, -value1.Y);
+
+    public static Vector2Int operator *(Vector2Int value1, Vector2Int value2) =>
+        new(value1.X * value2.X, value1.Y * value2.Y);
+
+    public static Vector2Int operator /(Vector2Int value1, Vector2Int value2) =>
+        new(value1.X / value2.X, value1.Y / value2.Y);
+
+    public static Vector2Int operator *(Vector2Int value, int multiplier) =>
+        new(value.X * multiplier, value.Y * multiplier);
+
     /// <inheritdoc />
     public override int GetHashCode() => X.GetHashCode() + Y.GetHashCode();
 
@@ -70,6 +83,10 @@ public struct Vector2Int {
     public static explicit operator Vector2Int(Vector2 vector2) =>
         new((int)Math.Round(vector2.X), (int)Math.Round(vector2.Y));
 
+    public static implicit operator Point(Vector2Int vector2Int) => new(vector2Int.X, vector2Int.Y);
+
+    public static implicit operator Vector2Int(Point point) => new(point.X, point.Y);
+    
     // Preset values
     /// <summary>Returns a <see cref="Vector2Int" /> with values (0, 0).</summary>
     public static readonly Vector2Int Zero = new(0, 0);
@@ -88,4 +105,14 @@ public struct Vector2Int {
 
     /// <summary>Returns a <see cref="Vector2Int" /> with values (1, 0).</summary>
     public static readonly Vector2Int Right = new(1, 0);
+
+    public void Serialize(NetDataWriter writer) {
+        writer.Put(X);
+        writer.Put(Y);
+    }
+
+    public void Deserialize(NetDataReader reader) {
+        X = reader.GetInt();
+        Y = reader.GetInt();
+    }
 }

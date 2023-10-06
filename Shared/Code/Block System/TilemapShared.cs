@@ -1,19 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.Xna.Framework;
+﻿using System.Diagnostics.CodeAnalysis;
 namespace Shared.Code.Block_System;
 
 /// <summary>
 ///     A grid filled with <see cref="TileShared" />s, usually representing terrain.
 /// </summary>
 public sealed class TilemapShared {
-    /// <summary>
-    ///     A list of <see cref="Vector2Int" />s that specify which blocks should be refreshed when a tile is placed/destroyed.
-    ///     Defaults to the changed block and all cardinal directions.
-    /// </summary>
-    private static readonly List<Vector2Int> Adjacencies = new()
-        { Vector2Int.Zero, Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right };
-
     /// <summary>
     ///     The size of each cell (in pixels) in the tilemap's grid.
     /// </summary>
@@ -27,7 +18,11 @@ public sealed class TilemapShared {
     /// <summary>
     ///     The 2D array of all tiles in the tilemap.
     /// </summary>
-    public TileShared?[,] TileGrid;
+    public readonly TileShared?[,] TileGrid;
+
+    public bool Background;
+
+    public event Action<TileShared, Vector2Int>? OnTileChanged;
 
 
     /// <summary>
@@ -35,7 +30,7 @@ public sealed class TilemapShared {
     /// </summary>
     /// <param name="sizeX">The width of the tilemap in tiles.</param>
     /// <param name="sizeY">The height of the tilemap in tiles.</param>
-    public TilemapShared(int sizeX, int sizeY) {
+    public TilemapShared(int sizeX, int sizeY, bool background) {
         TilemapSize = new Vector2Int(sizeX, sizeY);
         TileGrid = new TileShared[sizeX, sizeY];
         for (int x = 0; x < sizeX; x++) {
@@ -43,6 +38,7 @@ public sealed class TilemapShared {
                 TileGrid[x, y] = new TileShared(BlockManagerShared.AllBlocks[0], new Vector2Int(x, y)); //Fill with air
             }
         }
+        Background = background;
     }
 
     /// <summary>
@@ -61,15 +57,7 @@ public sealed class TilemapShared {
     public TileShared SetTile(Vector2Int location, TileShared newTile) {
         TileGrid[location.X, location.Y] = newTile;
 
-        foreach (Vector2Int dir in Adjacencies) {
-            if (location.X + dir.X < 0 ||
-                location.X + dir.X >= TilemapSize.X ||
-                location.Y + dir.Y < 0 ||
-                location.Y + dir.Y >= TilemapSize.Y) {
-                continue;
-            }
-            TileGrid[location.X + dir.X, location.Y + dir.Y]?.UpdateAdjacencies(location + dir, this);
-        }
+        OnTileChanged?.Invoke(newTile, location);
 
         return newTile;
     }
@@ -88,96 +76,4 @@ public sealed class TilemapShared {
         result = TileGrid[location.X, location.Y] as T;
         return result != null;
     }
-}
-
-/// <summary>
-///     A <see cref="TilemapShared" /> is filled with tile instances, one for each grid square.
-///     They contain basic information such as name and sprite, but the behaviours and more advanced properties are found
-///     in the correlating Block classes.
-/// </summary>
-public class TileShared {
-    /// <summary>
-    ///     Used for bitmask smoothing, should MAYBE not be here.
-    /// </summary>
-    public byte Bitmask;
-
-    /// <summary>
-    ///     Color of the tile.
-    /// </summary>
-    public Color Color = Color.White;
-
-    /// <summary>
-    ///     The rectangle of the tile, used for sprite rendering and collisions.
-    /// </summary>
-    public Rectangle Rectangle;
-
-    /// <summary>
-    ///     The size of the tile square's edges, in pixels (Default 8)
-    /// </summary>
-    protected byte Size = 8;
-
-    /// <summary>
-    ///     The type of block this tile is.
-    /// </summary>
-    public BlockShared SourceBlock;
-
-    /// <summary>
-    ///     Creates a <see cref="TileShared" />.
-    /// </summary>
-    /// <param name="newBlock">The type of block the new tile should be.</param>
-    /// <param name="position">The position in a tilemap the tile will be.</param>
-    public TileShared(BlockShared newBlock, Vector2Int position) {
-        SourceBlock = newBlock;
-        Rectangle = new Rectangle(GlobalsShared.GridSize.X * position.X, GlobalsShared.GridSize.Y * position.Y, Size,
-            Size); // TODO: This can probably be done better
-    }
-
-    /// <summary>
-    ///     This method is called whenever an adjacent (according to a tilemap's adjacency variable) tile is placed or removed.
-    ///     Used for smoothing.
-    /// </summary>
-    /// <param name="position">The position of the current tile.</param>
-    /// <param name="tilemap">The tilemap the tile is on.</param>
-    public void UpdateAdjacencies(Vector2Int position, TilemapShared tilemap) {
-        if (!SourceBlock.BlockSmoothing) {
-            return;
-        } // If the tile doesn't smooth, don't even try
-
-        Bitmask = 0; // Uses bitmask smoothing, look it up
-
-        if (HasSmoothableTile(position + Vector2Int.Up, tilemap)) {
-            Bitmask += 2;
-        }
-        if (HasSmoothableTile(position + Vector2Int.Down, tilemap)) {
-            Bitmask += 1;
-        }
-        if (HasSmoothableTile(position + Vector2Int.Right, tilemap)) {
-            Bitmask += 4;
-        }
-        if (HasSmoothableTile(position + Vector2Int.Left, tilemap)) {
-            Bitmask += 8;
-        }
-    }
-
-    /// <summary>
-    ///     Whether or not the tile at a certain <paramref name="position" /> can smooth with this tile.
-    /// </summary>
-    /// <param name="position">The position of the tile to check for smoothing.</param>
-    /// <param name="tilemap">The tilemap on which the tile you want to check for smoothing is.</param>
-    /// <returns>Whether or not the tile can smooth with this tile.</returns>
-    private bool HasSmoothableTile(Vector2Int position, TilemapShared tilemap) {
-        if (tilemap.TryGetTile(position, out TileShared? tile)) {
-            return SourceBlock.SmoothSelf
-                ? IsSameTileType(tile)
-                : tile.SourceBlock.BlockId != 0; // Don't smooth with air, possibly find nicer way to do this later.
-        }
-        return false;
-    }
-
-    /// <summary>
-    ///     If the tile provided is the same type (references the same block) as the current tile.
-    /// </summary>
-    /// <param name="otherTile">The other tile to check.</param>
-    /// <returns>Whether or not the other block is the same type as the current tile</returns>
-    private bool IsSameTileType(TileShared otherTile) => otherTile.SourceBlock == SourceBlock;
 }
