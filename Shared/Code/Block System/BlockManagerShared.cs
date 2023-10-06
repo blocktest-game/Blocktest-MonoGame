@@ -18,6 +18,7 @@ public abstract class BlockManagerShared {
         get => _allBlocks;
         private set => _allBlocks = value;
     }
+    
     /// <summary> List used to store the names of blocks. The indexes are the corresponding block's ID. </summary>
     public static string[] BlockNames {
         get => _blockNames;
@@ -43,7 +44,11 @@ public abstract class BlockManagerShared {
         // For loops to populate main allBlocks array.
         for (int i = 0; i < allBlockTypes.Length; i++) {
             Type newBlockType = allBlockTypes[i];
-            BlockShared newBlock = (BlockShared)Activator.CreateInstance(newBlockType);
+            BlockShared? newBlock = (BlockShared?)Activator.CreateInstance(newBlockType);
+            if (newBlock == null) {
+                Console.WriteLine($"Failed to create instance of {newBlockType}!");
+                continue;
+            }
             newBlock.Initialize();
             if (newBlock.BlockId == -1) {
                 newBlock.BlockId = i;

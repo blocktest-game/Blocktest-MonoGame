@@ -17,9 +17,9 @@ public sealed class BlockSprites {
 
     /* METHODS */
 
-    public BlockSprites(BlockShared newBlockShared, ContentManager content) {
+    public BlockSprites(BlockShared newBlockShared) {
         BlockShared = newBlockShared;
-        LoadSprite(content);
+        LoadSprite();
     }
 
     /// <summary>
@@ -28,16 +28,16 @@ public sealed class BlockSprites {
     /// <remarks>
     ///     DO NOT FORGET TO CALL THE BASE METHOD IF YOU OVERRIDE THIS.
     /// </remarks>
-    public void LoadSprite(ContentManager content) {
+    public void LoadSprite() {
         string path = @"Graphics\Blocks\" + BlockShared.BlockName.ToLower().Replace(" ", "");
         try {
             BlockSprite =
                 new Drawable(path,
                     new Rectangle(1, 1, 10,
                         10)); //this might need to be expanded in the future in case we decide to make use of the full 12x12 tiles on our spritesheets
-            /*if (!blockShared.blockSmoothing) {
+            if (!BlockShared.BlockSmoothing) {
                 return;
-            }*/
+            }
             SpriteSheet = new SpriteSheet(path, 4, 4, 1);
             if (SpriteSheet.OrderedSprites.Length <= 1) {
                 Console.WriteLine("Block " +

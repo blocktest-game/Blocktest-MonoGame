@@ -146,6 +146,11 @@ public sealed class GameScene : IScene {
         string fps = $"FPS: {_frameCounter.CurrentFramesPerSecond:##0.00}";
         _spriteBatch.DrawString(_spriteFont, fps, new Vector2(10, 10), Color.Black);
 
+        if (_connect) {
+            string ping = $"Ping: {_networkingClient.Server?.Ping}ms";
+            _spriteBatch.DrawString(_spriteFont, ping, new Vector2(10, 30), Color.Black);
+        }
+
         if (_buildMode) {
             _spriteBatch.Draw(BlockSpritesManager.AllBlocksSprites[_blockSelected].BlockSprite.Texture,
                 new Vector2Int(Mouse.GetState().X - Mouse.GetState().X % 8,

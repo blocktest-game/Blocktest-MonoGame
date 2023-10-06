@@ -40,7 +40,7 @@ public sealed class BlocktestGame : Game {
     /// <inheritdoc />
     protected override void LoadContent() {
         ContentManager = Content;
-        BlockSpritesManager.LoadBlockSprites(Content);
+        BlockSpritesManager.LoadBlockSprites();
         _currentScene = new GameScene(this, _connect, _ip);
     }
 

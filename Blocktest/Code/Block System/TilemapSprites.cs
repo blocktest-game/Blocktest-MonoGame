@@ -1,4 +1,5 @@
 using Blocktest.Rendering;
+using Shared.Code;
 using Shared.Code.Block_System;
 namespace Blocktest.Block_System;
 
@@ -28,9 +29,13 @@ public sealed class TilemapSprites {
     public void DrawAllTiles(SpriteBatch spriteBatch) {
         for (int x = 0; x < Tilemap.TilemapSize.X; x++) {
             for (int y = 0; y < Tilemap.TilemapSize.Y; y++) {
-                TileShared? tile = Tilemap.TileGrid[x, y];
+                if (!Tilemap.TryGetTile(new Vector2Int(x, y), out TileShared? tile)) {
+                    continue;
+                }
                 BlockSprites blockSprites = BlockSpritesManager.AllBlocksSprites[tile.SourceBlock.BlockId];
-                Drawable sprite = blockSprites.SpriteSheet.OrderedSprites[tile.Bitmask];
+                Drawable sprite = tile.SourceBlock.BlockSmoothing
+                    ? blockSprites.SpriteSheet.OrderedSprites[tile.Bitmask]
+                    : blockSprites.BlockSprite;
                 spriteBatch.Draw(sprite.Texture, new Vector2(tile.Rectangle.X, tile.Rectangle.Y), sprite.Bounds,
                     tile.Color);
             }

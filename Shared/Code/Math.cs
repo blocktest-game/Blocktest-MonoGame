@@ -25,7 +25,7 @@ public struct Vector2Int {
     }
 
     /// <inheritdoc />
-    public override bool Equals(object obj) => obj is Vector2Int @int && Equals(@int);
+    public override bool Equals(object? obj) => obj is Vector2Int @int && Equals(@int);
 
     /// <summary>
     ///     Indicates whether this Vector2Int and another's X and Y values are the same.

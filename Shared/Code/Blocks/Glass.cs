@@ -1,16 +1,15 @@
-/* Glass crashes game right now
+using Shared.Code.Block_System;
 namespace Shared.Blocks
 {
     public class Glass : BlockShared
     {
         public override void Initialize()
         {
-            blockName = "Glass";
-            blockID = -1;       // Needs to be changed if this is fixed
-            blockSmoothing = false;
+            BlockName = "Glass";
+            BlockId = 23;
+            BlockSmoothing = false;
             base.Initialize();
         }
     }
 }
-*/
 

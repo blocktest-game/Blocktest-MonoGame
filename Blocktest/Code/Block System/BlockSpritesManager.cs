@@ -19,13 +19,12 @@ public sealed class BlockSpritesManager {
         private set => _blockSpriteNames = value;
     }
 
-    public static void LoadBlockSprites(ContentManager content) {
+    public static void LoadBlockSprites() {
         AllBlocksSprites = new BlockSprites[BlockManagerShared.AllBlocks.Length];
         BlockSpriteNames = new string[BlockManagerShared.AllBlocks.Length];
 
-        for (int i = 0; i < BlockManagerShared.AllBlocks.Length; i++) {
-            BlockShared block = BlockManagerShared.AllBlocks[i];
-            BlockSprites newBlockSprites = new(block, content);
+        foreach (BlockShared block in BlockManagerShared.AllBlocks) {
+            BlockSprites newBlockSprites = new(block);
             BlockSpriteNames[block.BlockId] = block.BlockName;
             AllBlocksSprites[block.BlockId] = newBlockSprites;
         }

@@ -11,7 +11,7 @@ public sealed class TilemapShared {
     ///     A list of <see cref="Vector2Int" />s that specify which blocks should be refreshed when a tile is placed/destroyed.
     ///     Defaults to the changed block and all cardinal directions.
     /// </summary>
-    private readonly List<Vector2Int> _adjacencies = new()
+    private static readonly List<Vector2Int> Adjacencies = new()
         { Vector2Int.Zero, Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right };
 
     /// <summary>
@@ -59,11 +59,9 @@ public sealed class TilemapShared {
     /// <param name="location">Location the new Block will be placed.</param>
     /// <param name="newTile">Block type to be placed in the cell.</param>
     public TileShared SetTile(Vector2Int location, TileShared newTile) {
-        TileShared oldTile = GetTile(location);
-
         TileGrid[location.X, location.Y] = newTile;
 
-        foreach (Vector2Int dir in _adjacencies) {
+        foreach (Vector2Int dir in Adjacencies) {
             if (location.X + dir.X < 0 ||
                 location.X + dir.X >= TilemapSize.X ||
                 location.Y + dir.Y < 0 ||
@@ -77,37 +75,10 @@ public sealed class TilemapShared {
     }
 
     /// <summary>
-    ///     Deletes a <see cref="TileShared" /> at a specific location(sets value to null).
+    ///     Deletes a <see cref="TileShared" /> at a specific location (sets block to air).
     /// </summary>
     /// <param name="location"></param>
-    public void DeleteTile(Vector2Int location) => SetTile(location, null);
-
-    /// <summary>
-    ///     Gets the <see cref="TileShared" /> at a specific location on a <see cref="Tilemap" />.
-    /// </summary>
-    /// <param name="location">Location of the Tile on the Tilemap to check.</param>
-    /// <returns><see cref="TileShared" /> placed at the cell.</returns>
-    public TileShared? GetTile(Vector2Int location) => GetTile(location.X, location.Y);
-
-    /// <summary>
-    ///     Gets the <see cref="TileShared" /> at a specific location on a <see cref="Tilemap" />.
-    /// </summary>
-    /// <param name="x">X position of the Tile on the Tilemap to check.</param>
-    /// <param name="y">Y position of the Tile on the Tilemap to check.</param>
-    /// <returns><see cref="TileShared" /> placed at the cell.</returns>
-    public TileShared? GetTile(int x, int y) {
-        if (x < 0 || y < 0 || x >= TilemapSize.X || y >= TilemapSize.Y) {
-            return null;
-        }
-        return TileGrid[x, y];
-    }
-
-    /// <summary>
-    ///     Returns whether there is a <see cref="TileShared" /> at the location specified.
-    /// </summary>
-    /// <param name="location">Location to check.</param>
-    /// <returns>Returns true if there is a Tile at the position. Returns false otherwise.</returns>
-    public bool HasTile(Vector2Int location) => TileGrid[location.X, location.Y] != null;
+    public void DeleteTile(Vector2Int location) => SetBlock(location, BlockManagerShared.AllBlocks[0]);
 
     public bool TryGetTile<T>(Vector2Int location, [NotNullWhen(true)] out T? result) where T : TileShared {
         result = null;
@@ -158,7 +129,7 @@ public class TileShared {
     public TileShared(BlockShared newBlock, Vector2Int position) {
         SourceBlock = newBlock;
         Rectangle = new Rectangle(GlobalsShared.GridSize.X * position.X, GlobalsShared.GridSize.Y * position.Y, Size,
-            Size); // HACK: This can probably be done better
+            Size); // TODO: This can probably be done better
     }
 
     /// <summary>
@@ -172,7 +143,7 @@ public class TileShared {
             return;
         } // If the tile doesn't smooth, don't even try
 
-        Bitmask = 0; // Using bitmask smoothing, look it up
+        Bitmask = 0; // Uses bitmask smoothing, look it up
 
         if (HasSmoothableTile(position + Vector2Int.Up, tilemap)) {
             Bitmask += 2;
@@ -195,13 +166,12 @@ public class TileShared {
     /// <param name="tilemap">The tilemap on which the tile you want to check for smoothing is.</param>
     /// <returns>Whether or not the tile can smooth with this tile.</returns>
     private bool HasSmoothableTile(Vector2Int position, TilemapShared tilemap) {
-        TileShared otherTile = tilemap.GetTile(position);
-        if (SourceBlock.SmoothSelf) {
-            return IsSameTileType(otherTile);
+        if (tilemap.TryGetTile(position, out TileShared? tile)) {
+            return SourceBlock.SmoothSelf
+                ? IsSameTileType(tile)
+                : tile.SourceBlock.BlockId != 0; // Don't smooth with air, possibly find nicer way to do this later.
         }
-        return
-            otherTile != null &&
-            otherTile.SourceBlock.BlockId != 0; // Don't smooth with air, possibly find nicer way to do this later.
+        return false;
     }
 
     /// <summary>
@@ -209,5 +179,5 @@ public class TileShared {
     /// </summary>
     /// <param name="otherTile">The other tile to check.</param>
     /// <returns>Whether or not the other block is the same type as the current tile</returns>
-    private bool IsSameTileType(TileShared otherTile) => otherTile?.SourceBlock == SourceBlock;
+    private bool IsSameTileType(TileShared otherTile) => otherTile.SourceBlock == SourceBlock;
 }

@@ -7,13 +7,13 @@ namespace Blocktest.Networking;
 public sealed class Client {
     private readonly EventBasedNetListener _listener;
     private readonly NetManager _manager;
-    private NetPeer? _server;
+    public NetPeer? Server { get; private set; }
     public TickBuffer ClientTickBuffer = new(0);
 
     public Client() {
         _listener = new EventBasedNetListener();
         _manager = new NetManager(_listener);
-        _listener.NetworkReceiveEvent += NetworkRecieveEvent;
+        _listener.NetworkReceiveEvent += NetworkReceiveEvent;
         _manager.Start();
     }
 
@@ -36,10 +36,10 @@ public sealed class Client {
     /// <param name="packetReader">Contains the packet from the server.</param>
     /// <param name="channelNumber"></param>
     /// <param name="deliveryMethod">The delivery method used to deliver this packet.</param>
-    protected void NetworkRecieveEvent(NetPeer peer, NetPacketReader packetReader, byte channelNumber,
-                                       DeliveryMethod deliveryMethod) {
-        if (_server == null) {
-            _server = peer;
+    private void NetworkReceiveEvent(NetPeer peer, NetPacketReader packetReader, byte channelNumber,
+                                     DeliveryMethod deliveryMethod) {
+        if (Server == null) {
+            Server = peer;
             WorldDownload worldPacket = new();
             byte packetByte = packetReader.GetByte();
             PacketType packetType = (PacketType)packetByte;
@@ -58,7 +58,7 @@ public sealed class Client {
     ///     Handles packets after the first.
     /// </summary>
     /// <param name="packetReader">Contains the packet sent by the server.</param>
-    public void HandlePackets(NetPacketReader packetReader) {
+    private void HandlePackets(NetPacketReader packetReader) {
         byte packetByte = packetReader.GetByte();
         PacketType packetType = (PacketType)packetByte;
         switch (packetType) {
@@ -90,13 +90,13 @@ public sealed class Client {
         NetDataWriter writer = new();
         writer.Put((byte)PacketType.TileChange);
         writer.Put(tileChange);
-        _server?.Send(writer, DeliveryMethod.ReliableUnordered);
+        Server?.Send(writer, DeliveryMethod.ReliableUnordered);
     }
 
     public void SendBreakTile(BreakTile breakTile) {
         NetDataWriter writer = new();
         writer.Put((byte)PacketType.BreakTile);
         writer.Put(breakTile);
-        _server?.Send(writer, DeliveryMethod.ReliableUnordered);
+        Server?.Send(writer, DeliveryMethod.ReliableUnordered);
     }
 }
