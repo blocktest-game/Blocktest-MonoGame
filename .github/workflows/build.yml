@@ -31,8 +31,8 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - Blocktest.csproj
-          - DedicatedServer.csproj
+          - Blocktest
+          - DedicatedServer
         targetPlatform:
           - linux-x64 # Build a macOS standalone (Intel 64-bit).
           - win-x86 # Build a Windows 32-bit standalone.
