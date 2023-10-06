@@ -14,7 +14,6 @@ public sealed class GameScene : IScene {
     private readonly BlocktestGame _game;
     private readonly Client _networkingClient;
     private readonly SpriteBatch _spriteBatch;
-    private readonly SpriteFont _spriteFont;
     private int _blockSelected = 1; //ID of the block to place
 
     private readonly RenderableTilemap _backgroundTilemapSprites;
@@ -29,7 +28,7 @@ public sealed class GameScene : IScene {
     public GameScene(BlocktestGame game, bool doConnect, string? ip) {
         _connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
-        _spriteFont = game.Content.Load<SpriteFont>("Fonts/OpenSans");
+        game.Content.Load<SpriteFont>("Fonts/OpenSans");
         _game = game;
 
         _camera = new Camera(Vector2.Zero, new Vector2(512, 256), game.GraphicsDevice);
@@ -171,14 +170,6 @@ public sealed class GameScene : IScene {
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         _frameCounter.Update(deltaTime);
-
-        string fps = $"FPS: {_frameCounter.CurrentFramesPerSecond:##0.00}";
-        _spriteBatch.DrawString(_spriteFont, fps, new Vector2(10, 10), Color.Black);
-
-        if (_connect) {
-            string ping = $"Ping: {_networkingClient.Server?.Ping}ms";
-            _spriteBatch.DrawString(_spriteFont, ping, new Vector2(10, 30), Color.Black);
-        }
 
         _spriteBatch.End();
     }
