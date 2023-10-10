@@ -25,21 +25,8 @@ internal sealed class WorldHandler {
         BlockManagerShared.Initialize();
         GlobalsShared.BackgroundTilemap = new TilemapShared(GlobalsShared.MaxX, GlobalsShared.MaxY, true);
         GlobalsShared.ForegroundTilemap = new TilemapShared(GlobalsShared.MaxX, GlobalsShared.MaxY, false);
-
-
-        int[,,] newWorld = new int[GlobalsShared.MaxX, GlobalsShared.MaxY, 2];
-        for (int i = 0; i < GlobalsShared.MaxX; i++) {
-            newWorld[i, 0, 1] = 4;
-            newWorld[i, 1, 1] = 2;
-            newWorld[i, 2, 1] = 2;
-            newWorld[i, 3, 1] = 2;
-            newWorld[i, 4, 1] = 2;
-            newWorld[i, 5, 1] = 3;
-        }
-        WorldDownload testDownload = new() {
-            World = newWorld,
-            TickNum = 1
-        };
+        
+        var testDownload = WorldDownload.Default();
         testDownload.Process();
 
         _server = new Server();

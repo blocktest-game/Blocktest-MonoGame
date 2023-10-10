@@ -26,11 +26,17 @@
         "resolved": "2.2.0",
         "contentHash": "u06nYzGcXCBcnF7cRe8Xa0KxBxGx8grhujZmb3PUiMVbds8d/I6qJ+waGn0IeC7Tdwmt0P6l3v7MqdYog5rJQg=="
       },
+      "YamlDotNet": {
+        "type": "Transitive",
+        "resolved": "13.7.0",
+        "contentHash": "RKkoQSCyk/94N20SL3U15hWAqBVXHu+59upcPi8R2uhrcAalyVa4Y/vYdXQ7MXQ71Lut//DH0tLcYByAkGmXhA=="
+      },
       "shared": {
         "type": "Project",
         "dependencies": {
           "LiteNetLib": "[1.1.0, )",
-          "MonoGame.Framework.DesktopGL": "[3.8.1.303, )"
+          "MonoGame.Framework.DesktopGL": "[3.8.1.303, )",
+          "YamlDotNet": "[13.7.0, )"
         }
       }
     }

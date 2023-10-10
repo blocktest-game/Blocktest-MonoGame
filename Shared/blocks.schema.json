@@ -1,0 +1,26 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Block",
+	"description": "A block for use in Blocktest",
+	"type": "object",
+	"required": ["BlockName"],
+	"properties": {
+		"BlockName": {
+			"type": "string",
+			"description": "The name of the block"
+		},
+		"BlockSmoothing": {
+			"type": "boolean",
+			"description": "Whether the block is capable of smoothing with other blocks",
+			"default": false
+		},
+		"SmoothSelf": {
+			"type": "boolean",
+			"default": false
+		},
+		"CanPlaceBackground": {
+			"type": "boolean",
+			"default": true
+		}
+	}
+}

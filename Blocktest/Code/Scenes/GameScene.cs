@@ -1,3 +1,4 @@
+using System.Linq;
 using Blocktest.Block_System;
 using Blocktest.Misc;
 using Blocktest.Networking;
@@ -15,6 +16,7 @@ public sealed class GameScene : IScene {
     private readonly Client _networkingClient;
     private readonly SpriteBatch _spriteBatch;
     private int _blockSelected = 1; //ID of the block to place
+    private string[] _blockStrings;
 
     private readonly RenderableTilemap _backgroundTilemapSprites;
     private readonly RenderableTilemap _foregroundTilemapSprites;
@@ -28,7 +30,6 @@ public sealed class GameScene : IScene {
     public GameScene(BlocktestGame game, bool doConnect, string? ip) {
         _connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
-        game.Content.Load<SpriteFont>("Fonts/OpenSans");
         _game = game;
 
         _camera = new Camera(Vector2.Zero, new Vector2(512, 256), game.GraphicsDevice);
@@ -38,27 +39,16 @@ public sealed class GameScene : IScene {
         _backgroundTilemapSprites = new RenderableTilemap(GlobalsShared.BackgroundTilemap, _camera);
         _foregroundTilemapSprites = new RenderableTilemap(GlobalsShared.ForegroundTilemap, _camera);
         _networkingClient = new Client();
-
+        
+        _blockStrings = BlockManagerShared.AllBlocks.Keys.ToArray();
+        
         if (_connect && ip != null) {
             _networkingClient.Start(ip, 9050, "testKey");
             return;
         }
 
-        WorldDownload testDownload = new();
-
-        int[,,] newWorld = new int[GlobalsShared.MaxX, GlobalsShared.MaxY, 2];
-        for (int i = 0; i < GlobalsShared.MaxX; i++) {
-            newWorld[i, 0, 1] = 4;
-            newWorld[i, 1, 1] = 2;
-            newWorld[i, 2, 1] = 2;
-            newWorld[i, 3, 1] = 2;
-            newWorld[i, 4, 1] = 2;
-            newWorld[i, 5, 1] = 3;
-        }
-        testDownload.World = newWorld;
-        testDownload.TickNum = 1;
+        var testDownload = WorldDownload.Default();
         testDownload.Process();
-
     }
 
     public void Update(GameTime gameTime) {
@@ -90,7 +80,7 @@ public sealed class GameScene : IScene {
         if (currentKeyboardState.IsKeyDown(Keys.Q) &&
             _previousKeyboardState.IsKeyUp(Keys.Q)) {
             _blockSelected++;
-            if (_blockSelected >= BlockManagerShared.AllBlocks.Length) {
+            if (_blockSelected >= BlockManagerShared.AllBlocks.Count) {
                 _blockSelected = 1;
             }
         }
@@ -131,7 +121,7 @@ public sealed class GameScene : IScene {
                 TickNum = _networkingClient.ClientTickBuffer.CurrTick,
                 Position = tilePos,
                 Foreground = foreground,
-                BlockId = _blockSelected
+                BlockUid = _blockStrings[_blockSelected]
             };
 
             _networkingClient.ClientTickBuffer.AddPacket(testChange);

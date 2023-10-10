@@ -10,7 +10,7 @@ namespace Shared.Code.Packets;
 ///     Should be reworked when chunks are added.
 /// </remarks>
 public sealed class TileChange : IPacket {
-    public int BlockId;
+    public string BlockUid;
     public bool Foreground;
     public Vector2Int Position;
     public ushort TickNum;
@@ -18,7 +18,7 @@ public sealed class TileChange : IPacket {
     public ushort GetTickNum() => TickNum;
 
     public void Process() {
-        BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[BlockId], Foreground, Position);
+        BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[BlockUid], Foreground, Position);
     }
 
     public void Serialize(NetDataWriter writer) {
@@ -26,7 +26,7 @@ public sealed class TileChange : IPacket {
         writer.Put(Position.X);
         writer.Put(Position.Y);
         writer.Put(Foreground);
-        writer.Put(BlockId);
+        writer.Put(BlockUid);
     }
 
     public void Deserialize(NetDataReader reader) {
@@ -34,7 +34,7 @@ public sealed class TileChange : IPacket {
         int x = reader.GetInt();
         int y = reader.GetInt();
         Foreground = reader.GetBool();
-        BlockId = reader.GetInt();
+        BlockUid = reader.GetString();
 
         Position = new Vector2Int(x, y);
     }

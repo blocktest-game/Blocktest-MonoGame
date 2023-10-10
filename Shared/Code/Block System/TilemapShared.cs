@@ -20,7 +20,7 @@ public sealed class TilemapShared {
     /// </summary>
     public readonly TileShared?[,] TileGrid;
 
-    public bool Background;
+    public readonly bool Background;
 
     public event Action<TileShared, Vector2Int>? OnTileChanged;
 
@@ -35,7 +35,7 @@ public sealed class TilemapShared {
         TileGrid = new TileShared[sizeX, sizeY];
         for (int x = 0; x < sizeX; x++) {
             for (int y = 0; y < sizeY; y++) {
-                TileGrid[x, y] = new TileShared(BlockManagerShared.AllBlocks[0], new Vector2Int(x, y)); //Fill with air
+                TileGrid[x, y] = new TileShared(BlockManagerShared.AllBlocks["air"], new Vector2Int(x, y)); //Fill with air
             }
         }
         Background = background;
@@ -66,7 +66,7 @@ public sealed class TilemapShared {
     ///     Deletes a <see cref="TileShared" /> at a specific location (sets block to air).
     /// </summary>
     /// <param name="location"></param>
-    public void DeleteTile(Vector2Int location) => SetBlock(location, BlockManagerShared.AllBlocks[0]);
+    public void DeleteTile(Vector2Int location) => SetBlock(location, BlockManagerShared.AllBlocks["air"]);
 
     public bool TryGetTile<T>(Vector2Int location, [NotNullWhen(true)] out T? result) where T : TileShared {
         result = null;

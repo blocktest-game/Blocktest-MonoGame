@@ -5,7 +5,7 @@ public static class BuildSystem {
     /// <summary>
     ///     An array containing an entry for every block in the world. Used for saving games.
     /// </summary>
-    public static int[,,] CurrentWorld { get; } = new int[GlobalsShared.MaxX, GlobalsShared.MaxY, 2];
+    public static string[,,] CurrentWorld { get; } = new string[GlobalsShared.MaxX, GlobalsShared.MaxY, 2];
 
     /// <summary>
     ///     The method called whenever an object is removed.
@@ -18,7 +18,7 @@ public static class BuildSystem {
         }
         TilemapShared tilemap = foreground ? GlobalsShared.ForegroundTilemap : GlobalsShared.BackgroundTilemap;
 
-        BlockShared toPlace = BlockManagerShared.AllBlocks[0];
+        BlockShared toPlace = BlockManagerShared.AllBlocks["air"];
         TileShared newTile = new(toPlace, tilePosition);
 
         int z = foreground ? 1 : 0; // Convert foreground bool to int
@@ -27,7 +27,7 @@ public static class BuildSystem {
         }
 
         tilemap.SetTile(tilePosition, newTile);
-        CurrentWorld[tilePosition.X, tilePosition.Y, z] = 1;
+        CurrentWorld[tilePosition.X, tilePosition.Y, z] = "air";
     }
 
     /// <summary>
@@ -45,11 +45,11 @@ public static class BuildSystem {
 
         if (foreground) {
             GlobalsShared.ForegroundTilemap.SetTile(tilePosition, newTile);
-            CurrentWorld[tilePosition.X, tilePosition.Y, 1] = toPlace.BlockId + 1;
+            CurrentWorld[tilePosition.X, tilePosition.Y, 1] = toPlace.BlockUid;
         } else if (toPlace.CanPlaceBackground) {
             newTile.Color = GlobalsShared.BackgroundColor;
             GlobalsShared.BackgroundTilemap.SetTile(tilePosition, newTile);
-            CurrentWorld[tilePosition.X, tilePosition.Y, 0] = toPlace.BlockId + 1;
+            CurrentWorld[tilePosition.X, tilePosition.Y, 0] = toPlace.BlockUid;
         }
     }
 
@@ -60,27 +60,27 @@ public static class BuildSystem {
     ///     An array containing an entry for every block in the world. Used for loading games. MUST be the
     ///     same dimensions as currentWorld
     /// </param>
-    public static void LoadNewWorld(int[,,] newWorld) {
+    public static void LoadNewWorld(string?[,,] newWorld) {
         for (int x = 0; x < newWorld.GetLength(0); x++)
         for (int y = 0; y < newWorld.GetLength(1); y++)
         for (int z = 0; z < 2; z++) {
             Vector2Int tilePosition = new(x, y);
-            int blockNum = newWorld[x, y, z];
-            LoadNewBlock(blockNum, tilePosition, z);
+            string? blockUid = newWorld[x, y, z];
+            LoadNewBlock(blockUid, tilePosition, z);
         }
     }
 
     /// <summary>
     ///     Loads a new block from an int
     /// </summary>
-    /// <param name="blockNum">The blockid + 1</param>
+    /// <param name="blockUid">The blockUid</param>
     /// <param name="tilePosition">The position of the tile in the tilemap</param>
     /// <param name="foregroundInt">Whether the block is in the foreground, expressed as an int</param>
-    private static void LoadNewBlock(int blockNum, Vector2Int tilePosition, int foregroundInt) {
-        CurrentWorld[tilePosition.X, tilePosition.Y, foregroundInt] = blockNum;
+    private static void LoadNewBlock(string? blockUid, Vector2Int tilePosition, int foregroundInt) {
+        CurrentWorld[tilePosition.X, tilePosition.Y, foregroundInt] = blockUid;
         bool foreground = Convert.ToBoolean(foregroundInt);
-        if (blockNum > 1) {
-            BlockShared newBlock = BlockManagerShared.AllBlocks[blockNum - 1];
+        if (blockUid is not null) {
+            BlockShared newBlock = BlockManagerShared.AllBlocks[blockUid];
             PlaceBlockCell(newBlock, foreground, tilePosition);
         } else {
             BreakBlockCell(foreground, tilePosition);

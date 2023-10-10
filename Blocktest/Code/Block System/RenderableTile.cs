@@ -9,7 +9,7 @@ public class RenderableTile : TileShared {
     public RenderableTile(TileShared tile, bool background) : base(tile.SourceBlock,
         tile.Transform.Position / GlobalsShared.GridSize) {
         Renderable = new Renderable(Transform, background ? Layer.BackgroundBlocks : Layer.ForegroundBlocks,
-            BlockSpritesManager.AllBlocksSprites[tile.SourceBlock.BlockId].BlockSprite, tile.Color);
+            BlockSpritesManager.AllBlocksSprites[tile.SourceBlock.BlockUid].BlockSprite, tile.Color);
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public class RenderableTile : TileShared {
             bitmask += 8;
         }
 
-        Renderable.Appearance = BlockSpritesManager.AllBlocksSprites[SourceBlock.BlockId].SpriteSheet
+        Renderable.Appearance = BlockSpritesManager.AllBlocksSprites[SourceBlock.BlockUid].SpriteSheet
             .OrderedSprites[bitmask];
     }
 
@@ -52,7 +52,7 @@ public class RenderableTile : TileShared {
         if (tilemap.TryGetTile(position, out TileShared? tile)) {
             return SourceBlock.SmoothSelf
                 ? IsSameTileType(tile)
-                : tile.SourceBlock.BlockId != 0; // Don't smooth with air, possibly find nicer way to do this later.
+                : tile.SourceBlock.BlockUid != "air"; // Don't smooth with air, possibly find nicer way to do this later.
         }
         return false;
     }

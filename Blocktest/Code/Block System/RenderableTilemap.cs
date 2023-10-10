@@ -28,11 +28,9 @@ public class RenderableTilemap {
     private void OnTilemapChanged(TileShared tile, Vector2Int location) {
         _camera.RenderedComponents.Remove(_renderables[location.X, location.Y].Renderable);
 
+        
         foreach (Vector2Int dir in Adjacencies) {
-            if (location.X + dir.X < 0 ||
-                location.X + dir.X >= _tilemap.TilemapSize.X ||
-                location.Y + dir.Y < 0 ||
-                location.Y + dir.Y >= _tilemap.TilemapSize.Y) {
+            if (!_tilemap.TryGetTile(location + dir, out TileShared? adjacentTile)) {
                 continue;
             }
             _renderables[location.X + dir.X, location.Y + dir.Y].UpdateAdjacencies(location + dir, _tilemap);

@@ -1,66 +1,44 @@
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using YamlDotNet.Serialization;
+
 namespace Shared.Code.Block_System;
 
 /// <summary>
-///     The BlockManager contains all of the block types in <see cref="AllBlocks">an array of blocks</see> and a
-///     <see cref="BlockNames">list of block names.</see>
+///     The BlockManager contains all of the block types in <see cref="AllBlocks">a dictionary of blocks indexed by their name</see>
 /// </summary>
 public abstract class BlockManagerShared {
     /// <summary> Array which stores all block instances for referencing as if they were globals. </summary>
-    private static BlockShared[] _allBlocks;
-
-
-    /// <summary> List used to store the names of blocks. The indexes are the corresponding block's ID. </summary>
-    private static string[] _blockNames;
-
-    /// <summary> Array which stores all block instances for referencing as if they were globals. </summary>
-    public static BlockShared[] AllBlocks {
-        get => _allBlocks;
-        private set => _allBlocks = value;
-    }
-    
-    /// <summary> List used to store the names of blocks. The indexes are the corresponding block's ID. </summary>
-    public static string[] BlockNames {
-        get => _blockNames;
-        private set => _blockNames = value;
-    }
+    public static Dictionary<string, BlockShared> AllBlocks { get; private set; }
 
 
     /// <summary>
-    ///     Compiles all block subtypes into <see cref="AllBlocks">an array of blocks</see> and a
-    ///     <see cref="BlockNames">list of block names.</see>
+    ///     Compiles all block subtypes into <see cref="AllBlocks">a dictionary of blocks indexed by their name</see>
     /// </summary>
     public static void Initialize() {
-        // This mess gets all subtypes of Block and puts the types in a list.
-        Type[] allBlockTypes = (
-            from domainAssembly in AppDomain.CurrentDomain.GetAssemblies()
-            from assemblyType in domainAssembly.GetTypes()
-            where assemblyType.IsSubclassOf(typeof(BlockShared))
-            select assemblyType).ToArray();
+        var deserialize = new DeserializerBuilder().Build();
+        var assembly = typeof(BlockManagerShared).Assembly;
+        var assemblyNames = assembly.GetManifestResourceNames();
+        var blockNames = assemblyNames.Where(x => x.StartsWith("Shared.Content.Blocks."));
 
-        AllBlocks = new BlockShared[allBlockTypes.Length];
-        BlockNames = new string[allBlockTypes.Length];
-
-        // For loops to populate main allBlocks array.
-        for (int i = 0; i < allBlockTypes.Length; i++) {
-            Type newBlockType = allBlockTypes[i];
-            BlockShared? newBlock = (BlockShared?)Activator.CreateInstance(newBlockType);
-            if (newBlock == null) {
-                Console.WriteLine($"Failed to create instance of {newBlockType}!");
+        AllBlocks = new Dictionary<string, BlockShared>();
+        foreach (string resourceName in blockNames) {
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null) {
                 continue;
             }
-            newBlock.Initialize();
-            if (newBlock.BlockId == -1) {
-                newBlock.BlockId = i;
+            using StreamReader reader = new(stream);
+            string yaml = reader.ReadToEnd();
+            var block = deserialize.Deserialize<BlockShared?>(yaml);
+            if (block == null) {
+                continue;
             }
-            if (AllBlocks[newBlock.BlockId] != null) {
-                Console.WriteLine(
-                    $"Block {newBlock} conflicts with block {AllBlocks[newBlock.BlockId]}! (Block ID: {newBlock.BlockId})");
-            } else if (newBlock.BlockId > AllBlocks.Length || newBlock.BlockId < 0) {
-                Console.WriteLine($"Block {newBlock} has invalid ID {newBlock.BlockId}! (Max ID {AllBlocks.Length})");
+            block.BlockUid = block.BlockName.ToLower().Replace(" ", "_");
+
+            if (!AllBlocks.TryAdd(block.BlockUid, block)) {
+                Console.WriteLine($"File {resourceName} contains duplicate definition of block {block.BlockName}!");
             }
-            BlockNames[newBlock.BlockId] = newBlock.BlockName;
-            AllBlocks[newBlock.BlockId] = newBlock;
         }
     }
 }
