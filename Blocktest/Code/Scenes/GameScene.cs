@@ -152,7 +152,7 @@ public sealed class GameScene : IScene {
         Rectangle destinationRectangle = pixelPerfect ? GetPixelPerfectRect() : GetFitRect();
         _camera.RenderLocation = destinationRectangle;
 
-        graphicsDevice.Clear(Color.DarkGray);
+        graphicsDevice.Clear(Color.Black);
 
         _spriteBatch.Begin(samplerState: pixelPerfect ? SamplerState.PointClamp : null);
         _spriteBatch.Draw(_camera.RenderTarget, destinationRectangle, Color.White);

@@ -1,5 +1,6 @@
 using Blocktest.Block_System;
 using Blocktest.Scenes;
+using Myra;
 using Shared.Code.Block_System;
 namespace Blocktest;
 
@@ -11,26 +12,23 @@ public sealed class BlocktestGame : Game {
     private GraphicsDeviceManager _graphics;
 
     /// <inheritdoc />
-    public BlocktestGame() {
-        _connect = false;
-        _graphics = new GraphicsDeviceManager(this);
-        Content.RootDirectory = "Content";
-        IsMouseVisible = true;
-        TargetElapsedTime = TimeSpan.FromMilliseconds(16);
-        Window.AllowUserResizing = true;
-    }
-
-    public BlocktestGame(string newIp) {
-        _connect = true;
+    public BlocktestGame(string? newIp = null) {
+        _connect = newIp != null;
         _ip = newIp;
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         Window.AllowUserResizing = true;
         TargetElapsedTime = TimeSpan.FromMilliseconds(16);
+        MyraEnvironment.Game = this;
     }
 
     public static ContentManager? ContentManager { get; private set; }
+    
+    public void SetScene(IScene newScene) {
+        _currentScene?.EndScene();
+        _currentScene = newScene;
+    }
 
     /// <inheritdoc />
     protected override void Initialize() {
@@ -42,7 +40,17 @@ public sealed class BlocktestGame : Game {
     protected override void LoadContent() {
         ContentManager = Content;
         BlockSpritesManager.LoadBlockSprites();
-        _currentScene = new GameScene(this, _connect, _ip);
+        
+        if(_ip != null) {
+            SetScene(new GameScene(this, true, _ip));
+            return;
+        }
+
+#if DEBUG
+        SetScene(new GameScene(this, _connect, _ip));
+#else
+        SetScene(new MainMenuScene(this));
+#endif
     }
 
     /// <inheritdoc />

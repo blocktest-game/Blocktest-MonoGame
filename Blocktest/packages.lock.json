@@ -26,10 +26,84 @@
         "resolved": "2.2.0",
         "contentHash": "u06nYzGcXCBcnF7cRe8Xa0KxBxGx8grhujZmb3PUiMVbds8d/I6qJ+waGn0IeC7Tdwmt0P6l3v7MqdYog5rJQg=="
       },
+      "AssetManagementBase": {
+        "type": "Transitive",
+        "resolved": "0.6.6",
+        "contentHash": "iIMu6/5Zcxr07hS58j2jK8RhyY6cZyqTl3ouaFc1YjnQRKaoGSPZdaO3ysok8JDO18FjS6d+/2pyuNsScn4l7A=="
+      },
+      "Cyotek.Drawing.BitmapFont": {
+        "type": "Transitive",
+        "resolved": "2.0.4",
+        "contentHash": "iA6WehGVdMUuNbfsQQDq/Bt+mMd/OqHjiMUtKFLIQd/0pyYh4ehT7FEjTxN9/4OXNKQZsp9bAJgltP2nnswUJg=="
+      },
+      "DdsKtxXna.MonoGame": {
+        "type": "Transitive",
+        "resolved": "0.4.2",
+        "contentHash": "e350xVdu1c4Ix6h5q8EqmDqUfol9lPpkw5geq1yuxfjf96eXQOE90ejxE/dtqbrMf7smDZ2hVPfUsAQVkadMuw=="
+      },
+      "FontStashSharp.Base": {
+        "type": "Transitive",
+        "resolved": "1.1.8",
+        "contentHash": "4EthXSV0SR1fhL+Bab3qc5b7vZy090FI8zJbb2p1vOjXKwCTAgaX2F9HPKD6ywEou0VdNWl1Wy3d8X+jEEcLBg=="
+      },
+      "FontStashSharp.MonoGame": {
+        "type": "Transitive",
+        "resolved": "1.3.0",
+        "contentHash": "8hB/cYyHmeEXL6sn5KIb0PDdTKdiDTM9euvBp5E4b4MlnheHxBSSRp9qog//5kQKUlwVHFkjf6V3iACP2KvZyg==",
+        "dependencies": {
+          "Cyotek.Drawing.BitmapFont": "2.0.4",
+          "FontStashSharp.Base": "1.1.8",
+          "FontStashSharp.Rasterizers.StbTrueTypeSharp": "1.1.8",
+          "StbImageSharp": "2.27.13"
+        }
+      },
+      "FontStashSharp.Rasterizers.StbTrueTypeSharp": {
+        "type": "Transitive",
+        "resolved": "1.1.8",
+        "contentHash": "QtO7CQ41xa2zbbBagNVtUdNz2rankAFDDH1g9rkDqSkvqb6/2/rJG950nHmSY+j6rFWxcbOYzkZtB9OEwyHhAw==",
+        "dependencies": {
+          "FontStashSharp.Base": "1.1.8",
+          "StbTrueTypeSharp": "1.26.11"
+        }
+      },
+      "info.lundin.math.dll": {
+        "type": "Transitive",
+        "resolved": "1.2.6",
+        "contentHash": "rCSUXUISKOmFkpEPd9wZJP9bHsyozEwvid3zO4gByG1QQX9IMAUZ8R9OZmpKp20JWrBMGBMTgoXAuLCSoK6VAQ=="
+      },
+      "StbImageSharp": {
+        "type": "Transitive",
+        "resolved": "2.27.13",
+        "contentHash": "tHnP2RHgFzWbOS96UqvRO/LYU1WmpMT1bKiig45we+rpaXacBr11Fq2IBF+MqlgyLyNXxRz18E66qr4R9YlSbg=="
+      },
+      "StbTrueTypeSharp": {
+        "type": "Transitive",
+        "resolved": "1.26.11",
+        "contentHash": "3AFGjLBGUnUGMEMNMiFrHdsG7bLk/PIJqMgxUN57Wbv0OPTYQqHHG8O0W1bOArcc+/xDsCMHiK5CRCzw8F/2kg=="
+      },
+      "XNAssets.MonoGame": {
+        "type": "Transitive",
+        "resolved": "0.6.7",
+        "contentHash": "bRO+Obkw5w1OL4UkarTokvtlCAwSZGyfz0FjJtwhbnvspz4dhLQZcBMlSnORm4dsvyM2zKdqa8hVdptQ1qf/CQ==",
+        "dependencies": {
+          "AssetManagementBase": "0.6.6",
+          "Cyotek.Drawing.BitmapFont": "2.0.4",
+          "DdsKtxXna.MonoGame": "0.4.2",
+          "StbImageSharp": "2.27.13"
+        }
+      },
       "YamlDotNet": {
         "type": "Transitive",
         "resolved": "13.7.0",
         "contentHash": "RKkoQSCyk/94N20SL3U15hWAqBVXHu+59upcPi8R2uhrcAalyVa4Y/vYdXQ7MXQ71Lut//DH0tLcYByAkGmXhA=="
+      },
+      "Myra": {
+        "type": "Project",
+        "dependencies": {
+          "FontStashSharp.MonoGame": "[1.3.0, )",
+          "XNAssets.MonoGame": "[0.6.7, )",
+          "info.lundin.math.dll": "[1.2.6, )"
+        }
       },
       "shared": {
         "type": "Project",
