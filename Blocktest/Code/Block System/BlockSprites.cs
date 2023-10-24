@@ -19,16 +19,8 @@ public sealed class BlockSprites {
 
     public BlockSprites(BlockShared newBlockShared) {
         _blockShared = newBlockShared;
-        LoadSprite();
-    }
-
-    /// <summary>
-    ///     Called when the block is created by the block sprites manager.
-    /// </summary>
-    /// <remarks>
-    ///     DO NOT FORGET TO CALL THE BASE METHOD IF YOU OVERRIDE THIS.
-    /// </remarks>
-    public void LoadSprite() {
+        SpriteSheet = SpriteSheet.ErrorSpriteSheet;
+        
         string path = @"Graphics\Blocks\" + _blockShared.BlockName.ToLower().Replace(" ", "");
         try {
             BlockSprite =
@@ -45,7 +37,7 @@ public sealed class BlockSprites {
             }
         }
         catch (ContentLoadException) {
-            BlockSprite = new Drawable(@"Graphics\Blocks\error");
+            BlockSprite = Drawable.ErrorDrawable;
             Console.WriteLine($"Block {this} does not have a sprite at {path}!");
         }
     }

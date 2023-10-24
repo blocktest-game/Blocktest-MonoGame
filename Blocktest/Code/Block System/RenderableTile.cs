@@ -5,6 +5,15 @@ namespace Blocktest.Block_System;
 
 public class RenderableTile : TileShared {
     public readonly Renderable Renderable;
+    
+    [Flags]
+    private enum DirectionalBitmask {
+        None = 0,
+        Up = 1,
+        Down = 2,
+        Right = 4,
+        Left = 8
+    }
 
     public RenderableTile(TileShared tile, bool background) : base(tile.SourceBlock,
         tile.Transform.Position / GlobalsShared.GridSize) {
@@ -23,23 +32,23 @@ public class RenderableTile : TileShared {
             return;
         } // If the tile doesn't smooth, don't even try
 
-        int bitmask = 0; // Uses bitmask smoothing, look it up
+        var dirBitmask = DirectionalBitmask.None;
 
         if (HasSmoothableTile(position + Vector2Int.Up, tilemap)) {
-            bitmask += 1;
+            dirBitmask |= DirectionalBitmask.Up;
         }
         if (HasSmoothableTile(position + Vector2Int.Down, tilemap)) {
-            bitmask += 2;
+            dirBitmask |= DirectionalBitmask.Down;
         }
         if (HasSmoothableTile(position + Vector2Int.Right, tilemap)) {
-            bitmask += 4;
+            dirBitmask |= DirectionalBitmask.Right;
         }
         if (HasSmoothableTile(position + Vector2Int.Left, tilemap)) {
-            bitmask += 8;
+            dirBitmask |= DirectionalBitmask.Left;
         }
 
         Renderable.Appearance = BlockSpritesManager.AllBlocksSprites[SourceBlock.BlockUid].SpriteSheet
-            .OrderedSprites[bitmask];
+            .OrderedSprites[(int) dirBitmask];
     }
 
     /// <summary>

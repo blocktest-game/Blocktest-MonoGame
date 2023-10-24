@@ -89,22 +89,22 @@ public struct Vector2Int : INetSerializable {
     
     // Preset values
     /// <summary>Returns a <see cref="Vector2Int" /> with values (0, 0).</summary>
-    public static readonly Vector2Int Zero = new(0, 0);
+    public static Vector2Int Zero { get; } = new(0, 0);
 
     /// <summary>Returns a <see cref="Vector2Int" /> with values (1, 1).</summary>
-    public static readonly Vector2Int One = new(1, 1);
+    public static Vector2Int One { get; } = new(1, 1);
 
     /// <summary>Returns a <see cref="Vector2Int" /> with values (0, 1).</summary>
-    public static readonly Vector2Int Up = new(0, 1);
+    public static Vector2Int Up { get; } = new(0, 1);
 
     /// <summary>Returns a <see cref="Vector2Int" /> with values (0, -1).</summary>
-    public static readonly Vector2Int Down = new(0, -1);
+    public static Vector2Int Down { get; } = new(0, -1);
 
     /// <summary>Returns a <see cref="Vector2Int" /> with values (-1, 0).</summary>
-    public static readonly Vector2Int Left = new(-1, 0);
+    public static Vector2Int Left { get; }  = new(-1, 0);
 
     /// <summary>Returns a <see cref="Vector2Int" /> with values (1, 0).</summary>
-    public static readonly Vector2Int Right = new(1, 0);
+    public static Vector2Int Right { get; } = new(1, 0);
 
     public void Serialize(NetDataWriter writer) {
         writer.Put(X);
