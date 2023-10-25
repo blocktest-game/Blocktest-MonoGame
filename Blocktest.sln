@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DedicatedServer", "Dedicate
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{391CA9CC-64C8-45C5-8902-4C7C718AB113}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Myra.MonoGame", "submodules\myra\src\Myra\Myra.MonoGame.csproj", "{48B9EA4E-5DFF-4206-87D3-C0776DA88F32}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +24,5 @@ Global
 		{391CA9CC-64C8-45C5-8902-4C7C718AB113}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{391CA9CC-64C8-45C5-8902-4C7C718AB113}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{391CA9CC-64C8-45C5-8902-4C7C718AB113}.Release|Any CPU.Build.0 = Release|Any CPU
-		{48B9EA4E-5DFF-4206-87D3-C0776DA88F32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{48B9EA4E-5DFF-4206-87D3-C0776DA88F32}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{48B9EA4E-5DFF-4206-87D3-C0776DA88F32}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{48B9EA4E-5DFF-4206-87D3-C0776DA88F32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
