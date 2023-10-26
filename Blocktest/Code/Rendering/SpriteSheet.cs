@@ -22,6 +22,6 @@ public sealed class SpriteSheet {
             OrderedSprites[frameColumn + frameRow * frameColumns] = newDrawable;
         }
     }
-    
+
     public static SpriteSheet ErrorSpriteSheet { get; } = new(@"Graphics\Blocks\error", 1, 1);
 }

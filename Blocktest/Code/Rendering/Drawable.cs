@@ -10,6 +10,6 @@ public sealed class Drawable {
                   throw new Exception($"Could not load drawable {fileName}, content manager not initialized.");
         Bounds = bounds ?? Texture.Bounds;
     }
-    
+
     public static Drawable ErrorDrawable { get; } = new(@"Graphics\Blocks\error");
 }

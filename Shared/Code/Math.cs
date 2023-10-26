@@ -86,7 +86,7 @@ public struct Vector2Int : INetSerializable {
     public static implicit operator Point(Vector2Int vector2Int) => new(vector2Int.X, vector2Int.Y);
 
     public static implicit operator Vector2Int(Point point) => new(point.X, point.Y);
-    
+
     // Preset values
     /// <summary>Returns a <see cref="Vector2Int" /> with values (0, 0).</summary>
     public static Vector2Int Zero { get; } = new(0, 0);
@@ -101,7 +101,7 @@ public struct Vector2Int : INetSerializable {
     public static Vector2Int Down { get; } = new(0, -1);
 
     /// <summary>Returns a <see cref="Vector2Int" /> with values (-1, 0).</summary>
-    public static Vector2Int Left { get; }  = new(-1, 0);
+    public static Vector2Int Left { get; } = new(-1, 0);
 
     /// <summary>Returns a <see cref="Vector2Int" /> with values (1, 0).</summary>
     public static Vector2Int Right { get; } = new(1, 0);

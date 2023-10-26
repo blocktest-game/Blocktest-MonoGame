@@ -24,7 +24,7 @@ public sealed class BlocktestGame : Game {
     }
 
     public static ContentManager? ContentManager { get; private set; }
-    
+
     public void SetScene(IScene newScene) {
         _currentScene?.EndScene();
         _currentScene = newScene;
@@ -40,8 +40,8 @@ public sealed class BlocktestGame : Game {
     protected override void LoadContent() {
         ContentManager = Content;
         BlockSpritesManager.LoadBlockSprites();
-        
-        if(_ip != null) {
+
+        if (_ip != null) {
             SetScene(new GameScene(this, true, _ip));
             return;
         }

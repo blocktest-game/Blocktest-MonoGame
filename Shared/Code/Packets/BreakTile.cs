@@ -1,5 +1,6 @@
 using LiteNetLib;
 using LiteNetLib.Utils;
+using Shared.Code.Block_System;
 namespace Shared.Code.Packets;
 
 /// <summary>
@@ -11,27 +12,24 @@ namespace Shared.Code.Packets;
 public sealed class BreakTile : IPacket {
     public bool Foreground;
     public Vector2Int Position;
-    public ushort TickNum;
+    public ushort TickNum { get; init; }
 
-    public ushort GetTickNum() => TickNum;
+    public PacketType GetPacketType() => PacketType.BreakTile;
 
-    public void Process() {
-        BuildSystem.BreakBlockCell(Foreground, Position);
+    public int SourceId { get; init; }
+
+    public void Process(WorldState worldState) {
+        TilemapShared tilemap = Foreground ? worldState.Foreground : worldState.Background;
+        tilemap.DeleteTile(Position);
     }
 
     public void Serialize(NetDataWriter writer) {
-        writer.Put(TickNum);
-        writer.Put(Position.X);
-        writer.Put(Position.Y);
+        writer.Put(Position);
         writer.Put(Foreground);
     }
 
     public void Deserialize(NetDataReader reader) {
-        TickNum = reader.GetUShort();
-        int x = reader.GetInt();
-        int y = reader.GetInt();
+        Position = reader.Get<Vector2Int>();
         Foreground = reader.GetBool();
-
-        Position = new Vector2Int(x, y);
     }
 }

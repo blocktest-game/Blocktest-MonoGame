@@ -5,24 +5,22 @@ namespace Shared.Code.Block_System;
 ///     A grid filled with <see cref="TileShared" />s, usually representing terrain.
 /// </summary>
 public sealed class TilemapShared {
+    public readonly bool Background;
+
     /// <summary>
     ///     The size of each cell (in pixels) in the tilemap's grid.
     /// </summary>
     public readonly Vector2Int GridSize = new(8, 8);
 
     /// <summary>
-    ///     The size of the tilemap in tiles.
-    /// </summary>
-    public readonly Vector2Int TilemapSize;
-
-    /// <summary>
     ///     The 2D array of all tiles in the tilemap.
     /// </summary>
     public readonly TileShared?[,] TileGrid;
 
-    public readonly bool Background;
-
-    public event Action<TileShared, Vector2Int>? OnTileChanged;
+    /// <summary>
+    ///     The size of the tilemap in tiles.
+    /// </summary>
+    public readonly Vector2Int TilemapSize;
 
 
     /// <summary>
@@ -35,31 +33,45 @@ public sealed class TilemapShared {
         TileGrid = new TileShared[sizeX, sizeY];
         for (int x = 0; x < sizeX; x++) {
             for (int y = 0; y < sizeY; y++) {
-                TileGrid[x, y] = new TileShared(BlockManagerShared.AllBlocks["air"], new Vector2Int(x, y)); //Fill with air
+                TileGrid[x, y] =
+                    new TileShared(BlockManagerShared.AllBlocks["air"], new Vector2Int(x, y)); //Fill with air
             }
         }
         Background = background;
     }
+
+    public event Action<TileShared, Vector2Int>? OnTileChanged;
 
     /// <summary>
     ///     Sets a Tile at the given XYZ coordinates of a cell in the tile map to a specific <see cref="Block" /> type.
     /// </summary>
     /// <param name="location">Location the new Block will be placed.</param>
     /// <param name="newBlock">Block type to be placed in the cell.</param>
-    public TileShared SetBlock(Vector2Int location, BlockShared newBlock) =>
+    public void SetBlock(Vector2Int location, BlockShared newBlock) =>
         SetTile(location, new TileShared(newBlock, location));
+
+    public void SetBlock(Vector2Int location, string blockUid) =>
+        SetTile(location, new TileShared(BlockManagerShared.AllBlocks[blockUid], location));
 
     /// <summary>
     ///     Sets a Tile at the given XYZ coordinates of a cell in the tile map to a specific <see cref="Block" /> type.
     /// </summary>
     /// <param name="location">Location the new Block will be placed.</param>
     /// <param name="newTile">Block type to be placed in the cell.</param>
-    public TileShared SetTile(Vector2Int location, TileShared newTile) {
+    public void SetTile(Vector2Int location, TileShared newTile) {
+        if (location.X < 0 || location.Y < 0 || location.X >= TilemapSize.X || location.Y >= TilemapSize.Y) {
+            return;
+        }
+
+        if (TryGetTile(location, out TileShared? oldTile)) {
+            oldTile.SourceBlock.OnBreak(location, Background);
+        }
+
         TileGrid[location.X, location.Y] = newTile;
 
-        OnTileChanged?.Invoke(newTile, location);
+        newTile.SourceBlock.OnPlace(location, Background);
 
-        return newTile;
+        OnTileChanged?.Invoke(newTile, location);
     }
 
     /// <summary>

@@ -20,7 +20,7 @@ public sealed class BlockSprites {
     public BlockSprites(BlockShared newBlockShared) {
         _blockShared = newBlockShared;
         SpriteSheet = SpriteSheet.ErrorSpriteSheet;
-        
+
         string path = @"Graphics\Blocks\" + _blockShared.BlockName.ToLower().Replace(" ", "");
         try {
             BlockSprite =

@@ -5,16 +5,16 @@ namespace Shared.Code.Block_System;
 ///     will be used for every tile of that type.
 /// </summary>
 public sealed class BlockShared {
-    /// <summary>
-    /// The block's unique string ID, generated from the name without spaces and turned to lowercase.
-    /// </summary>
-    public string BlockUid = "error";
-
     /// <summary> The block's name. </summary>
     public string BlockName = "Error";
 
     /// <summary> Whether or not the block supports icon smoothing. </summary>
     public bool BlockSmoothing = false;
+
+    /// <summary>
+    ///     The block's unique string ID, generated from the name without spaces and turned to lowercase.
+    /// </summary>
+    public string BlockUid = "error";
 
     /// <summary> Whether or not a block can be placed in the background. </summary>
     public bool CanPlaceBackground = true;
@@ -22,7 +22,7 @@ public sealed class BlockShared {
     /// <summary> Whether or not a block smooths only with itself </summary>
     /// <remarks> (Use normal 8x8 sprites to prevent overlap) </remarks>
     public bool SmoothSelf = false;
-    
+
     /* METHODS */
 
     /// <summary>

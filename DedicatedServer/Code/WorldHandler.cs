@@ -21,15 +21,16 @@ internal sealed class WorldHandler {
     private TimeSpan _currentTime = TimeSpan.Zero;
     private long _previousTicks = 0;
 
+    private readonly WorldState _worldState;
+
     public WorldHandler() {
         BlockManagerShared.Initialize();
-        GlobalsShared.BackgroundTilemap = new TilemapShared(GlobalsShared.MaxX, GlobalsShared.MaxY, true);
-        GlobalsShared.ForegroundTilemap = new TilemapShared(GlobalsShared.MaxX, GlobalsShared.MaxY, false);
-        
-        var testDownload = WorldDownload.Default();
-        testDownload.Process();
+        _worldState = new WorldState();
 
-        _server = new Server();
+        WorldDownload testDownload = WorldDownload.Default();
+        testDownload.Process(_worldState);
+
+        _server = new Server(_worldState);
         _stopwatch = new Stopwatch();
     }
 
@@ -60,7 +61,7 @@ internal sealed class WorldHandler {
             previousTicks = currentTicks;
             counter++;*/
             _server.Update();
-            _server.ServerTickBuffer.IncrCurrTick();
+            _server.ServerTickBuffer.IncrCurrTick(_worldState);
         }
     }
 

@@ -5,15 +5,6 @@ namespace Blocktest.Block_System;
 
 public class RenderableTile : TileShared {
     public readonly Renderable Renderable;
-    
-    [Flags]
-    private enum DirectionalBitmask {
-        None = 0,
-        Up = 1,
-        Down = 2,
-        Right = 4,
-        Left = 8
-    }
 
     public RenderableTile(TileShared tile, bool background) : base(tile.SourceBlock,
         tile.Transform.Position / GlobalsShared.GridSize) {
@@ -32,7 +23,7 @@ public class RenderableTile : TileShared {
             return;
         } // If the tile doesn't smooth, don't even try
 
-        var dirBitmask = DirectionalBitmask.None;
+        DirectionalBitmask dirBitmask = DirectionalBitmask.None;
 
         if (HasSmoothableTile(position + Vector2Int.Up, tilemap)) {
             dirBitmask |= DirectionalBitmask.Up;
@@ -48,7 +39,7 @@ public class RenderableTile : TileShared {
         }
 
         Renderable.Appearance = BlockSpritesManager.AllBlocksSprites[SourceBlock.BlockUid].SpriteSheet
-            .OrderedSprites[(int) dirBitmask];
+            .OrderedSprites[(int)dirBitmask];
     }
 
     /// <summary>
@@ -61,7 +52,8 @@ public class RenderableTile : TileShared {
         if (tilemap.TryGetTile(position, out TileShared? tile)) {
             return SourceBlock.SmoothSelf
                 ? IsSameTileType(tile)
-                : tile.SourceBlock.BlockUid != "air"; // Don't smooth with air, possibly find nicer way to do this later.
+                : tile.SourceBlock.BlockUid !=
+                  "air"; // Don't smooth with air, possibly find nicer way to do this later.
         }
         return false;
     }
@@ -72,4 +64,13 @@ public class RenderableTile : TileShared {
     /// <param name="otherTile">The other tile to check.</param>
     /// <returns>Whether or not the other block is the same type as the current tile</returns>
     private bool IsSameTileType(TileShared otherTile) => otherTile.SourceBlock == SourceBlock;
+
+    [Flags]
+    private enum DirectionalBitmask {
+        None = 0,
+        Up = 1,
+        Down = 2,
+        Right = 4,
+        Left = 8
+    }
 }

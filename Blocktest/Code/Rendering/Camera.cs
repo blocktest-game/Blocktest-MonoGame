@@ -1,14 +1,15 @@
 namespace Blocktest.Rendering;
 
 public sealed class Camera {
+    private static readonly int EnumCount = Enum.GetValues(typeof(Layer)).Length;
     private readonly Color _backgroundColor;
     private readonly Vector2 _size;
 
     public readonly List<Renderable> RenderedComponents = new();
-
-    public Rectangle RenderLocation;
     public readonly RenderTarget2D RenderTarget;
     public Vector2 Position;
+
+    public Rectangle RenderLocation;
 
     public Camera(Vector2 position, Vector2 size, GraphicsDevice graphicsDevice, Color? backgroundColor = null) {
         Position = position;
@@ -55,8 +56,6 @@ public sealed class Camera {
 
         graphics.SetRenderTarget(null);
     }
-
-    private static readonly int EnumCount = Enum.GetValues(typeof(Layer)).Length;
 
     public Vector2 CameraToWorldPos(Vector2 mouseState) => new(
         (mouseState.X - RenderLocation.X) / RenderLocation.Width * RenderTarget.Width + Position.X, Position.Y +

@@ -23,23 +23,23 @@ public sealed class Tick {
     /// <summary>
     ///     Process all packets taking action on this tick.
     /// </summary>
-    public void ProcessStartTick() {
-        Array.Copy(_foreground.TileGrid, GlobalsShared.ForegroundTilemap.TileGrid,
-            GlobalsShared.MaxX * GlobalsShared.MaxY);
-        Array.Copy(_background.TileGrid, GlobalsShared.BackgroundTilemap.TileGrid,
-            GlobalsShared.MaxX * GlobalsShared.MaxY);
+    public void ProcessStartTick(WorldState worldState) {
+        //Array.Copy(_foreground.TileGrid, worldState.Foreground.TileGrid,
+        // GlobalsShared.MaxX * GlobalsShared.MaxY);
+        //Array.Copy(_background.TileGrid, worldState.Background.TileGrid,
+        //GlobalsShared.MaxX * GlobalsShared.MaxY);
         foreach (IPacket packet in Packets) {
-            packet.Process();
+            packet.Process(worldState);
         }
     }
 
-    public void ProcessTick() {
-        Array.Copy(GlobalsShared.ForegroundTilemap.TileGrid, _foreground.TileGrid,
-            GlobalsShared.MaxX * GlobalsShared.MaxY);
-        Array.Copy(GlobalsShared.BackgroundTilemap.TileGrid, _background.TileGrid,
-            GlobalsShared.MaxX * GlobalsShared.MaxY);
+    public void ProcessTick(WorldState worldState) {
+        //Array.Copy(worldState.Foreground.TileGrid, _foreground.TileGrid,
+        //  GlobalsShared.MaxX * GlobalsShared.MaxY);
+        //Array.Copy(worldState.Background.TileGrid, _background.TileGrid,
+        // GlobalsShared.MaxX * GlobalsShared.MaxY);
         foreach (IPacket packet in Packets) {
-            packet.Process();
+            packet.Process(worldState);
         }
     }
 }

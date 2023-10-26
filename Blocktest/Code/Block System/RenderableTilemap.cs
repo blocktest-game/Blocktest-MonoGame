@@ -4,17 +4,17 @@ using Shared.Code.Block_System;
 namespace Blocktest.Block_System;
 
 public class RenderableTilemap {
-    private readonly TilemapShared _tilemap;
-
-    private readonly RenderableTile[,] _renderables;
-    private readonly Camera _camera;
-
     /// <summary>
     ///     A list of <see cref="Vector2Int" />s that specify which blocks should be refreshed when a tile is placed/destroyed.
     ///     Defaults to the changed block and all cardinal directions.
     /// </summary>
     private static readonly List<Vector2Int> Adjacencies = new()
-        { Vector2Int.Zero, Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right };
+        { Vector2Int.Up, Vector2Int.Down, Vector2Int.Left, Vector2Int.Right };
+
+    private readonly Camera _camera;
+
+    private readonly RenderableTile[,] _renderables;
+    private readonly TilemapShared _tilemap;
 
 
     public RenderableTilemap(TilemapShared newTilemap, Camera camera) {
@@ -28,7 +28,7 @@ public class RenderableTilemap {
     private void OnTilemapChanged(TileShared tile, Vector2Int location) {
         _camera.RenderedComponents.Remove(_renderables[location.X, location.Y].Renderable);
 
-        
+
         foreach (Vector2Int dir in Adjacencies) {
             if (!_tilemap.TryGetTile(location + dir, out TileShared? adjacentTile)) {
                 continue;
@@ -36,7 +36,7 @@ public class RenderableTilemap {
             _renderables[location.X + dir.X, location.Y + dir.Y].UpdateAdjacencies(location + dir, _tilemap);
         }
 
-        RenderableTile newTile = new RenderableTile(tile, _tilemap.Background);
+        RenderableTile newTile = new(tile, _tilemap.Background);
         _renderables[location.X, location.Y] = newTile;
         newTile.UpdateAdjacencies(location, _tilemap);
         _camera.RenderedComponents.Add(newTile.Renderable);
@@ -49,7 +49,7 @@ public class RenderableTilemap {
             if (!_tilemap.TryGetTile(new Vector2Int(x, y), out TileShared? tile)) {
                 continue;
             }
-            RenderableTile newTile = new RenderableTile(tile, _tilemap.Background);
+            RenderableTile newTile = new(tile, _tilemap.Background);
             _renderables[x, y] = newTile;
             _camera.RenderedComponents.Add(newTile.Renderable);
             newTile.UpdateAdjacencies(new Vector2Int(x, y), _tilemap);

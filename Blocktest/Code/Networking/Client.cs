@@ -1,21 +1,34 @@
+using Blocktest.Rendering;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using Shared.Code;
+using Shared.Code.Components;
 using Shared.Code.Networking;
 using Shared.Code.Packets;
 namespace Blocktest.Networking;
 
 public sealed class Client {
+    private readonly Camera _camera;
     private readonly EventBasedNetListener _listener;
     private readonly NetManager _manager;
-    public NetPeer? Server { get; private set; }
-    public TickBuffer ClientTickBuffer = new(0);
+    private readonly Dictionary<int, Renderable> _playerRenderables = new();
 
-    public Client() {
+    private readonly WorldState _worldState;
+    public TickBuffer ClientTickBuffer;
+
+    public Client(WorldState worldState, Camera camera) {
+        _worldState = worldState;
+        _camera = camera;
+        ClientTickBuffer = new TickBuffer(0, _worldState);
         _listener = new EventBasedNetListener();
         _manager = new NetManager(_listener);
         _listener.NetworkReceiveEvent += NetworkReceiveEvent;
+        _listener.PeerConnectedEvent += PeerConnected;
+        _listener.PeerDisconnectedEvent += PeerDisconnected;
         _manager.Start();
     }
+
+    public NetPeer? Server { get; private set; }
 
     public void Start(string ip, int port, string key) {
         _manager.Connect(ip, port, key);
@@ -29,6 +42,20 @@ public sealed class Client {
         _manager.PollEvents();
     }
 
+    private void PeerConnected(NetPeer peer) {
+        Console.WriteLine("Connected to server");
+
+        Transform newTransform = new(new Vector2Int(256, 128));
+        Renderable newRenderable = new(newTransform, Layer.Player, Drawable.ErrorDrawable, Color.Orange);
+        _worldState.PlayerPositions.Add(peer.RemoteId, newTransform);
+        _playerRenderables.Add(peer.RemoteId, newRenderable);
+        _camera.RenderedComponents.Add(newRenderable);
+    }
+
+    private void PeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) {
+        Console.WriteLine("Disconnected from server");
+    }
+
     /// <summary>
     ///     Recieve network events from LiteNetLib
     /// </summary>
@@ -40,15 +67,24 @@ public sealed class Client {
                                      DeliveryMethod deliveryMethod) {
         if (Server == null) {
             Server = peer;
-            WorldDownload worldPacket = new();
-            byte packetByte = packetReader.GetByte();
-            PacketType packetType = (PacketType)packetByte;
+
+            PacketType packetType = (PacketType)packetReader.GetByte();
             if (packetType != PacketType.WorldDownload) {
+                Console.WriteLine("Bad packet!!!");
                 return;
             }
-            worldPacket.Deserialize(packetReader);
-            ClientTickBuffer = new TickBuffer(worldPacket.TickNum);
-            ClientTickBuffer.AddPacket(worldPacket);
+
+            int sourceId = packetReader.GetInt();
+
+            WorldDownload worldPacket = HandlePacket<WorldDownload>(packetReader, sourceId);
+            worldPacket.Process(_worldState);
+            ClientTickBuffer = new TickBuffer(worldPacket.TickNum, _worldState);
+
+            SendPacket(new PeerEvent {
+                SourceId = Server.RemoteId,
+                TickNum = worldPacket.TickNum,
+                Type = PeerEvent.PeerEventType.PlayerList
+            });
         } else {
             HandlePackets(packetReader);
         }
@@ -58,45 +94,76 @@ public sealed class Client {
     ///     Handles packets after the first.
     /// </summary>
     /// <param name="packetReader">Contains the packet sent by the server.</param>
-    private void HandlePackets(NetPacketReader packetReader) {
+    /// ACCEPTS PacketType:SourceID:TickNum:Packet
+    private void HandlePackets(NetDataReader packetReader) {
         byte packetByte = packetReader.GetByte();
         PacketType packetType = (PacketType)packetByte;
+
+        int sourceId = packetReader.GetInt();
+
         switch (packetType) {
             case PacketType.TileChange:
-                HandleTileChange(packetReader);
+                ClientTickBuffer.AddPacket(HandlePacket<TileChange>(packetReader, sourceId));
                 break;
             case PacketType.BreakTile:
-                HandleBreakTile(packetReader);
+                ClientTickBuffer.AddPacket(HandlePacket<BreakTile>(packetReader, sourceId));
                 break;
+            case PacketType.MovePlayer:
+                ClientTickBuffer.AddPacket(HandlePacket<MovePlayer>(packetReader, sourceId));
+                break;
+            case PacketType.PlayerList:
+                ClientTickBuffer.AddPacket(HandlePacket<PlayerList>(packetReader, sourceId));
+                break;
+            case PacketType.PeerEvent:
+                PeerEvent eventPacket = new() { SourceId = sourceId, TickNum = packetReader.GetUShort() };
+                eventPacket.Deserialize(packetReader);
+                HandleEvent(eventPacket);
+                break;
+            case PacketType.WorldDownload:
             default:
                 Console.WriteLine("Bad packet!!!");
                 break;
         }
     }
 
-    private void HandleTileChange(NetPacketReader packetReader) {
-        TileChange tileChange = new();
-        tileChange.Deserialize(packetReader);
-        ClientTickBuffer.AddPacket(tileChange);
+    private T HandlePacket<T>(NetDataReader packetReader, int sourceId) where T : IPacket, new() {
+        T packet = new() { SourceId = sourceId, TickNum = packetReader.GetUShort() };
+        packet.Deserialize(packetReader);
+        return packet;
     }
 
-    private void HandleBreakTile(NetPacketReader packetReader) {
-        BreakTile breakTile = new();
-        breakTile.Deserialize(packetReader);
-        ClientTickBuffer.AddPacket(breakTile);
+    private void HandleEvent(PeerEvent peerEvent) {
+        switch (peerEvent.Type) {
+            case PeerEvent.PeerEventType.PeerDisconnect:
+                Console.WriteLine("Player disconnected");
+
+                _worldState.PlayerPositions.Remove(peerEvent.SourceId);
+                _camera.RenderedComponents.Remove(_playerRenderables[peerEvent.SourceId]);
+                _playerRenderables.Remove(peerEvent.SourceId);
+                break;
+            case PeerEvent.PeerEventType.PeerConnect:
+                Console.WriteLine("New player connected");
+
+                Transform newTransform = new(new Vector2Int(256, 128));
+                Renderable newRenderable = new(newTransform, Layer.Player, Drawable.ErrorDrawable, Color.Orange);
+                _worldState.PlayerPositions.Add(peerEvent.SourceId, newTransform);
+                _playerRenderables.Add(peerEvent.SourceId, newRenderable);
+                _camera.RenderedComponents.Add(newRenderable);
+                break;
+            case PeerEvent.PeerEventType.PlayerList:
+            default:
+                throw new ArgumentOutOfRangeException(nameof(peerEvent), peerEvent, null);
+        }
     }
 
-    public void SendTileChange(TileChange tileChange) {
+    // SENDS PacketType:TickNum:Packet
+    public void SendPacket(IPacket packet, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableUnordered) {
         NetDataWriter writer = new();
-        writer.Put((byte)PacketType.TileChange);
-        writer.Put(tileChange);
-        Server?.Send(writer, DeliveryMethod.ReliableUnordered);
-    }
 
-    public void SendBreakTile(BreakTile breakTile) {
-        NetDataWriter writer = new();
-        writer.Put((byte)PacketType.BreakTile);
-        writer.Put(breakTile);
-        Server?.Send(writer, DeliveryMethod.ReliableUnordered);
+        writer.Put((byte)packet.GetPacketType());
+        writer.Put(packet.TickNum);
+        //ID is not needed for client to server packets
+        writer.Put(packet);
+        Server?.Send(writer, deliveryMethod);
     }
 }

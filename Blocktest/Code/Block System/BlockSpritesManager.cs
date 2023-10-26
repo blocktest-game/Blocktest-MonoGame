@@ -7,6 +7,7 @@ public sealed class BlockSpritesManager {
     public static Dictionary<string, BlockSprites> AllBlocksSprites { get; private set; }
 
     public static void LoadBlockSprites() {
-        AllBlocksSprites = BlockManagerShared.AllBlocks.ToDictionary(uid => uid.Key, block => new BlockSprites(block.Value));
+        AllBlocksSprites =
+            BlockManagerShared.AllBlocks.ToDictionary(uid => uid.Key, block => new BlockSprites(block.Value));
     }
 }
