@@ -14,14 +14,14 @@ internal sealed class WorldHandler {
     private readonly Stopwatch _stopwatch;
     private readonly TimeSpan _targetTime = TimeSpan.FromMilliseconds(16);
 
+    private readonly WorldState _worldState;
+
     private int _continueRun = 1;
     private bool _continueWait = true;
     private int _counter = 0;
     private long _currentTicks = 0;
     private TimeSpan _currentTime = TimeSpan.Zero;
     private long _previousTicks = 0;
-
-    private readonly WorldState _worldState;
 
     public WorldHandler() {
         BlockManagerShared.Initialize();
@@ -36,7 +36,7 @@ internal sealed class WorldHandler {
 
     public void Run() {
         lock (_locker) {
-            _server.Start();
+            _server.StartServer(9050);
         }
         _stopwatch.Start();
         Loop();
@@ -61,11 +61,13 @@ internal sealed class WorldHandler {
             previousTicks = currentTicks;
             counter++;*/
             _server.Update();
-            _server.ServerTickBuffer.IncrCurrTick(_worldState);
         }
     }
 
     public void Stop() {
         Interlocked.Exchange(ref _continueRun, 0);
+        lock (_locker) {
+            _server.Stop();
+        }
     }
 }

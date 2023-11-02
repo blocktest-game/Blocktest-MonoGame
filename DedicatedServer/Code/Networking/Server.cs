@@ -7,31 +7,15 @@ using Shared.Code.Networking;
 using Shared.Code.Packets;
 namespace DedicatedServer.Code.Networking;
 
-public sealed class Server {
-    private readonly EventBasedNetListener _listener = new();
-    private readonly NetManager _manager;
+public sealed class Server : NetworkInterface {
     private readonly ServerPlayerManager _playerManager;
-    private readonly WorldState _worldState;
-    public readonly TickBuffer ServerTickBuffer;
 
-    public Server(WorldState worldState) {
-        _worldState = worldState;
-        ServerTickBuffer = new TickBuffer(0, _worldState);
-        _manager = new NetManager(_listener);
+    public Server(WorldState worldState) : base(worldState) {
         _playerManager = new ServerPlayerManager(GlobalsShared.MaxPlayers);
 
-        _listener.ConnectionRequestEvent += NewConnection;
-        _listener.PeerConnectedEvent += NewPeer;
-        _listener.NetworkReceiveEvent += NetworkReceiveEvent;
-        _listener.PeerDisconnectedEvent += PeerDisconnected;
-    }
-
-    public void Start() {
-        _manager.Start(9050);
-    }
-
-    public void Update() {
-        _manager.PollEvents();
+        Listener.ConnectionRequestEvent += NewConnection;
+        Listener.PeerConnectedEvent += NewPeer;
+        Listener.PeerDisconnectedEvent += PeerDisconnected;
     }
 
     private void NewConnection(ConnectionRequest request) {
@@ -50,18 +34,18 @@ public sealed class Server {
     private void NewPeer(NetPeer peer) {
         Console.WriteLine("New Peer");
         _playerManager.AddPlayer(peer);
-        _worldState.PlayerPositions.Add(peer.Id, new Transform(Vector2Int.Zero));
+        LocalWorldState.PlayerPositions.Add(peer.Id, new Transform(Vector2Int.Zero));
 
         WorldDownload worldDownload = new() {
-            World = _worldState.CurrentWorld,
-            TickNum = ServerTickBuffer.CurrTick,
+            World = LocalWorldState.CurrentWorld,
+            TickNum = LocalTickBuffer.CurrTick,
             SourceId = -1
         };
         SendPacket(worldDownload, peer, DeliveryMethod.ReliableOrdered);
 
         SendPacketAllPeers(new PeerEvent {
             SourceId = peer.Id,
-            TickNum = ServerTickBuffer.CurrTick,
+            TickNum = LocalTickBuffer.CurrTick,
             Type = PeerEvent.PeerEventType.PeerConnect
         }, peer);
     }
@@ -74,63 +58,46 @@ public sealed class Server {
     private void PeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) {
         Console.WriteLine($"Peer Disconnected: {disconnectInfo.Reason}");
         _playerManager.RemovePlayer(peer);
-        _worldState.PlayerPositions.Remove(peer.Id);
+        LocalWorldState.PlayerPositions.Remove(peer.Id);
 
         SendPacketAllPeers(new PeerEvent {
             SourceId = peer.Id,
-            TickNum = ServerTickBuffer.CurrTick,
+            TickNum = LocalTickBuffer.CurrTick,
             Type = PeerEvent.PeerEventType.PeerDisconnect
         }, peer);
     }
 
-    /// <summary>
-    ///     Receive network events from LiteNetLib
-    /// </summary>
-    /// <param name="peer">The client the packet is coming from.</param>
-    /// <param name="packetReader">Contains the packet from the client.</param>
-    /// <param name="channelNumber"></param>
-    /// <param name="deliveryMethod">The delivery method used to deliver this packet.</param>
-    /// ACCEPTS PacketType:TickNum:Packet
-    private void NetworkReceiveEvent(NetPeer peer, NetPacketReader packetReader, byte channelNumber,
-                                     DeliveryMethod deliveryMethod) {
-        byte packetByte = packetReader.GetByte();
-        PacketType packetType = (PacketType)packetByte;
+    protected override void HandlePackets(NetDataReader packetReader, int sourceId, PacketType packetType,
+                                          ushort tickNum, NetPeer peer) {
+        IPacket newPacket;
         switch (packetType) {
             case PacketType.TileChange:
-                HandlePacket<TileChange>(packetReader, peer);
+                newPacket = HandlePacket<TileChange>(packetReader, sourceId, tickNum);
                 break;
             case PacketType.BreakTile:
-                HandlePacket<BreakTile>(packetReader, peer);
+                newPacket = HandlePacket<BreakTile>(packetReader, sourceId, tickNum);
                 break;
             case PacketType.MovePlayer:
-                HandlePacket<MovePlayer>(packetReader, peer);
+                newPacket = HandlePacket<MovePlayer>(packetReader, sourceId, tickNum);
                 break;
             case PacketType.PeerEvent:
-                PeerEvent eventPacket = new() { SourceId = peer.Id, TickNum = packetReader.GetUShort() };
-                eventPacket.Deserialize(packetReader);
-                HandleEvent(eventPacket);
-                break;
+                HandleEvent(HandlePacket<PeerEvent>(packetReader, sourceId, tickNum));
+                return;
             case PacketType.WorldDownload:
             case PacketType.PlayerList:
             default:
                 Console.WriteLine("Bad packet!!!");
-                break;
+                return;
         }
+        LocalTickBuffer.AddPacket(newPacket);
+        SendPacketAllPeers(newPacket, peer);
     }
 
-    private void HandlePacket<T>(NetDataReader packetReader, NetPeer source) where T : IPacket, new() {
-        T packet = new() { SourceId = source.Id, TickNum = packetReader.GetUShort() };
-        packet.Deserialize(packetReader);
-        ServerTickBuffer.AddPacket(packet);
-
-        SendPacketAllPeers(packet, source);
-    }
-
-    private void HandleEvent(PeerEvent peerEvent) {
+    protected override void HandleEvent(PeerEvent peerEvent) {
         switch (peerEvent.Type) {
             case PeerEvent.PeerEventType.PlayerList:
-                Console.WriteLine("PlayerList requested");
-                NetPeer? peer = _manager.GetPeerById(peerEvent.SourceId);
+                Console.WriteLine("Player List requested");
+                NetPeer? peer = Manager.GetPeerById(peerEvent.SourceId);
                 foreach (var player in _playerManager.PlayerList) {
                     if (player.Key == peerEvent.SourceId) {
                         continue;
@@ -138,7 +105,7 @@ public sealed class Server {
                     SendPacket(
                         new PeerEvent {
                             SourceId = player.Key, Type = PeerEvent.PeerEventType.PeerConnect,
-                            TickNum = ServerTickBuffer.CurrTick
+                            TickNum = LocalTickBuffer.CurrTick
                         }, peer);
                 }
 
@@ -149,27 +116,5 @@ public sealed class Server {
             default:
                 throw new ArgumentOutOfRangeException(nameof(peerEvent), peerEvent, null);
         }
-    }
-
-    // SENDS PacketType:SourceID:TickNum:Packet
-    private void SendPacketAllPeers(IPacket packet, NetPeer source,
-                                    DeliveryMethod deliveryMethod = DeliveryMethod.ReliableUnordered) {
-        NetDataWriter writer = new();
-        writer.Put((byte)packet.GetPacketType());
-        writer.Put(source.Id);
-        writer.Put(packet.TickNum);
-        writer.Put(packet);
-        _manager.SendToAll(writer, deliveryMethod, source); // Send to all clients except the source
-    }
-
-    // SENDS PacketType:SourceID:TickNum:Packet
-    private void SendPacket(IPacket packet, NetPeer target,
-                            DeliveryMethod deliveryMethod = DeliveryMethod.ReliableUnordered) {
-        NetDataWriter writer = new();
-        writer.Put((byte)packet.GetPacketType());
-        writer.Put(packet.SourceId);
-        writer.Put(packet.TickNum);
-        writer.Put(packet);
-        target.Send(writer, deliveryMethod);
     }
 }

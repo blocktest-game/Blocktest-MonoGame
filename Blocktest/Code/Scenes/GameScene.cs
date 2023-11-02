@@ -12,6 +12,7 @@ namespace Blocktest.Scenes;
 
 public sealed class GameScene : IScene {
     private readonly RenderableTilemap _backgroundTilemapSprites;
+    private readonly string[] _blockStrings;
 
     private readonly Camera _camera;
     private readonly bool _connect;
@@ -23,7 +24,6 @@ public sealed class GameScene : IScene {
 
     private readonly WorldState _worldState = new();
     private int _blockSelected = 1; //ID of the block to place
-    private readonly string[] _blockStrings;
 
     private bool _buildMode = true; //true for build, false for destroy
 
@@ -43,7 +43,7 @@ public sealed class GameScene : IScene {
         _blockStrings = BlockManagerShared.AllBlocks.Keys.ToArray();
 
         if (_connect && ip != null) {
-            _networkingClient.Start(ip, "testKey");
+            _networkingClient.Connect(ip);
             return;
         }
 
@@ -58,7 +58,7 @@ public sealed class GameScene : IScene {
 
         HandleInput();
 
-        _networkingClient.ClientTickBuffer.IncrCurrTick(_worldState);
+        _networkingClient.LocalTickBuffer.IncrCurrTick(_worldState);
     }
 
     public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice) {
@@ -136,11 +136,11 @@ public sealed class GameScene : IScene {
             _camera.Position += moveVector;
 
             MovePlayer movementPacket = new() {
-                TickNum = _networkingClient.ClientTickBuffer.CurrTick,
+                TickNum = _networkingClient.LocalTickBuffer.CurrTick,
                 Position = (Vector2Int)_camera.Position,
                 SourceId = _networkingClient.Server?.RemoteId ?? 0
             };
-            _networkingClient.ClientTickBuffer.AddPacket(movementPacket);
+            _networkingClient.LocalTickBuffer.AddPacket(movementPacket);
             if (_connect) {
                 _networkingClient.SendPacket(movementPacket);
             }
@@ -162,26 +162,26 @@ public sealed class GameScene : IScene {
 
         if (_buildMode) {
             TileChange testChange = new() {
-                TickNum = _networkingClient.ClientTickBuffer.CurrTick,
+                TickNum = _networkingClient.LocalTickBuffer.CurrTick,
                 Position = tilePos,
                 Foreground = foreground,
                 BlockUid = _blockStrings[_blockSelected],
                 SourceId = _networkingClient.Server?.RemoteId ?? 0
             };
 
-            _networkingClient.ClientTickBuffer.AddPacket(testChange);
+            _networkingClient.LocalTickBuffer.AddPacket(testChange);
             if (_connect) {
                 _networkingClient.SendPacket(testChange);
             }
         } else {
             BreakTile testBreak = new() {
-                TickNum = _networkingClient.ClientTickBuffer.CurrTick,
+                TickNum = _networkingClient.LocalTickBuffer.CurrTick,
                 Position = tilePos,
                 Foreground = foreground,
                 SourceId = _networkingClient.Server?.RemoteId ?? 0
             };
 
-            _networkingClient.ClientTickBuffer.AddPacket(testBreak);
+            _networkingClient.LocalTickBuffer.AddPacket(testBreak);
             if (_connect) {
                 _networkingClient.SendPacket(testBreak);
             }
