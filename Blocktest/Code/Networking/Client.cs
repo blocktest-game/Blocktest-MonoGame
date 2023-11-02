@@ -1,4 +1,7 @@
+using System.Net;
 using Blocktest.Rendering;
+using Blocktest.Scenes;
+using Blocktest.UI;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Shared.Code;
@@ -16,9 +19,12 @@ public sealed class Client {
     private readonly WorldState _worldState;
     public TickBuffer ClientTickBuffer;
 
-    public Client(WorldState worldState, Camera camera) {
+    private readonly BlocktestGame _game;
+
+    public Client(WorldState worldState, Camera camera, BlocktestGame game) {
         _worldState = worldState;
         _camera = camera;
+        _game = game;
         ClientTickBuffer = new TickBuffer(0, _worldState);
         _listener = new EventBasedNetListener();
         _manager = new NetManager(_listener);
@@ -30,8 +36,8 @@ public sealed class Client {
 
     public NetPeer? Server { get; private set; }
 
-    public void Start(string ip, int port, string key) {
-        _manager.Connect(ip, port, key);
+    public void Start(IPEndPoint ipEndPoint, string key) {
+        _manager.Connect(ipEndPoint, key);
     }
 
     public void Stop() {
@@ -54,6 +60,9 @@ public sealed class Client {
 
     private void PeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo) {
         Console.WriteLine("Disconnected from server");
+
+        _game.SetScene(new MainMenuScene(_game,
+            new DialogueWindow("Disconnected from server.", $"{disconnectInfo.Reason}")));
     }
 
     /// <summary>

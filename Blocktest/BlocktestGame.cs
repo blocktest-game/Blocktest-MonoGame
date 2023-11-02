@@ -1,3 +1,4 @@
+using System.Net;
 using Blocktest.Block_System;
 using Blocktest.Scenes;
 using Myra;
@@ -7,12 +8,12 @@ namespace Blocktest;
 /// <inheritdoc />
 public sealed class BlocktestGame : Game {
     private readonly bool _connect;
-    private readonly string? _ip;
+    private readonly IPEndPoint? _ip;
     private IScene? _currentScene;
     private GraphicsDeviceManager _graphics;
 
     /// <inheritdoc />
-    public BlocktestGame(string? newIp = null) {
+    public BlocktestGame(IPEndPoint? newIp = null) {
         _connect = newIp != null;
         _ip = newIp;
         _graphics = new GraphicsDeviceManager(this);

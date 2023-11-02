@@ -9,11 +9,11 @@ public abstract class Program {
                 Console.WriteLine("Invalid argument.");
                 return;
             }
-            if (!IPAddress.TryParse(args[1], out IPAddress? _)) {
+            if (!IPEndPoint.TryParse(args[1], out IPEndPoint? ip)) {
                 Console.WriteLine("Invalid IP address.");
                 return;
             }
-            using BlocktestGame game = new(args[1]);
+            using BlocktestGame game = new(ip);
             game.Run();
         } else {
             using BlocktestGame game = new();

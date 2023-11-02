@@ -6,10 +6,9 @@ namespace Blocktest.Scenes;
 
 public class MainMenuScene : IScene {
     private readonly Desktop _desktop;
-    private readonly VerticalStackPanel _mainMenu;
 
-    public MainMenuScene(BlocktestGame game) {
-        _mainMenu = new VerticalStackPanel {
+    public MainMenuScene(BlocktestGame game, Window? modal = null) {
+        VerticalStackPanel mainMenu = new() {
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
             BorderThickness = new Thickness(1),
@@ -23,7 +22,7 @@ public class MainMenuScene : IScene {
             VerticalAlignment = VerticalAlignment.Center,
             Padding = new Thickness(8)
         };
-        _mainMenu.Widgets.Add(titleLabel);
+        mainMenu.Widgets.Add(titleLabel);
 
         TextButton newGameButton = new() {
             Text = "New Game",
@@ -31,7 +30,7 @@ public class MainMenuScene : IScene {
             Padding = new Thickness(5)
         };
         newGameButton.Click += (_, _) => { game.SetScene(new GameScene(game, false, null)); };
-        _mainMenu.Widgets.Add(newGameButton);
+        mainMenu.Widgets.Add(newGameButton);
 
         TextButton connectButton = new() {
             Text = "Connect",
@@ -39,7 +38,7 @@ public class MainMenuScene : IScene {
             Padding = new Thickness(5)
         };
         connectButton.Click += (_, _) => { new ConnectionWindow(game).ShowModal(_desktop); };
-        _mainMenu.Widgets.Add(connectButton);
+        mainMenu.Widgets.Add(connectButton);
 
         TextButton exitButton = new() {
             Text = "Exit",
@@ -47,9 +46,11 @@ public class MainMenuScene : IScene {
             Padding = new Thickness(5)
         };
         exitButton.Click += (_, _) => { game.Exit(); };
-        _mainMenu.Widgets.Add(exitButton);
+        mainMenu.Widgets.Add(exitButton);
 
-        _desktop = new Desktop { Root = _mainMenu };
+        _desktop = new Desktop { Root = mainMenu };
+
+        modal?.ShowModal(_desktop);
     }
 
     public void Update(GameTime gameTime) { }

@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Net;
 using Blocktest.Block_System;
 using Blocktest.Misc;
 using Blocktest.Networking;
@@ -28,7 +29,7 @@ public sealed class GameScene : IScene {
 
     private KeyboardState _previousKeyboardState;
 
-    public GameScene(BlocktestGame game, bool doConnect, string? ip) {
+    public GameScene(BlocktestGame game, bool doConnect, IPEndPoint? ip) {
         _connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
@@ -37,12 +38,12 @@ public sealed class GameScene : IScene {
 
         _backgroundTilemapSprites = new RenderableTilemap(_worldState.Foreground, _camera);
         _foregroundTilemapSprites = new RenderableTilemap(_worldState.Background, _camera);
-        _networkingClient = new Client(_worldState, _camera);
+        _networkingClient = new Client(_worldState, _camera, game);
 
         _blockStrings = BlockManagerShared.AllBlocks.Keys.ToArray();
 
         if (_connect && ip != null) {
-            _networkingClient.Start(ip, 9050, "testKey");
+            _networkingClient.Start(ip, "testKey");
             return;
         }
 

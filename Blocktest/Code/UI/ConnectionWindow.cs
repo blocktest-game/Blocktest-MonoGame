@@ -1,3 +1,4 @@
+using System.Net;
 using Blocktest.Scenes;
 using Myra.Graphics2D;
 using Myra.Graphics2D.UI;
@@ -20,13 +21,13 @@ public class ConnectionWindow : Window {
         };
         windowGrid.Widgets.Add(label1);
 
-        TextBox textBox = new() {
-            Text = "127.0.0.1",
+        TextBox ipBox = new() {
+            Text = "127.0.0.1:9050",
             Padding = new Thickness(5),
             GridColumn = 1,
             GridRow = 0
         };
-        windowGrid.Widgets.Add(textBox);
+        windowGrid.Widgets.Add(ipBox);
 
         TextButton button = new() {
             Text = "Connect",
@@ -37,9 +38,16 @@ public class ConnectionWindow : Window {
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
 
-        button.Click += (_, _) => { game.SetScene(new GameScene(game, true, textBox.Text)); };
+        button.Click += (_, _) => {
+            if (!IPEndPoint.TryParse(ipBox.Text, out IPEndPoint? ip)) {
+                new DialogueWindow("Connect to server", "Invalid IP address.").ShowModal(Desktop);
+                return;
+            }
+            game.SetScene(new GameScene(game, true, ip));
+        };
         windowGrid.Widgets.Add(button);
 
+        Title = "Connect to server";
         Content = windowGrid;
     }
 }
