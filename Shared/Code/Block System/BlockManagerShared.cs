@@ -21,7 +21,7 @@ public abstract class BlockManagerShared {
         IDeserializer deserialize = new DeserializerBuilder().Build();
         Assembly assembly = typeof(BlockManagerShared).Assembly;
         string[] assemblyNames = assembly.GetManifestResourceNames();
-        var blockNames = assemblyNames.Where(x => x.StartsWith("Shared.Content.Blocks."));
+        var blockNames = assemblyNames.Where(x => x.StartsWith("Shared.Content.Blocks.")).Order();
 
         AllBlocks = new Dictionary<string, BlockShared>();
         foreach (string resourceName in blockNames) {

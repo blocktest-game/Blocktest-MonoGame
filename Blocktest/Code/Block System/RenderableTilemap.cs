@@ -30,7 +30,7 @@ public class RenderableTilemap {
 
 
         foreach (Vector2Int dir in Adjacencies) {
-            if (!_tilemap.TryGetTile(location + dir, out TileShared? adjacentTile)) {
+            if (!_tilemap.TryGetTile(location + dir, out TileShared? _)) {
                 continue;
             }
             _renderables[location.X + dir.X, location.Y + dir.Y].UpdateAdjacencies(location + dir, _tilemap);

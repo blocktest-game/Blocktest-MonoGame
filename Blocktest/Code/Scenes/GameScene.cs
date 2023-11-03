@@ -4,7 +4,9 @@ using Blocktest.Block_System;
 using Blocktest.Misc;
 using Blocktest.Networking;
 using Blocktest.Rendering;
+using Blocktest.UI;
 using Microsoft.Xna.Framework.Input;
+using Myra.Graphics2D.UI;
 using Shared.Code;
 using Shared.Code.Block_System;
 using Shared.Code.Packets;
@@ -23,12 +25,14 @@ public sealed class GameScene : IScene {
     private readonly SpriteBatch _spriteBatch;
 
     private readonly WorldState _worldState = new();
-    private int _blockSelected = 1; //ID of the block to place
+    public int BlockSelected = 1; //ID of the block to place
 
-    private bool _buildMode = true; //true for build, false for destroy
+    public bool BuildMode { get; private set; } = true; //true for build, false for destroy
 
     private KeyboardState _previousKeyboardState;
-
+    private readonly Desktop _gameDesktop;
+    private readonly GameUI _gameUi;
+    
     public GameScene(BlocktestGame game, bool doConnect, IPEndPoint? ip) {
         _connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
@@ -42,6 +46,9 @@ public sealed class GameScene : IScene {
 
         _blockStrings = BlockManagerShared.AllBlocks.Keys.ToArray();
 
+        _gameUi = new GameUI(this);
+        _gameDesktop = new Desktop { Root = _gameUi };
+        
         if (_connect && ip != null) {
             _networkingClient.Connect(ip);
             return;
@@ -80,13 +87,15 @@ public sealed class GameScene : IScene {
         _frameCounter.Update(deltaTime);
 
         _spriteBatch.End();
+        
+        _gameDesktop.Render();
     }
 
     public void EndScene() {
         _networkingClient.Stop();
     }
 
-    public void HandleInput() {
+    private void HandleInput() {
         if (!_game.IsActive) {
             return;
         }
@@ -102,16 +111,15 @@ public sealed class GameScene : IScene {
         //press E to toggle build/destroy
         if (currentKeyboardState.IsKeyDown(Keys.E) &&
             _previousKeyboardState.IsKeyUp(Keys.E)) {
-            _buildMode = !_buildMode;
+            BuildMode = !BuildMode;
         }
 
         //Q changes which block you have selected
         if (currentKeyboardState.IsKeyDown(Keys.Q) &&
             _previousKeyboardState.IsKeyUp(Keys.Q)) {
-            _blockSelected++;
-            if (_blockSelected >= BlockManagerShared.AllBlocks.Count) {
-                _blockSelected = 1;
-            }
+            
+            BlockSelected = (BlockSelected + 1) % BlockManagerShared.AllBlocks.Count;
+            _gameUi.BlockSelector.SelectedIndex = BlockSelected;
         }
 
         float moveValue = 2.5f;
@@ -160,12 +168,12 @@ public sealed class GameScene : IScene {
             Math.Clamp((int)mousePos.X / GlobalsShared.GridSize.X, 0, GlobalsShared.MaxX),
             Math.Clamp((int)mousePos.Y / GlobalsShared.GridSize.Y, 0, GlobalsShared.MaxY));
 
-        if (_buildMode) {
+        if (BuildMode) {
             TileChange testChange = new() {
                 TickNum = _networkingClient.LocalTickBuffer.CurrTick,
                 Position = tilePos,
                 Foreground = foreground,
-                BlockUid = _blockStrings[_blockSelected],
+                BlockUid = _blockStrings[BlockSelected],
                 SourceId = _networkingClient.Server?.RemoteId ?? 0
             };
 
@@ -218,5 +226,9 @@ public sealed class GameScene : IScene {
         int y = (_game.GraphicsDevice.Viewport.Height - height) / 2;
 
         return new Rectangle(x, y, width, height);
+    }
+    
+    public void SetBuildMode(bool buildMode) {
+        BuildMode = buildMode;
     }
 }

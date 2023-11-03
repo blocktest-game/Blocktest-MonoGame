@@ -17,11 +17,12 @@ internal sealed class WorldHandler {
     private readonly WorldState _worldState;
 
     private int _continueRun = 1;
-    private bool _continueWait = true;
-    private int _counter = 0;
-    private long _currentTicks = 0;
-    private TimeSpan _currentTime = TimeSpan.Zero;
-    private long _previousTicks = 0;
+
+#if DEBUG
+    private long _currentTicks;
+    private long _previousTicks;
+#endif
+
 
     public WorldHandler() {
         BlockManagerShared.Initialize();
@@ -43,23 +44,22 @@ internal sealed class WorldHandler {
     }
 
     private void Loop() {
-        Timer timer = new(Tick, _frameCounter, TimeSpan.Zero, _targetTime);
-        //System.Threading.Timer timer = new(Tick, _frameCounter, 16, 16);
+        var timer = new Timer(Tick, _frameCounter, TimeSpan.Zero, _targetTime);
+
         while (Interlocked.Exchange(ref _continueRun, 1) == 1) {
-            //Tick();
-            //WaitHandler();
             Thread.Sleep(1000);
         }
     }
 
     private void Tick(object? state) {
         lock (_locker) {
-            /*currentTicks = stopwatch.ElapsedTicks;
-            long test = currentTicks - previousTicks;
+            #if DEBUG
+            _currentTicks = _stopwatch.ElapsedTicks;
+            long test = _currentTicks - _previousTicks;
             Console.WriteLine("CurrentMilliseconds = " + test / 1000000);
-            Console.WriteLine("Current Tick = " + GlobalsServer.serverTickBuffer.currTick);
-            previousTicks = currentTicks;
-            counter++;*/
+            Console.WriteLine("Current Tick = " + _server.LocalTickBuffer.CurrTick);
+            _previousTicks = _currentTicks;
+            #endif
             _server.Update();
         }
     }
