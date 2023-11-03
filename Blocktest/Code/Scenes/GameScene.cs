@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using Myra.Graphics2D.UI;
 using Shared.Code;
 using Shared.Code.Block_System;
+using Shared.Code.Components;
 using Shared.Code.Packets;
 namespace Blocktest.Scenes;
 
@@ -21,18 +22,16 @@ public sealed class GameScene : IScene {
     private readonly RenderableTilemap _foregroundTilemapSprites;
     private readonly FrameCounter _frameCounter = new();
     private readonly BlocktestGame _game;
+    private readonly Desktop _gameDesktop;
+    private readonly GameUI _gameUi;
     private readonly Client _networkingClient;
     private readonly SpriteBatch _spriteBatch;
 
     private readonly WorldState _worldState = new();
-    public int BlockSelected = 1; //ID of the block to place
-
-    public bool BuildMode { get; private set; } = true; //true for build, false for destroy
 
     private KeyboardState _previousKeyboardState;
-    private readonly Desktop _gameDesktop;
-    private readonly GameUI _gameUi;
-    
+    public int BlockSelected = 1; //ID of the block to place
+
     public GameScene(BlocktestGame game, bool doConnect, IPEndPoint? ip) {
         _connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
@@ -48,15 +47,23 @@ public sealed class GameScene : IScene {
 
         _gameUi = new GameUI(this);
         _gameDesktop = new Desktop { Root = _gameUi };
-        
+
         if (_connect && ip != null) {
             _networkingClient.Connect(ip);
             return;
         }
 
+        //Add player to world in singleplayer
+        Transform newTransform = new(new Vector2Int(256, 128));
+        Renderable newRenderable = new(newTransform, Layer.Player, Drawable.ErrorDrawable, Color.Orange);
+        _worldState.PlayerPositions.Add(0, newTransform);
+        _camera.RenderedComponents.Add(newRenderable);
+
         WorldDownload testDownload = WorldDownload.Default();
         testDownload.Process(_worldState);
     }
+
+    public bool BuildMode { get; private set; } = true; //true for build, false for destroy
 
     public void Update(GameTime gameTime) {
         if (_connect) {
@@ -87,7 +94,7 @@ public sealed class GameScene : IScene {
         _frameCounter.Update(deltaTime);
 
         _spriteBatch.End();
-        
+
         _gameDesktop.Render();
     }
 
@@ -117,7 +124,7 @@ public sealed class GameScene : IScene {
         //Q changes which block you have selected
         if (currentKeyboardState.IsKeyDown(Keys.Q) &&
             _previousKeyboardState.IsKeyUp(Keys.Q)) {
-            
+
             BlockSelected = (BlockSelected + 1) % BlockManagerShared.AllBlocks.Count;
             _gameUi.BlockSelector.SelectedIndex = BlockSelected;
         }
@@ -227,7 +234,7 @@ public sealed class GameScene : IScene {
 
         return new Rectangle(x, y, width, height);
     }
-    
+
     public void SetBuildMode(bool buildMode) {
         BuildMode = buildMode;
     }
