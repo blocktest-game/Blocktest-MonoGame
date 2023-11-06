@@ -12,4 +12,10 @@
         <EmbeddedResource Include="blocks.schema.json"/>
         <EmbeddedResource Include="Content\**\*.*"/>
     </ItemGroup>
+    <ItemGroup>
+      <None Remove="content\blocks\Copper.yml" />
+      <None Remove="content\blocks\Gold.yml" />
+      <None Remove="content\blocks\Iron.yml" />
+      <None Remove="content\blocks\Silver.yml" />
+    </ItemGroup>
 </Project>
