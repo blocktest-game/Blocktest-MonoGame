@@ -1,6 +1,8 @@
+using Myra.Graphics2D;
+
 namespace Blocktest.Rendering;
 
-public sealed class Drawable {
+public sealed class Drawable : IImage {
     public readonly Rectangle Bounds;
     public readonly Texture2D Texture;
 
@@ -10,4 +12,12 @@ public sealed class Drawable {
                   throw new Exception($"Could not load drawable {fileName}, content manager not initialized.");
         Bounds = bounds ?? Texture.Bounds;
     }
+
+    public static Drawable ErrorDrawable { get; } = new(@"Graphics\Blocks\error");
+    
+    public void Draw(RenderContext context, Rectangle dest, Color color) {
+        context.Draw(Texture, dest, Bounds, color);
+    }
+
+    public Point Size => Bounds.Size;
 }

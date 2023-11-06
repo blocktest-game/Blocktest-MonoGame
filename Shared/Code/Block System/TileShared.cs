@@ -9,6 +9,8 @@ namespace Shared.Code.Block_System;
 ///     in the correlating Block classes.
 /// </summary>
 public class TileShared : INetSerializable {
+    public readonly Transform Transform;
+
     /// <summary>
     ///     Color of the tile.
     /// </summary>
@@ -18,8 +20,6 @@ public class TileShared : INetSerializable {
     ///     The type of block this tile is.
     /// </summary>
     public BlockShared SourceBlock;
-
-    public readonly Transform Transform;
 
     /// <summary>
     ///     Creates a <see cref="TileShared" />.

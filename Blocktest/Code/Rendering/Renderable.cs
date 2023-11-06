@@ -12,8 +12,8 @@ public enum Layer {
 public sealed class Renderable {
     public readonly Transform Transform;
     public Drawable? Appearance;
-    public Color RenderColor;
     public Layer Layer;
+    public Color RenderColor;
 
     public Renderable(Transform transform, Layer layer = Layer.Default, Drawable? appearance = null,
                       Color? renderColor = null) {

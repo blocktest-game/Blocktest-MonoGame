@@ -13,29 +13,27 @@ public sealed class TileChange : IPacket {
     public string BlockUid;
     public bool Foreground;
     public Vector2Int Position;
-    public ushort TickNum;
 
-    public ushort GetTickNum() => TickNum;
+    public ushort TickNum { get; init; }
 
-    public void Process() {
-        BuildSystem.PlaceBlockCell(BlockManagerShared.AllBlocks[BlockUid], Foreground, Position);
+    public PacketType GetPacketType() => PacketType.TileChange;
+
+    public int SourceId { get; init; }
+
+    public void Process(WorldState worldState) {
+        TilemapShared tilemap = Foreground ? worldState.Foreground : worldState.Background;
+        tilemap.SetBlock(Position, BlockUid);
     }
 
     public void Serialize(NetDataWriter writer) {
-        writer.Put(TickNum);
-        writer.Put(Position.X);
-        writer.Put(Position.Y);
+        writer.Put(Position);
         writer.Put(Foreground);
         writer.Put(BlockUid);
     }
 
     public void Deserialize(NetDataReader reader) {
-        TickNum = reader.GetUShort();
-        int x = reader.GetInt();
-        int y = reader.GetInt();
+        Position = reader.Get<Vector2Int>();
         Foreground = reader.GetBool();
         BlockUid = reader.GetString();
-
-        Position = new Vector2Int(x, y);
     }
 }

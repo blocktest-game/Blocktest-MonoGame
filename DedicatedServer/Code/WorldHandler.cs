@@ -14,57 +14,60 @@ internal sealed class WorldHandler {
     private readonly Stopwatch _stopwatch;
     private readonly TimeSpan _targetTime = TimeSpan.FromMilliseconds(16);
 
+    private readonly WorldState _worldState;
+
     private int _continueRun = 1;
-    private bool _continueWait = true;
-    private int _counter = 0;
-    private long _currentTicks = 0;
-    private TimeSpan _currentTime = TimeSpan.Zero;
-    private long _previousTicks = 0;
+
+#if DEBUG
+    private long _currentTicks;
+    private long _previousTicks;
+#endif
+
 
     public WorldHandler() {
         BlockManagerShared.Initialize();
-        GlobalsShared.BackgroundTilemap = new TilemapShared(GlobalsShared.MaxX, GlobalsShared.MaxY, true);
-        GlobalsShared.ForegroundTilemap = new TilemapShared(GlobalsShared.MaxX, GlobalsShared.MaxY, false);
-        
-        var testDownload = WorldDownload.Default();
-        testDownload.Process();
+        _worldState = new WorldState();
 
-        _server = new Server();
+        WorldDownload testDownload = WorldDownload.Default();
+        testDownload.Process(_worldState);
+
+        _server = new Server(_worldState);
         _stopwatch = new Stopwatch();
     }
 
     public void Run() {
         lock (_locker) {
-            _server.Start();
+            _server.StartServer(9050);
         }
         _stopwatch.Start();
         Loop();
     }
 
     private void Loop() {
-        Timer timer = new(Tick, _frameCounter, TimeSpan.Zero, _targetTime);
-        //System.Threading.Timer timer = new(Tick, _frameCounter, 16, 16);
+        var timer = new Timer(Tick, _frameCounter, TimeSpan.Zero, _targetTime);
+
         while (Interlocked.Exchange(ref _continueRun, 1) == 1) {
-            //Tick();
-            //WaitHandler();
             Thread.Sleep(1000);
         }
     }
 
     private void Tick(object? state) {
         lock (_locker) {
-            /*currentTicks = stopwatch.ElapsedTicks;
-            long test = currentTicks - previousTicks;
+            #if DEBUG
+            _currentTicks = _stopwatch.ElapsedTicks;
+            long test = _currentTicks - _previousTicks;
             Console.WriteLine("CurrentMilliseconds = " + test / 1000000);
-            Console.WriteLine("Current Tick = " + GlobalsServer.serverTickBuffer.currTick);
-            previousTicks = currentTicks;
-            counter++;*/
+            Console.WriteLine("Current Tick = " + _server.LocalTickBuffer.CurrTick);
+            _previousTicks = _currentTicks;
+            #endif
             _server.Update();
-            _server.ServerTickBuffer.IncrCurrTick();
         }
     }
 
     public void Stop() {
         Interlocked.Exchange(ref _continueRun, 0);
+        lock (_locker) {
+            _server.Stop();
+        }
     }
 }

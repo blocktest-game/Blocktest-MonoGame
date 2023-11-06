@@ -4,18 +4,24 @@ namespace Shared.Code.Packets;
 public enum PacketType : byte {
     WorldDownload,
     BreakTile,
-    TileChange
+    TileChange,
+    MovePlayer,
+    PlayerList,
+    PeerEvent
 }
 
 public interface IPacket : INetSerializable {
+    public int SourceId { get; init; }
+
+    public ushort TickNum { get; init; }
+
     /// <summary>
     ///     Handles all processing for the packet.
     /// </summary>
-    public void Process();
+    public void Process(WorldState worldState);
 
     /// <summary>
-    ///     Returns the tick number that the simulation must rewind to.
+    ///     Returns the type of packet.
     /// </summary>
-    /// <returns>The number of the tick this packet applies to.</returns>
-    public ushort GetTickNum();
+    public PacketType GetPacketType();
 }

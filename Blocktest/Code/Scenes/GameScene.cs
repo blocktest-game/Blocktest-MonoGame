@@ -1,57 +1,112 @@
 using System.Linq;
+using System.Net;
 using Blocktest.Block_System;
 using Blocktest.Misc;
 using Blocktest.Networking;
 using Blocktest.Rendering;
+using Blocktest.UI;
 using Microsoft.Xna.Framework.Input;
+using Myra.Graphics2D.UI;
 using Shared.Code;
 using Shared.Code.Block_System;
+using Shared.Code.Components;
 using Shared.Code.Packets;
 namespace Blocktest.Scenes;
 
 public sealed class GameScene : IScene {
-    private readonly bool _connect;
-    private readonly FrameCounter _frameCounter = new();
-    private readonly BlocktestGame _game;
-    private readonly Client _networkingClient;
-    private readonly SpriteBatch _spriteBatch;
-    private int _blockSelected = 1; //ID of the block to place
-    private string[] _blockStrings;
-
     private readonly RenderableTilemap _backgroundTilemapSprites;
-    private readonly RenderableTilemap _foregroundTilemapSprites;
-    
-    private bool _buildMode = true; //true for build, false for destroy
-
-    private KeyboardState _previousKeyboardState;
+    private readonly string[] _blockStrings;
 
     private readonly Camera _camera;
+    private readonly bool _connect;
+    private readonly RenderableTilemap _foregroundTilemapSprites;
+    private readonly FrameCounter _frameCounter = new();
+    private readonly BlocktestGame _game;
+    private readonly Desktop _gameDesktop;
+    private readonly GameUI _gameUi;
+    private readonly Client _networkingClient;
+    private readonly SpriteBatch _spriteBatch;
 
-    public GameScene(BlocktestGame game, bool doConnect, string? ip) {
+    private readonly WorldState _worldState = new();
+
+    private KeyboardState _previousKeyboardState;
+    public int BlockSelected = 1; //ID of the block to place
+
+    public GameScene(BlocktestGame game, bool doConnect, IPEndPoint? ip) {
         _connect = doConnect;
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
 
         _camera = new Camera(Vector2.Zero, new Vector2(512, 256), game.GraphicsDevice);
 
-        GlobalsShared.BackgroundTilemap = new TilemapShared(GlobalsShared.MaxX, GlobalsShared.MaxY, true);
-        GlobalsShared.ForegroundTilemap = new TilemapShared(GlobalsShared.MaxX, GlobalsShared.MaxY, false);
-        _backgroundTilemapSprites = new RenderableTilemap(GlobalsShared.BackgroundTilemap, _camera);
-        _foregroundTilemapSprites = new RenderableTilemap(GlobalsShared.ForegroundTilemap, _camera);
-        _networkingClient = new Client();
-        
+        _backgroundTilemapSprites = new RenderableTilemap(_worldState.Foreground, _camera);
+        _foregroundTilemapSprites = new RenderableTilemap(_worldState.Background, _camera);
+        _networkingClient = new Client(_worldState, _camera, game);
+
         _blockStrings = BlockManagerShared.AllBlocks.Keys.ToArray();
-        
+
+        _gameUi = new GameUI(this);
+        _gameDesktop = new Desktop { Root = _gameUi };
+
         if (_connect && ip != null) {
-            _networkingClient.Start(ip, 9050, "testKey");
+            _networkingClient.Connect(ip);
             return;
         }
 
-        var testDownload = WorldDownload.Default();
-        testDownload.Process();
+        //Add player to world in singleplayer
+        Transform newTransform = new(new Vector2Int(256, 128));
+        Renderable newRenderable = new(newTransform, Layer.Player, Drawable.ErrorDrawable, Color.Orange);
+        _worldState.PlayerPositions.Add(0, newTransform);
+        _camera.RenderedComponents.Add(newRenderable);
+
+        WorldDownload testDownload = WorldDownload.Default();
+        testDownload.Process(_worldState);
     }
 
+    public bool BuildMode { get; private set; } = true; //true for build, false for destroy
+
     public void Update(GameTime gameTime) {
+        if (_connect) {
+            _networkingClient.Update();
+        }
+
+        HandleInput();
+
+        _networkingClient.LocalTickBuffer.IncrCurrTick(_worldState);
+    }
+
+    public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice) {
+        graphicsDevice.Clear(Color.CornflowerBlue);
+        _camera.Draw(graphicsDevice, _spriteBatch);
+
+        const bool pixelPerfect = false;
+
+        Rectangle destinationRectangle = pixelPerfect ? GetPixelPerfectRect() : GetFitRect();
+        _camera.RenderLocation = destinationRectangle;
+
+        graphicsDevice.Clear(Color.Black);
+
+        _spriteBatch.Begin(samplerState: pixelPerfect ? SamplerState.PointClamp : null);
+        _spriteBatch.Draw(_camera.RenderTarget, destinationRectangle, Color.White);
+
+        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        _frameCounter.Update(deltaTime);
+
+        _spriteBatch.End();
+
+        _gameDesktop.Render();
+    }
+
+    public void EndScene() {
+        _networkingClient.Stop();
+    }
+
+    private void HandleInput() {
+        if (!_game.IsActive) {
+            return;
+        }
+
         MouseState currentMouseState = Mouse.GetState();
         KeyboardState currentKeyboardState = Keyboard.GetState();
 
@@ -60,29 +115,18 @@ public sealed class GameScene : IScene {
             _game.Exit();
         }
 
-        if (_connect) {
-            _networkingClient.Update();
-        }
-        
-        _networkingClient.ClientTickBuffer.IncrCurrTick();
-
-        if (!_game.IsActive) {
-            return;
-        }
-
         //press E to toggle build/destroy
         if (currentKeyboardState.IsKeyDown(Keys.E) &&
             _previousKeyboardState.IsKeyUp(Keys.E)) {
-            _buildMode = !_buildMode;
+            BuildMode = !BuildMode;
         }
 
         //Q changes which block you have selected
         if (currentKeyboardState.IsKeyDown(Keys.Q) &&
             _previousKeyboardState.IsKeyUp(Keys.Q)) {
-            _blockSelected++;
-            if (_blockSelected >= BlockManagerShared.AllBlocks.Count) {
-                _blockSelected = 1;
-            }
+
+            BlockSelected = (BlockSelected + 1) % BlockManagerShared.AllBlocks.Count;
+            _gameUi.BlockSelector.SelectedIndex = BlockSelected;
         }
 
         float moveValue = 2.5f;
@@ -90,18 +134,33 @@ public sealed class GameScene : IScene {
             moveValue *= 4;
         }
 
+        Vector2 moveVector = Vector2.Zero;
         if (currentKeyboardState.IsKeyDown(Keys.A)) {
-            _camera.Position.X -= moveValue;
+            moveVector.X -= moveValue;
         } else if (currentKeyboardState.IsKeyDown(Keys.D)) {
-            _camera.Position.X += moveValue;
+            moveVector.X += moveValue;
         }
 
         if (currentKeyboardState.IsKeyDown(Keys.W)) {
-            _camera.Position.Y += moveValue;
+            moveVector.Y += moveValue;
         } else if (currentKeyboardState.IsKeyDown(Keys.S)) {
-            _camera.Position.Y -= moveValue;
+            moveVector.Y -= moveValue;
         }
-        
+
+        if (moveVector != Vector2.Zero) {
+            _camera.Position += moveVector;
+
+            MovePlayer movementPacket = new() {
+                TickNum = _networkingClient.LocalTickBuffer.CurrTick,
+                Position = (Vector2Int)_camera.Position,
+                SourceId = _networkingClient.Server?.RemoteId ?? 0
+            };
+            _networkingClient.LocalTickBuffer.AddPacket(movementPacket);
+            if (_connect) {
+                _networkingClient.SendPacket(movementPacket);
+            }
+        }
+
         _previousKeyboardState = currentKeyboardState;
 
         if (currentMouseState.LeftButton != ButtonState.Pressed &&
@@ -112,56 +171,36 @@ public sealed class GameScene : IScene {
 
         bool foreground = currentMouseState.LeftButton == ButtonState.Pressed;
         Vector2 mousePos = _camera.CameraToWorldPos(currentMouseState.Position.ToVector2());
-        Vector2Int tilePos = new Vector2Int(
+        Vector2Int tilePos = new(
             Math.Clamp((int)mousePos.X / GlobalsShared.GridSize.X, 0, GlobalsShared.MaxX),
             Math.Clamp((int)mousePos.Y / GlobalsShared.GridSize.Y, 0, GlobalsShared.MaxY));
 
-        if (_buildMode) {
+        if (BuildMode) {
             TileChange testChange = new() {
-                TickNum = _networkingClient.ClientTickBuffer.CurrTick,
+                TickNum = _networkingClient.LocalTickBuffer.CurrTick,
                 Position = tilePos,
                 Foreground = foreground,
-                BlockUid = _blockStrings[_blockSelected]
+                BlockUid = _blockStrings[BlockSelected],
+                SourceId = _networkingClient.Server?.RemoteId ?? 0
             };
 
-            _networkingClient.ClientTickBuffer.AddPacket(testChange);
+            _networkingClient.LocalTickBuffer.AddPacket(testChange);
             if (_connect) {
-                _networkingClient.SendTileChange(testChange);
+                _networkingClient.SendPacket(testChange);
             }
         } else {
             BreakTile testBreak = new() {
-                TickNum = _networkingClient.ClientTickBuffer.CurrTick,
+                TickNum = _networkingClient.LocalTickBuffer.CurrTick,
                 Position = tilePos,
-                Foreground = foreground
+                Foreground = foreground,
+                SourceId = _networkingClient.Server?.RemoteId ?? 0
             };
 
-            _networkingClient.ClientTickBuffer.AddPacket(testBreak);
+            _networkingClient.LocalTickBuffer.AddPacket(testBreak);
             if (_connect) {
-                _networkingClient.SendBreakTile(testBreak);
+                _networkingClient.SendPacket(testBreak);
             }
         }
-    }
-
-    public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice) {
-        graphicsDevice.Clear(Color.CornflowerBlue);
-
-        _camera.Draw(graphicsDevice, _spriteBatch);
-
-        const bool pixelPerfect = false;
-
-        Rectangle destinationRectangle = pixelPerfect ? GetPixelPerfectRect() : GetFitRect();
-        _camera.RenderLocation = destinationRectangle;
-
-        graphicsDevice.Clear(Color.DarkGray);
-
-        _spriteBatch.Begin(samplerState: pixelPerfect ? SamplerState.PointClamp : null);
-        _spriteBatch.Draw(_camera.RenderTarget, destinationRectangle, Color.White);
-        
-        float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-        _frameCounter.Update(deltaTime);
-
-        _spriteBatch.End();
     }
 
     private Rectangle GetPixelPerfectRect() {
@@ -195,8 +234,8 @@ public sealed class GameScene : IScene {
 
         return new Rectangle(x, y, width, height);
     }
-    
-    public void EndScene() {
-        _networkingClient.Stop();
+
+    public void SetBuildMode(bool buildMode) {
+        BuildMode = buildMode;
     }
 }

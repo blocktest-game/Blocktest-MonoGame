@@ -3,10 +3,10 @@ using Microsoft.Xna.Framework;
 namespace Shared.Code.Components;
 
 public sealed class Transform : INetSerializable {
+    public Vector2Int Origin;
     public Vector2Int Position;
     public float Rotation;
     public Vector2 Scale;
-    public Vector2Int Origin;
 
     public Transform(Vector2Int position, Vector2? scale = null, Vector2Int? origin = null, float rotation = 0) {
         Position = position;
