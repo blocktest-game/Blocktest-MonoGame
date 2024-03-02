@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="LiteNetLib" Version="1.1.0"/>
+        <PackageReference Include="LiteNetLib" Version="1.2.0" />
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303"/>
-        <PackageReference Include="YamlDotNet" Version="13.7.0"/>
+        <PackageReference Include="YamlDotNet" Version="15.1.2" />
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="blocks.schema.json"/>

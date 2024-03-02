@@ -1,33 +1,33 @@
 {
   "version": 1,
   "dependencies": {
-    "net7.0": {
+    "net8.0": {
       "LiteNetLib": {
         "type": "Direct",
-        "requested": "[1.1.0, )",
-        "resolved": "1.1.0",
-        "contentHash": "GavpDPs65Y4vvAeECbApWXynTOn7f7IVIHmRKpPmzLWSf3vllcxHN4XPN+Tu3YFqIwOYUdgI8fhkCMhn4FLQCw=="
+        "requested": "[1.2.0, )",
+        "resolved": "1.2.0",
+        "contentHash": "N4pJ6Drzdt7M7Ok//J1YB1t2jBNQikKud3OEgllUwK2qcu6elLyvb+vgOy4WJy9xbyobYg7oav1g5vuoaDHLuw=="
       },
       "MonoGame.Content.Builder.Task": {
         "type": "Direct",
-        "requested": "[3.8.*, )",
+        "requested": "[3.8.1.303, )",
         "resolved": "3.8.1.303",
         "contentHash": "9Ilzzje62LhWElbPNEl7vh7XsRSbze+lvCJdZtTZUGu48FRgvYN6THURwIB9PN98EI33/Wnf6iuShNUtD7hL4Q=="
       },
       "MonoGame.Framework.DesktopGL": {
         "type": "Direct",
-        "requested": "[3.8.*, )",
+        "requested": "[3.8.1.303, )",
         "resolved": "3.8.1.303",
         "contentHash": "eGYhqn0n1olk8MNYeE9EuBmoNNECN1T18rPMaQpkzsEQ0H3nVyFPXC+uCo78v5pi5juQpJ3PSFnSkjzZJ1U58A=="
       },
       "Myra": {
         "type": "Direct",
-        "requested": "[1.5.0, )",
-        "resolved": "1.5.0",
-        "contentHash": "0UlrR+BEwFMzC1F/u3Fl0oyCldkZvG7xgADUvMeqIxlEHUK1InA1zb902eixAR32M7dSzqd/1GCno8blfvQGaQ==",
+        "requested": "[1.5.5, )",
+        "resolved": "1.5.5",
+        "contentHash": "Iv6JnC3QnpNWXcF10JZRxthm8WfMCh0Iha58ja81MW9MXg8/Oo3WrBjFOt3ZLVzlhkrVbzCGjEpFlJELiyDq1A==",
         "dependencies": {
-          "FontStashSharp.MonoGame": "1.3.0",
-          "XNAssets.MonoGame": "0.6.7",
+          "FontStashSharp.MonoGame": "1.3.6",
+          "XNAssets.MonoGame": "0.7.1",
           "info.lundin.math.dll": "1.2.6"
         }
       },
@@ -39,8 +39,8 @@
       },
       "AssetManagementBase": {
         "type": "Transitive",
-        "resolved": "0.6.6",
-        "contentHash": "iIMu6/5Zcxr07hS58j2jK8RhyY6cZyqTl3ouaFc1YjnQRKaoGSPZdaO3ysok8JDO18FjS6d+/2pyuNsScn4l7A=="
+        "resolved": "0.6.7",
+        "contentHash": "jIaUsU6wazL0S6O0bgIx8Xn2D8rwaSJFb7WlNvKQbEwrx+h6ABl1xxcFKfoMVzNB7CV/+BhEjmeNdKmf3Wm9Ag=="
       },
       "Cyotek.Drawing.BitmapFont": {
         "type": "Transitive",
@@ -49,32 +49,32 @@
       },
       "DdsKtxXna.MonoGame": {
         "type": "Transitive",
-        "resolved": "0.4.2",
-        "contentHash": "e350xVdu1c4Ix6h5q8EqmDqUfol9lPpkw5geq1yuxfjf96eXQOE90ejxE/dtqbrMf7smDZ2hVPfUsAQVkadMuw=="
+        "resolved": "0.4.4",
+        "contentHash": "fafUrTw865cOMn3YwXFPjFPNdhlEBeSCJSjxZB68j9WKp+Mq5s53SaoeRbn8Bq+K8zy5x1KJdOT4/6wfFYpIDQ=="
       },
       "FontStashSharp.Base": {
         "type": "Transitive",
-        "resolved": "1.1.8",
-        "contentHash": "4EthXSV0SR1fhL+Bab3qc5b7vZy090FI8zJbb2p1vOjXKwCTAgaX2F9HPKD6ywEou0VdNWl1Wy3d8X+jEEcLBg=="
+        "resolved": "1.1.9",
+        "contentHash": "/AjkOcPNijs8vyNgcCj3FfBJbVWmsSH744hqkhLfBt8qspDz/tEoD+U09my5u9eRBX6zX+RLQ/gdCvwy+ZBOtg=="
       },
       "FontStashSharp.MonoGame": {
         "type": "Transitive",
-        "resolved": "1.3.0",
-        "contentHash": "8hB/cYyHmeEXL6sn5KIb0PDdTKdiDTM9euvBp5E4b4MlnheHxBSSRp9qog//5kQKUlwVHFkjf6V3iACP2KvZyg==",
+        "resolved": "1.3.6",
+        "contentHash": "Oxu3nX8MoyNvS4bCfz4ntewdQkgsoFfPhPMRnUToLeAZh34yvfDJ5l4mxRbzF9p5/Dx49k66lUhfiNR6CbGh4w==",
         "dependencies": {
           "Cyotek.Drawing.BitmapFont": "2.0.4",
-          "FontStashSharp.Base": "1.1.8",
-          "FontStashSharp.Rasterizers.StbTrueTypeSharp": "1.1.8",
+          "FontStashSharp.Base": "1.1.9",
+          "FontStashSharp.Rasterizers.StbTrueTypeSharp": "1.1.9",
           "StbImageSharp": "2.27.13"
         }
       },
       "FontStashSharp.Rasterizers.StbTrueTypeSharp": {
         "type": "Transitive",
-        "resolved": "1.1.8",
-        "contentHash": "QtO7CQ41xa2zbbBagNVtUdNz2rankAFDDH1g9rkDqSkvqb6/2/rJG950nHmSY+j6rFWxcbOYzkZtB9OEwyHhAw==",
+        "resolved": "1.1.9",
+        "contentHash": "yi5iuTERem46uyHC5p+jRi3Jh8dKWzgNWLqcvHciGlyVHD1cWFdERgnxshZU4xWB2hRGnogxaCudCirbMpg4eQ==",
         "dependencies": {
-          "FontStashSharp.Base": "1.1.8",
-          "StbTrueTypeSharp": "1.26.11"
+          "FontStashSharp.Base": "1.1.9",
+          "StbTrueTypeSharp": "1.26.12"
         }
       },
       "info.lundin.math.dll": {
@@ -89,31 +89,31 @@
       },
       "StbTrueTypeSharp": {
         "type": "Transitive",
-        "resolved": "1.26.11",
-        "contentHash": "3AFGjLBGUnUGMEMNMiFrHdsG7bLk/PIJqMgxUN57Wbv0OPTYQqHHG8O0W1bOArcc+/xDsCMHiK5CRCzw8F/2kg=="
+        "resolved": "1.26.12",
+        "contentHash": "hCc6/OsfcPa5VsLECcEU2m78WOshBrKwK42nAodSm9Z5wH68f7n66SoiRLCdGCkDaqbWz2TlX4zYHIjogj1HJA=="
       },
       "XNAssets.MonoGame": {
         "type": "Transitive",
-        "resolved": "0.6.7",
-        "contentHash": "bRO+Obkw5w1OL4UkarTokvtlCAwSZGyfz0FjJtwhbnvspz4dhLQZcBMlSnORm4dsvyM2zKdqa8hVdptQ1qf/CQ==",
+        "resolved": "0.7.1",
+        "contentHash": "bhbw4Cf902F+U5Q9LThTWwp9t/wp9hS7woZCCy05iLMCAu8Ltpu+x/rJ/C6/Q7Eyf2CkHseZ4msrOeIlMTTXcQ==",
         "dependencies": {
-          "AssetManagementBase": "0.6.6",
+          "AssetManagementBase": "0.6.7",
           "Cyotek.Drawing.BitmapFont": "2.0.4",
-          "DdsKtxXna.MonoGame": "0.4.2",
+          "DdsKtxXna.MonoGame": "0.4.4",
           "StbImageSharp": "2.27.13"
         }
       },
       "YamlDotNet": {
         "type": "Transitive",
-        "resolved": "13.7.0",
-        "contentHash": "RKkoQSCyk/94N20SL3U15hWAqBVXHu+59upcPi8R2uhrcAalyVa4Y/vYdXQ7MXQ71Lut//DH0tLcYByAkGmXhA=="
+        "resolved": "15.1.2",
+        "contentHash": "qeX0XhzOIcQEvnI5JxnPaIwcINwyY4Qy/LXhSfsdHkFrl9F41AT52UFfy2nIE7kgrhMg+cP7xuS+GtPJhmHmTA=="
       },
       "shared": {
         "type": "Project",
         "dependencies": {
-          "LiteNetLib": "[1.1.0, )",
+          "LiteNetLib": "[1.2.0, )",
           "MonoGame.Framework.DesktopGL": "[3.8.1.303, )",
-          "YamlDotNet": "[13.7.0, )"
+          "YamlDotNet": "[15.1.2, )"
         }
       }
     }

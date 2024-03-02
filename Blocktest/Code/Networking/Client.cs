@@ -25,7 +25,7 @@ public sealed class Client : NetworkInterface {
     }
 
     private void PeerConnected(NetPeer peer) {
-        Console.WriteLine($"Connected to server {peer.EndPoint} as {peer.RemoteId}");
+        Console.WriteLine($"Connected to server {peer.Address}:{peer.Port} as {peer.RemoteId}");
 
         Transform newTransform = new(new Vector2Int(256, 128));
         Renderable newRenderable = new(newTransform, Layer.Player, Drawable.ErrorDrawable, Color.Orange);
