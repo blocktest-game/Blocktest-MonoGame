@@ -28,7 +28,7 @@ public sealed class Client : NetworkInterface {
         Console.WriteLine($"Connected to server {peer.Address}:{peer.Port} as {peer.RemoteId}");
 
         Transform newTransform = new(new Vector2Int(256, 128));
-        Renderable newRenderable = new(newTransform, Layer.Player, Drawable.ErrorDrawable, Color.Orange);
+        Renderable newRenderable = new(newTransform, Layer.Player, Drawable.PlaceholderDrawable);
         LocalWorldState.PlayerPositions.Add(peer.RemoteId, newTransform);
         _playerRenderables.Add(peer.RemoteId, newRenderable);
         _camera.RenderedComponents.Add(newRenderable);
@@ -96,7 +96,7 @@ public sealed class Client : NetworkInterface {
                 Console.WriteLine("New player connected");
 
                 Transform newTransform = new(new Vector2Int(256, 128));
-                Renderable newRenderable = new(newTransform, Layer.Player, Drawable.ErrorDrawable, Color.Orange);
+                Renderable newRenderable = new(newTransform, Layer.Player, Drawable.PlaceholderDrawable);
                 LocalWorldState.PlayerPositions.Add(peerEvent.SourceId, newTransform);
                 _playerRenderables.Add(peerEvent.SourceId, newRenderable);
                 _camera.RenderedComponents.Add(newRenderable);

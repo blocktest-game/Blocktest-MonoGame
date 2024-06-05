@@ -55,7 +55,7 @@ public sealed class GameScene : IScene {
 
         //Add player to world in singleplayer
         Transform newTransform = new(new Vector2Int(256, 128));
-        Renderable newRenderable = new(newTransform, Layer.Player, Drawable.ErrorDrawable, Color.Orange);
+        Renderable newRenderable = new(newTransform, Layer.Player, Drawable.PlaceholderDrawable);
         _worldState.PlayerPositions.Add(0, newTransform);
         _camera.RenderedComponents.Add(newRenderable);
 
