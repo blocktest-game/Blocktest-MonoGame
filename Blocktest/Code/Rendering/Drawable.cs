@@ -14,7 +14,8 @@ public sealed class Drawable : IImage {
     }
 
     public static Drawable ErrorDrawable { get; } = new(@"Graphics\Blocks\error");
-    
+    public static Drawable PlaceholderDrawable { get; } = new(@"Graphics\Player\placeholder-base");
+
     public void Draw(RenderContext context, Rectangle dest, Color color) {
         context.Draw(Texture, dest, Bounds, color);
     }
