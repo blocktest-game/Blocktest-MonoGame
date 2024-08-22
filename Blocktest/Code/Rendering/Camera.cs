@@ -5,7 +5,7 @@ public sealed class Camera {
     private readonly Color _backgroundColor;
     private readonly Vector2 _size;
 
-    public readonly List<Renderable> RenderedComponents = new();
+    public readonly HashSet<Renderable> RenderedComponents = [];
     public readonly RenderTarget2D RenderTarget;
     public Vector2 Position;
 
@@ -23,7 +23,7 @@ public sealed class Camera {
         graphics.SetRenderTarget(RenderTarget);
         graphics.Clear(_backgroundColor);
 
-        spriteBatch.Begin();
+        spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend, SamplerState.PointClamp);
 
         foreach (Renderable component in RenderedComponents) {
             if (component.Appearance == null) {

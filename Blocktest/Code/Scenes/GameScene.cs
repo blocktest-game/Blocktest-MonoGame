@@ -37,7 +37,7 @@ public sealed class GameScene : IScene {
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
 
-        _camera = new Camera(Vector2.Zero, new Vector2(512, 256), game.GraphicsDevice);
+        _camera = new Camera(Vector2.Zero, new Vector2(640, 360), game.GraphicsDevice);
 
         _backgroundTilemapSprites = new RenderableTilemap(_worldState.Foreground, _camera);
         _foregroundTilemapSprites = new RenderableTilemap(_worldState.Background, _camera);
@@ -79,14 +79,14 @@ public sealed class GameScene : IScene {
         graphicsDevice.Clear(Color.CornflowerBlue);
         _camera.Draw(graphicsDevice, _spriteBatch);
 
-        const bool pixelPerfect = false;
+        const bool pixelPerfect = true;
 
         Rectangle destinationRectangle = pixelPerfect ? GetPixelPerfectRect() : GetFitRect();
         _camera.RenderLocation = destinationRectangle;
 
         graphicsDevice.Clear(Color.Black);
 
-        _spriteBatch.Begin(samplerState: pixelPerfect ? SamplerState.PointClamp : null);
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
         _spriteBatch.Draw(_camera.RenderTarget, destinationRectangle, Color.White);
 
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -165,7 +165,8 @@ public sealed class GameScene : IScene {
 
         if (currentMouseState.LeftButton != ButtonState.Pressed &&
             currentMouseState.RightButton != ButtonState.Pressed ||
-            !_camera.RenderLocation.Contains(currentMouseState.Position)) {
+            !_camera.RenderLocation.Contains(currentMouseState.Position) ||
+            _gameDesktop.IsMouseOverGUI) {
             return;
         }
 

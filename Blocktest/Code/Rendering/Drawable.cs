@@ -21,4 +21,8 @@ public sealed class Drawable : IImage {
     }
 
     public Point Size => Bounds.Size;
+
+    public override int GetHashCode() {
+        return HashCode.Combine(Bounds, Texture);
+    }
 }
