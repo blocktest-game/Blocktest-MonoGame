@@ -42,12 +42,10 @@ jobs:
         dotnet:
           - 8.x
     steps:
-      - uses: actions/checkout@v3
-        with:
-          lfs: true
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
             ${{ matrix.dotnet }}
