@@ -42,7 +42,7 @@ jobs:
         uses: proudust/gh-describe@v2
 
       - name: Build
-        run: dotnet publish ${{ matrix.projectPath }} --configuration Release --runtime ${{ matrix.targetPlatform }} -p:PublishReadyToRun=false -p:TieredCompilation=false -p:PublishSingleFile=true -p:Version=${{ desc.outputs.describe }} --self-contained false --output ./Build/${{ matrix.targetPlatform }}
+        run: dotnet publish ${{ matrix.projectPath }} --configuration Release --runtime ${{ matrix.targetPlatform }} -p:PublishReadyToRun=false -p:TieredCompilation=false -p:PublishSingleFile=true -p:Version=${{ steps.desc.outputs.describe }} --self-contained false --output ./Build/${{ matrix.targetPlatform }}
 
       - name: Zip build
         run: |
