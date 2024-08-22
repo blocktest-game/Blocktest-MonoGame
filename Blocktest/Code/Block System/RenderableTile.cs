@@ -9,7 +9,8 @@ public class RenderableTile : TileShared {
     public RenderableTile(TileShared tile, bool background) : base(tile.SourceBlock,
         tile.Transform.Position / GlobalsShared.GridSize) {
         Renderable = new Renderable(Transform, background ? Layer.BackgroundBlocks : Layer.ForegroundBlocks,
-            BlockSpritesManager.AllBlocksSprites[tile.SourceBlock.BlockUid].BlockSprite, tile.Color);
+            BlockSpritesManager.AllBlocksSprites[tile.SourceBlock.BlockUid].BlockSprite,
+            background ? Color.Gray : Color.White);
     }
 
     /// <summary>
