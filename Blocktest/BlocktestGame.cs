@@ -33,6 +33,10 @@ public sealed class BlocktestGame : Game {
 
     /// <inheritdoc />
     protected override void Initialize() {
+        _graphics.PreferredBackBufferHeight = 720;
+        _graphics.PreferredBackBufferWidth = 1280;
+        _graphics.ApplyChanges();
+        
         BlockManagerShared.Initialize();
         base.Initialize();
     }

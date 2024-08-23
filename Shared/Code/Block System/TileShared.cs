@@ -12,11 +12,6 @@ public class TileShared : INetSerializable {
     public readonly Transform Transform;
 
     /// <summary>
-    ///     Color of the tile.
-    /// </summary>
-    public Color Color = Color.White;
-
-    /// <summary>
     ///     The type of block this tile is.
     /// </summary>
     public BlockShared SourceBlock;
@@ -33,15 +28,11 @@ public class TileShared : INetSerializable {
     }
 
     public void Serialize(NetDataWriter writer) {
-        writer.Put(Color.R);
-        writer.Put(Color.G);
-        writer.Put(Color.B);
         writer.Put(Transform);
         writer.Put(SourceBlock.BlockUid);
     }
 
     public void Deserialize(NetDataReader reader) {
-        Color = new Color(reader.GetByte(), reader.GetByte(), reader.GetByte());
         Transform.Deserialize(reader);
         SourceBlock = BlockManagerShared.AllBlocks[reader.GetString()];
     }
