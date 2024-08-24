@@ -3,9 +3,9 @@ namespace Blocktest.Rendering;
 
 public enum Layer {
     Top = 0,
-    Player = 1,
+    Player = 3,
     Default = 2,
-    ForegroundBlocks = 3,
+    ForegroundBlocks = 1,
     BackgroundBlocks = 4
 }
 

@@ -42,7 +42,7 @@ public sealed class GameScene : IScene {
         _game = game;
 
         _cameraPosition = Vector2.Zero;
-        _camera = new Camera(Vector2.Zero, new Vector2(640, 360), game.GraphicsDevice);
+        _camera = new Camera(_cameraPosition, new Vector2(640, 360), game.GraphicsDevice);
 
         _backgroundTilemapSprites = new RenderableTilemap(_worldState.Foreground, _camera);
         _foregroundTilemapSprites = new RenderableTilemap(_worldState.Background, _camera);
