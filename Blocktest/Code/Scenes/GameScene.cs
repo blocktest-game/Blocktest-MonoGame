@@ -41,12 +41,8 @@ public sealed class GameScene : IScene {
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
 
-<<<<<<< HEAD
         _cameraPosition = Vector2.Zero;
-        _camera = new Camera(_cameraPosition, new Vector2(512, 256), game.GraphicsDevice);
-=======
         _camera = new Camera(Vector2.Zero, new Vector2(640, 360), game.GraphicsDevice);
->>>>>>> 502011249a7e6cbad7269a1d9f212d8211770372
 
         _backgroundTilemapSprites = new RenderableTilemap(_worldState.Foreground, _camera);
         _foregroundTilemapSprites = new RenderableTilemap(_worldState.Background, _camera);
