@@ -51,6 +51,16 @@ public class MainMenuScene : IScene {
         _desktop = new Desktop { Root = mainMenu };
 
         modal?.ShowModal(_desktop);
+
+        string version = game.BlocktestVersion is { Major: 0, Minor: 0, Build: 0, Revision: 0 } ? "Dev Build" : $"Version {game.BlocktestVersion}";
+
+        Label versionLabel = new() {
+            Text = version,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Bottom
+        };
+        
+        _desktop.Widgets.Add(versionLabel);
     }
 
     public void Update(GameTime gameTime) { }
