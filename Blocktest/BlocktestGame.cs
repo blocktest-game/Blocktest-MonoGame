@@ -12,6 +12,8 @@ public sealed class BlocktestGame : Game {
     private IScene? _currentScene;
     private GraphicsDeviceManager _graphics;
 
+    public readonly Version? BlocktestVersion = typeof(BlocktestGame).Assembly.GetName().Version;
+
     /// <inheritdoc />
     public BlocktestGame(IPEndPoint? newIp = null) {
         _connect = newIp != null;
