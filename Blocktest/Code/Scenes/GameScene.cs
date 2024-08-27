@@ -129,7 +129,7 @@ public sealed class GameScene : IScene {
             _gameUi.BlockSelector.SelectedIndex = BlockSelected;
         }
 
-        float moveValue = 2f;
+        float moveValue = 2;
         if (currentKeyboardState.IsKeyDown(Keys.LeftShift) || currentKeyboardState.IsKeyDown(Keys.RightShift)) {
             moveValue *= 4;
         }
