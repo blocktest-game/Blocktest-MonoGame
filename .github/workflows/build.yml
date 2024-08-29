@@ -44,15 +44,9 @@ jobs:
       - name: Build
         run: dotnet publish ${{ matrix.projectPath }} --configuration Release --runtime ${{ matrix.targetPlatform }} -p:PublishReadyToRun=false -p:TieredCompilation=false -p:PublishSingleFile=true -p:Version=${{ steps.desc.outputs.describe }} --self-contained false --output ./Build/${{ matrix.targetPlatform }}
 
-      - name: Zip build
-        run: |
-          pushd Build/${{ matrix.targetPlatform }}
-          zip -r ../../Blocktest-${{ matrix.targetPlatform }}-${{ matrix.dotnet }}.zip .
-          popd
-
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.projectPath }}-${{ matrix.targetPlatform }}-${{ matrix.dotnet }}
-          path: ./Blocktest-${{ matrix.targetPlatform }}-${{ matrix.dotnet }}.zip
+          name: ${{ matrix.projectPath }}-${{ steps.desc.outputs.describe }}-${{ matrix.targetPlatform }}
+          path: ./Build/${{ matrix.targetPlatform }}
           compression-level: 0
