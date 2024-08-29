@@ -75,7 +75,10 @@ public sealed class GameScene : IScene {
             _networkingClient.Update();
         }
 
-        HandleInput();
+        if (!_connect || _networkingClient.WorldDownloaded)
+        {
+            HandleInput();
+        }
 
         _networkingClient.LocalTickBuffer.IncrCurrTick(_worldState);
     }
@@ -171,25 +174,22 @@ public sealed class GameScene : IScene {
 
         // allows free camera movement with lctrl, returns to player
         Vector2 cameraMoveVector = Vector2.Zero;
-        if (!_connect || _networkingClient.WorldDownloaded)
+        if (currentKeyboardState.IsKeyDown(Keys.LeftControl))
         {
-            if (currentKeyboardState.IsKeyDown(Keys.LeftControl))
+            if (_camera.RenderLocation.Contains(currentMouseState.Position))
             {
-                if (_camera.RenderLocation.Contains(currentMouseState.Position))
-                {
-                    cameraMoveVector.X = (currentMouseState.Position.X - _camera.RenderLocation.Center.X) / 10;
-                    cameraMoveVector.Y = -(currentMouseState.Position.Y - _camera.RenderLocation.Center.Y) / 10;
-                }
-                if (cameraMoveVector != Vector2.Zero)
-                {
-                    _camera.Position += cameraMoveVector;
-                }
+                cameraMoveVector.X = (currentMouseState.Position.X - _camera.RenderLocation.Center.X) / 10;
+                cameraMoveVector.Y = -(currentMouseState.Position.Y - _camera.RenderLocation.Center.Y) / 10;
             }
-            else
+            if (cameraMoveVector != Vector2.Zero)
             {
-                _camera.Position.X = _worldState.PlayerPositions[selfId].Position.X - _camera.RenderTarget.Width / 2;
-                _camera.Position.Y = _worldState.PlayerPositions[selfId].Position.Y - _camera.RenderTarget.Height / 2;
+                _camera.Position += cameraMoveVector;
             }
+        }
+        else
+        {
+            _camera.Position.X = _worldState.PlayerPositions[selfId].Position.X - _camera.RenderTarget.Width / 2;
+            _camera.Position.Y = _worldState.PlayerPositions[selfId].Position.Y - _camera.RenderTarget.Height / 2;
         }
 
         _previousKeyboardState = currentKeyboardState;
