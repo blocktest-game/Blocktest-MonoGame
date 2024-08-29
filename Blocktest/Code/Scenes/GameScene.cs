@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Blocktest.Block_System;
@@ -27,6 +28,9 @@ public sealed class GameScene : IScene {
     private readonly Client _networkingClient;
     private readonly SpriteBatch _spriteBatch;
 
+    private readonly Vector2 _cameraPosition;
+    private Vector2 _cameraStayPosition;
+
     private readonly WorldState _worldState = new();
 
     private KeyboardState _previousKeyboardState;
@@ -37,7 +41,8 @@ public sealed class GameScene : IScene {
         _spriteBatch = new SpriteBatch(game.GraphicsDevice);
         _game = game;
 
-        _camera = new Camera(Vector2.Zero, new Vector2(640, 360), game.GraphicsDevice);
+        _cameraPosition = Vector2.Zero;
+        _camera = new Camera(_cameraPosition, new Vector2(640, 360), game.GraphicsDevice);
 
         _backgroundTilemapSprites = new RenderableTilemap(_worldState.Foreground, _camera);
         _foregroundTilemapSprites = new RenderableTilemap(_worldState.Background, _camera);
@@ -70,7 +75,10 @@ public sealed class GameScene : IScene {
             _networkingClient.Update();
         }
 
-        HandleInput();
+        if (!_connect || _networkingClient.WorldDownloaded)
+        {
+            HandleInput();
+        }
 
         _networkingClient.LocalTickBuffer.IncrCurrTick(_worldState);
     }
@@ -147,18 +155,41 @@ public sealed class GameScene : IScene {
             moveVector.Y -= moveValue;
         }
 
+        int selfId = _networkingClient.Server?.RemoteId ?? 0;
         if (moveVector != Vector2.Zero) {
-            _camera.Position += moveVector;
+            //_camera.Position += moveVector;
+            Debug.WriteLine(selfId);
 
             MovePlayer movementPacket = new() {
                 TickNum = _networkingClient.LocalTickBuffer.CurrTick,
-                Position = (Vector2Int)_camera.Position,
-                SourceId = _networkingClient.Server?.RemoteId ?? 0
+                //Position = (Vector2Int)_camera.Position,
+                AddToPosition = (Vector2Int)moveVector,
+                SourceId = selfId
             };
             _networkingClient.LocalTickBuffer.AddPacket(movementPacket);
             if (_connect) {
                 _networkingClient.SendPacket(movementPacket);
             }
+        }
+
+        // allows free camera movement with lctrl, returns to player
+        Vector2 cameraMoveVector = Vector2.Zero;
+        if (currentKeyboardState.IsKeyDown(Keys.LeftControl))
+        {
+            if (_camera.RenderLocation.Contains(currentMouseState.Position))
+            {
+                cameraMoveVector.X = (currentMouseState.Position.X - _camera.RenderLocation.Center.X) / 10;
+                cameraMoveVector.Y = -(currentMouseState.Position.Y - _camera.RenderLocation.Center.Y) / 10;
+            }
+            if (cameraMoveVector != Vector2.Zero)
+            {
+                _camera.Position += cameraMoveVector;
+            }
+        }
+        else
+        {
+            _camera.Position.X = _worldState.PlayerPositions[selfId].Position.X - _camera.RenderTarget.Width / 2;
+            _camera.Position.Y = _worldState.PlayerPositions[selfId].Position.Y - _camera.RenderTarget.Height / 2;
         }
 
         _previousKeyboardState = currentKeyboardState;
