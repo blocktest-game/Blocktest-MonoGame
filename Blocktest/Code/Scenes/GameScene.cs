@@ -171,7 +171,7 @@ public sealed class GameScene : IScene {
 
         // allows free camera movement with lctrl, returns to player
         Vector2 cameraMoveVector = Vector2.Zero;
-        if (_networkingClient.WorldDownloaded)
+        if (!_connect || _networkingClient.WorldDownloaded)
         {
             if (currentKeyboardState.IsKeyDown(Keys.LeftControl))
             {
