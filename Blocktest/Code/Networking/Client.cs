@@ -15,6 +15,7 @@ public sealed class Client : NetworkInterface {
     private readonly BlocktestGame _game;
     private readonly Dictionary<int, Renderable> _playerRenderables = new();
     private bool _initialized;
+    public bool WorldDownloaded;
 
     public Client(WorldState worldState, Camera camera, BlocktestGame game) : base(worldState) {
         _camera = camera;
@@ -76,6 +77,11 @@ public sealed class Client : NetworkInterface {
                 }, Server);
 
                 _initialized = true;
+
+                if (!WorldDownloaded)
+                {
+                    WorldDownloaded = true; // nyehhh i dont know what i'm doing with this
+                }
                 break;
             default:
                 Console.WriteLine("Bad packet!!!");
